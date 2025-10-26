@@ -1,14 +1,19 @@
 package com.ifba.clinic.model.entity;
 
-import com.ifba.clinic.model.vo.Cep;
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
+@AllArgsConstructor
+@NoArgsConstructor
+@Data
 public class Address {
 
     @Id
@@ -31,6 +36,8 @@ public class Address {
     @NotBlank
     private String state;
 
-    private Cep Cep;
+    @NotBlank
+    @Pattern(regexp = "\\d{5}-\\d{3}", message = "CEP inválido. Formato esperado: XXXXX-XXX")
+    private String cep;
 
 }
