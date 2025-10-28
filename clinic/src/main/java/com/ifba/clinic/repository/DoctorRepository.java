@@ -1,4 +1,4 @@
-package com.ifba.clinic.model.repository;
+package com.ifba.clinic.repository;
 
 import com.ifba.clinic.model.entity.Doctor;
 import org.springframework.data.jpa.repository.JpaRepository;
