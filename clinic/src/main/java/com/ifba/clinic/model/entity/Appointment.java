@@ -2,7 +2,12 @@ package com.ifba.clinic.model.entity;
 
 import java.time.LocalDateTime;
 
+import com.ifba.clinic.model.enums.AppointmentStatus;
+
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -12,12 +17,10 @@ import jakarta.persistence.ManyToOne;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@AllArgsConstructor
 @NoArgsConstructor
 @Data
 public class Appointment {
@@ -41,4 +44,8 @@ public class Appointment {
     @NotNull
     @Future
     private LocalDateTime appointmentDate;
+    
+    @Enumerated(EnumType.STRING)
+    @Column(name = "appointment_status", columnDefinition = "appointment_status_enum")
+    private AppointmentStatus appointmentStatus;
 }
