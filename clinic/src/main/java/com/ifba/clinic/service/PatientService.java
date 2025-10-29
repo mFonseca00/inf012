@@ -1,7 +1,8 @@
 package com.ifba.clinic.service;
 
-import com.ifba.clinic.repository.PatientRepository;
 import org.springframework.stereotype.Service;
+
+import com.ifba.clinic.repository.PatientRepository;
 
 @Service
 public class PatientService {
@@ -12,5 +13,6 @@ public class PatientService {
         this.patientRepository = patientRepository;
     }
 
+    // Para manipulação de patient, chamar service de address para manipulação do address
 
 }
