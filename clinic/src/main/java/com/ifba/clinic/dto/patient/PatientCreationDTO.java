@@ -1,13 +1,21 @@
 package com.ifba.clinic.dto.patient;
 
+import org.hibernate.validator.constraints.br.CPF;
+
 import com.ifba.clinic.dto.address.AddressDTO;
+
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
-import org.hibernate.validator.constraints.br.CPF;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class PatientCreationDTO {
 
     @NotBlank
