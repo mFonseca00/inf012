@@ -44,5 +44,5 @@ public class Appointment {
     
     @Enumerated(EnumType.STRING)
     @Column(name = "appointment_status", columnDefinition = "appointment_status_enum")
-    private AppointmentStatus appointmentStatus;
+    private AppointmentStatus appointmentStatus = AppointmentStatus.ATIVO;
 }

@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS patient (
     phone_number VARCHAR(20) NOT NULL,
     cpf VARCHAR(14) UNIQUE NOT NULL,
     address_id BIGINT NOT NULL,
-    active BOOLEAN DEFAULT TRUE,
+    is_active BOOLEAN DEFAULT TRUE,
     CONSTRAINT fk_patient_address FOREIGN KEY (address_id) REFERENCES address(id)
 );
 
@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS doctor (
     crm VARCHAR(20) UNIQUE NOT NULL,
     speciality speciality_enum NOT NULL,
     address_id BIGINT NOT NULL,
-    active BOOLEAN DEFAULT TRUE,
+    is_active BOOLEAN DEFAULT TRUE,
     CONSTRAINT fk_doctor_address FOREIGN KEY (address_id) REFERENCES address(id)
 );
 

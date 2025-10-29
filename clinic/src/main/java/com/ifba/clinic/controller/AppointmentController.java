@@ -1,8 +1,8 @@
 package com.ifba.clinic.controller;
 
-import com.ifba.clinic.repository.AppointmentRepository;
-import com.ifba.clinic.service.AppointmentService;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.ifba.clinic.service.AppointmentService;
 
 @RestController
 public class AppointmentController {
