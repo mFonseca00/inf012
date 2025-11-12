@@ -1,0 +1,13 @@
+com\api\agenda\service\JWTService.class
+com\api\agenda\dto\TokenDTO.class
+com\api\agenda\repository\UserRepository.class
+com\api\agenda\model\entity\User.class
+com\api\agenda\security\SecurityConfig.class
+com\api\agenda\service\UserService.class
+com\api\agenda\dto\UserDTO.class
+com\api\agenda\dto\LoginDTO.class
+com\api\agenda\security\SecurityFilter.class
+com\api\agenda\controller\UserController.class
+com\api\agenda\service\AuthService.class
+com\api\agenda\dto\RoleDTO.class
+com\api\agenda\model\entity\Role.class

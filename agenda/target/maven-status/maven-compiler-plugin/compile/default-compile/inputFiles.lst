@@ -1,0 +1,15 @@
+C:\Estudo\IFBA\ADS\inf012\agenda\src\main\java\com\api\agenda\AgendaApplication.java
+C:\Estudo\IFBA\ADS\inf012\agenda\src\main\java\com\api\agenda\controller\UserController.java
+C:\Estudo\IFBA\ADS\inf012\agenda\src\main\java\com\api\agenda\dto\LoginDTO.java
+C:\Estudo\IFBA\ADS\inf012\agenda\src\main\java\com\api\agenda\dto\RoleDTO.java
+C:\Estudo\IFBA\ADS\inf012\agenda\src\main\java\com\api\agenda\dto\TokenDTO.java
+C:\Estudo\IFBA\ADS\inf012\agenda\src\main\java\com\api\agenda\dto\UserDTO.java
+C:\Estudo\IFBA\ADS\inf012\agenda\src\main\java\com\api\agenda\model\entity\Role.java
+C:\Estudo\IFBA\ADS\inf012\agenda\src\main\java\com\api\agenda\model\entity\User.java
+C:\Estudo\IFBA\ADS\inf012\agenda\src\main\java\com\api\agenda\model\enums\Categoria.java
+C:\Estudo\IFBA\ADS\inf012\agenda\src\main\java\com\api\agenda\repository\UserRepository.java
+C:\Estudo\IFBA\ADS\inf012\agenda\src\main\java\com\api\agenda\security\SecurityConfig.java
+C:\Estudo\IFBA\ADS\inf012\agenda\src\main\java\com\api\agenda\security\SecurityFilter.java
+C:\Estudo\IFBA\ADS\inf012\agenda\src\main\java\com\api\agenda\service\AuthService.java
+C:\Estudo\IFBA\ADS\inf012\agenda\src\main\java\com\api\agenda\service\JWTService.java
+C:\Estudo\IFBA\ADS\inf012\agenda\src\main\java\com\api\agenda\service\UserService.java
