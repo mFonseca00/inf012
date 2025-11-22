@@ -44,7 +44,7 @@ public class UserController {
     @GetMapping("/all")
     @Operation(summary = "Listar todos os usuários",description = "Retorna uma lista de todos os usuários cadastrados. Requer privilégios de ADMIN.")
     public ResponseEntity<Page<UserResponseDTO>> getAllUsers(
-            @PageableDefault(size = 10, sort = "name") Pageable pageable){
+            @PageableDefault(size = 10, sort = "username") Pageable pageable){
         return userService.getAllUsers(pageable);
     }
 }
