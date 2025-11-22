@@ -1,19 +1,23 @@
 package com.ifba.clinic.service;
 
-import com.ifba.clinic.dto.user.ChangeRoleDTO;
-import com.ifba.clinic.dto.user.LoginDTO;
-import com.ifba.clinic.dto.user.TokenDTO;
-import com.ifba.clinic.dto.user.UserRegDTO;
-import com.ifba.clinic.model.entity.Role;
-import com.ifba.clinic.model.entity.User;
-import com.ifba.clinic.model.enums.UserRole;
-import com.ifba.clinic.repository.RoleRepository;
-import com.ifba.clinic.repository.UserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import com.ifba.clinic.dto.user.ChangeRoleDTO;
+import com.ifba.clinic.dto.user.LoginDTO;
+import com.ifba.clinic.dto.user.TokenDTO;
+import com.ifba.clinic.dto.user.UserRegDTO;
+import com.ifba.clinic.dto.user.UserResponseDTO;
+import com.ifba.clinic.model.entity.Role;
+import com.ifba.clinic.model.entity.User;
+import com.ifba.clinic.model.enums.UserRole;
+import com.ifba.clinic.repository.RoleRepository;
+import com.ifba.clinic.repository.UserRepository;
 
 @Service
 public class UserService {
@@ -40,7 +44,7 @@ public class UserService {
 
     public ResponseEntity<String> register(UserRegDTO newUser) {
         String encodedPassword = new BCryptPasswordEncoder().encode(newUser.password());
-        Role defaultRole = roleRepository.findByRole(UserRole.USER)
+        Role defaultRole = roleRepository.findByRole(UserRole.USER.name())
                 .orElseThrow(() -> new RuntimeException("Role not found"));
         User user = new User(newUser.username(), newUser.email(), encodedPassword, defaultRole);
         this.userRepository.save(user);
@@ -63,7 +67,10 @@ public class UserService {
         Role roleToRemove = roleRepository.findByRole(dto.role())
                 .orElseThrow(() -> new RuntimeException("Role not found"));
         User user = (User) userRepository.findByUsername(dto.username());
-        if( roleToRemove.getRole() == UserRole.USER){
+        if (roleToRemove.getRole().equals(UserRole.MASTER.name())) {
+            return ResponseEntity.badRequest().body("Cannot remove MASTER role");
+        }
+        if (roleToRemove.getRole().equals(UserRole.USER.name())) {
             return ResponseEntity.badRequest().body("Cannot remove default USER role");
         }
         if( !user.getRoles().contains(roleToRemove)){
@@ -72,5 +79,19 @@ public class UserService {
         user.removeRole(roleToRemove);
         userRepository.save(user);
         return ResponseEntity.ok("User role updated successfully");
+    }
+
+    public ResponseEntity<Page<UserResponseDTO>> getAllUsers(Pageable pageable) {
+        Page<User> users = userRepository.findAll(pageable);
+        if (users.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        Page<UserResponseDTO> response = users.map(user -> new UserResponseDTO(
+                user.getId(),
+                user.getUsername(),
+                user.getEmail(),
+                user.getRoles().stream().map(Role::getRole).toList()
+        ));
+        return ResponseEntity.ok(response);
     }
 }

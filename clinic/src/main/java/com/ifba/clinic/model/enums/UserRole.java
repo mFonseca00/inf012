@@ -1,8 +1,9 @@
 package com.ifba.clinic.model.enums;
 
 public enum UserRole {
-    ADMIN("Administrador"),
-    USER("Usuário");
+    MASTER("Master Administrator"),
+    ADMIN("Administrator"),
+    USER("User");
 
     private final String displayName;
 

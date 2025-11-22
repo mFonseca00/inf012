@@ -1,10 +1,11 @@
 package com.ifba.clinic.service;
 
-import com.ifba.clinic.repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+
+import com.ifba.clinic.repository.UserRepository;
 
 @Service
 public class AuthenticationService implements UserDetailsService {
@@ -17,6 +18,10 @@ public class AuthenticationService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return this.repository.findByUsername(username);
+        UserDetails user = repository.findByUsername(username);
+        if (user == null) {
+            throw new UsernameNotFoundException("User not found");
+        }
+        return user;
     }
 }

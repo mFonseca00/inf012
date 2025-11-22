@@ -1,9 +1,9 @@
-INSERT INTO roles (role) VALUES ('ADMIN'), ('USER') ON CONFLICT (role) DO NOTHING;
+INSERT INTO roles (role) VALUES ('MASTER'), ('ADMIN'), ('USER') ON CONFLICT (role) DO NOTHING;
 
 -- Insert default admin
 -- password: admin123 (with BCrypt)
 INSERT INTO users (username, email, password)
-VALUES ('admin', 'admin@clinic.com', '$2a$10$N.zmdr9k7uOCQb97h3/WX.JG5cj7SOJ9OgG8zCZ4rqv6yUS.r3WGi')
+VALUES ('admin', 'admin@clinic.com', '$2a$12$sKV6i1GKNanbPQKn6cLHCOb2Fa6ngMsbjFJ/50tKeoaSmW.05dEGy')
 ON CONFLICT DO NOTHING;
 
 -- Associar role ADMIN ao usuário admin
