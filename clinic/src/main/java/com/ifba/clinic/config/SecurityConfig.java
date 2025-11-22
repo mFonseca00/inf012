@@ -31,7 +31,8 @@ public class SecurityConfig {
                     .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll() // Swagger UI endpoints
                     .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                     .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
-                    .requestMatchers(HttpMethod.PATCH, "/auth/role/**").hasRole("ADMIN")
+                    .requestMatchers(HttpMethod.PATCH, "/user/role/**").hasAnyAuthority("ADMIN", "MASTER")
+                    .requestMatchers(HttpMethod.GET, "/user/all").hasAnyAuthority("ADMIN", "MASTER")
                     .anyRequest().authenticated()
             )
             .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class);

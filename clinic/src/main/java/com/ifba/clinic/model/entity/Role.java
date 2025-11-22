@@ -1,12 +1,16 @@
 package com.ifba.clinic.model.entity;
 
-import com.ifba.clinic.model.enums.UserRole;
+import org.springframework.security.core.GrantedAuthority;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.security.core.GrantedAuthority;
 
 @Entity
 @Table(name = "roles")
@@ -19,16 +23,15 @@ public class Role implements GrantedAuthority {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "role", columnDefinition = "role_enum")
-    private UserRole role;
+    @Column(name = "role", nullable = false, unique = true)
+    private String role;
 
-    public Role(UserRole role) {
+    public Role(String role) {
         this.role = role;
     }
 
     @Override
     public String getAuthority() {
-        return role.toString();
+        return role;
     }
 }
