@@ -1,4 +1,10 @@
 package com.ifba.clinic.dto.user;
 
-public record LoginDTO() {
-}
+import jakarta.validation.constraints.NotBlank;
+
+public record LoginDTO(
+        @NotBlank
+        String username,
+        @NotBlank
+        String password
+) {}

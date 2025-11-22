@@ -1,4 +1,3 @@
 package com.ifba.clinic.dto.user;
 
-public record LoginResponseDTO() {
-}
+public record TokenDTO(String token) { }
