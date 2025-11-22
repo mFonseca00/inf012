@@ -7,7 +7,7 @@ import com.ifba.clinic.repository.PatientRepository;
 @Service
 public class PatientService {
 
-    PatientRepository patientRepository;
+    private final PatientRepository patientRepository;
 
     PatientService(PatientRepository patientRepository){
         this.patientRepository = patientRepository;

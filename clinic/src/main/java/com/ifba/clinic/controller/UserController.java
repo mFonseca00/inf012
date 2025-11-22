@@ -23,7 +23,7 @@ import jakarta.validation.Valid;
 @Tag(name = "Usuários",description = "Endpoints para gerenciamento de usuários")
 public class UserController {
 
-    UserService userService;
+    private final UserService userService;
 
     public UserController(UserService userService) {
         this.userService = userService;

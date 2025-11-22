@@ -7,9 +7,9 @@ import com.ifba.clinic.service.AppointmentService;
 @RestController
 public class AppointmentController {
 
-    AppointmentService appointmentService;
+    private final AppointmentService appointmentService;
 
-    AppointmentController(AppointmentService appointmentService){
+    public AppointmentController(AppointmentService appointmentService){
         this.appointmentService = appointmentService;
     }
 }
