@@ -1,12 +1,13 @@
 package com.ifba.clinic.service;
 
-import com.ifba.clinic.repository.AppointmentRepository;
 import org.springframework.stereotype.Service;
+
+import com.ifba.clinic.repository.AppointmentRepository;
 
 @Service
 public class AppointmentService {
 
-    AppointmentRepository appointmentRepository;
+    private final AppointmentRepository appointmentRepository;
 
     AppointmentService(AppointmentRepository appointmentRepository){
         this.appointmentRepository = appointmentRepository;

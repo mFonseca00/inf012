@@ -10,7 +10,7 @@ import com.ifba.clinic.repository.UserRepository;
 @Service
 public class AuthenticationService implements UserDetailsService {
 
-    private UserRepository repository;
+    private final UserRepository repository;
 
     public AuthenticationService(UserRepository repository) {
         this.repository = repository;

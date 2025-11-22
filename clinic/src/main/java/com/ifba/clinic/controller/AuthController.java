@@ -1,6 +1,5 @@
 package com.ifba.clinic.controller;
 
-import com.ifba.clinic.dto.user.ChangeRoleDTO;
 import com.ifba.clinic.dto.user.LoginDTO;
 import com.ifba.clinic.dto.user.TokenDTO;
 import com.ifba.clinic.dto.user.UserRegDTO;

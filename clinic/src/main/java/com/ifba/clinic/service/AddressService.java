@@ -7,7 +7,7 @@ import com.ifba.clinic.repository.AddressRepository;
 @Service
 public class AddressService {
 
-    AddressRepository addressRepository;
+    private final AddressRepository addressRepository;
 
     AddressService(AddressRepository addressRepository){
         this.addressRepository = addressRepository;

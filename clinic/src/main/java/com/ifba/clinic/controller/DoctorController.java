@@ -1,14 +1,15 @@
 package com.ifba.clinic.controller;
 
-import com.ifba.clinic.service.DoctorService;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.ifba.clinic.service.DoctorService;
 
 @RestController
 public class DoctorController {
 
-    DoctorService doctorService;
+    private final DoctorService doctorService;
 
-    DoctorController(DoctorService doctorService){
+    public DoctorController(DoctorService doctorService){
         this.doctorService = doctorService;
     }
 }

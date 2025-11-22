@@ -22,10 +22,10 @@ import com.ifba.clinic.repository.UserRepository;
 @Service
 public class UserService {
 
-    private AuthenticationManager authenticationManager;
-    private UserRepository userRepository;
-    private RoleRepository roleRepository;
-    private TokenService tokenService;
+    private final AuthenticationManager authenticationManager;
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final TokenService tokenService;
 
     public UserService(AuthenticationManager authenticationManager, UserRepository userRepository,
                        RoleRepository roleRepository, TokenService tokenService) {
