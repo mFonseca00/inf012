@@ -30,64 +30,23 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(errors);
     }
 
-    // Tratamento para credenciais inválidas (login)
-    @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<Map<String, Object>> handleBadCredentials(BadCredentialsException ex) {
-        Map<String, Object> error = new HashMap<>();
-        error.put("timestamp", LocalDateTime.now());
-        error.put("status", HttpStatus.UNAUTHORIZED.value());
-        error.put("error", "Unauthorized");
-        error.put("message", "Invalid username or password");
-        
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<String> handleEntityNotFound(EntityNotFoundException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
     }
 
-    // Tratamento para acesso negado (403)
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<Map<String, Object>> handleAccessDenied(AccessDeniedException ex) {
-        Map<String, Object> error = new HashMap<>();
-        error.put("timestamp", LocalDateTime.now());
-        error.put("status", HttpStatus.FORBIDDEN.value());
-        error.put("error", "Forbidden");
-        error.put("message", "You don't have permission to access this resource");
-        
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
+    @ExceptionHandler(InvalidOperationException.class)
+    public ResponseEntity<String> handleInvalidOperation(InvalidOperationException e) {
+        return ResponseEntity.badRequest().body(e.getMessage());
     }
 
-    // Tratamento para RuntimeException genérica
+    @ExceptionHandler(BusinessRuleException.class)
+    public ResponseEntity<String> handleBusinessRule(BusinessRuleException e) {
+        return ResponseEntity.badRequest().body(e.getMessage());
+    }
+
     @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<Map<String, Object>> handleRuntimeException(RuntimeException ex) {
-        Map<String, Object> error = new HashMap<>();
-        error.put("timestamp", LocalDateTime.now());
-        error.put("status", HttpStatus.BAD_REQUEST.value());
-        error.put("error", "Bad Request");
-        error.put("message", ex.getMessage());
-        
-        return ResponseEntity.badRequest().body(error);
-    }
-
-    // Tratamento para erros de propriedade não encontrada (sort inválido)
-    @ExceptionHandler(org.springframework.data.mapping.PropertyReferenceException.class)
-    public ResponseEntity<Map<String, Object>> handlePropertyReferenceException(
-            org.springframework.data.mapping.PropertyReferenceException ex) {
-        Map<String, Object> error = new HashMap<>();
-        error.put("timestamp", LocalDateTime.now());
-        error.put("status", HttpStatus.BAD_REQUEST.value());
-        error.put("error", "Bad Request");
-        error.put("message", "Invalid sort field: " + ex.getPropertyName());
-        
-        return ResponseEntity.badRequest().body(error);
-    }
-
-    // Tratamento genérico para qualquer outra exceção não mapeada
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, Object>> handleGenericException(Exception ex) {
-        Map<String, Object> error = new HashMap<>();
-        error.put("timestamp", LocalDateTime.now());
-        error.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
-        error.put("error", "Internal Server Error");
-        error.put("message", "An unexpected error occurred: " + ex.getMessage());
-        
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+    public ResponseEntity<String> handleRuntimeException(RuntimeException e) {
+        return ResponseEntity.badRequest().body(e.getMessage());
     }
 }

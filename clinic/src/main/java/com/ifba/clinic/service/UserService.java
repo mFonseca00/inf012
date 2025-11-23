@@ -1,23 +1,21 @@
 package com.ifba.clinic.service;
 
+import com.ifba.clinic.dto.user.*;
+import com.ifba.clinic.exception.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.ifba.clinic.dto.user.ChangeRoleDTO;
-import com.ifba.clinic.dto.user.LoginDTO;
-import com.ifba.clinic.dto.user.TokenDTO;
-import com.ifba.clinic.dto.user.UserRegDTO;
-import com.ifba.clinic.dto.user.UserResponseDTO;
 import com.ifba.clinic.model.entity.Role;
 import com.ifba.clinic.model.entity.User;
 import com.ifba.clinic.model.enums.UserRole;
 import com.ifba.clinic.repository.RoleRepository;
 import com.ifba.clinic.repository.UserRepository;
+
+import java.time.LocalDateTime;
 
 @Service
 public class UserService {
@@ -35,63 +33,93 @@ public class UserService {
         this.tokenService = tokenService;
     }
 
-    public ResponseEntity<TokenDTO> login(LoginDTO login) {
+    public String login(LoginDTO login) {
         var usernamePassToken = new UsernamePasswordAuthenticationToken(login.username(), login.password());
         var auth = authenticationManager.authenticate(usernamePassToken);
-        var token = tokenService.generateToken((User) auth.getPrincipal());
-        return ResponseEntity.ok(new TokenDTO(token));
+        return tokenService.generateToken((User) auth.getPrincipal());
     }
 
-    public ResponseEntity<String> register(UserRegDTO newUser) {
+    public void register(UserRegDTO newUser) {
         String encodedPassword = new BCryptPasswordEncoder().encode(newUser.password());
         Role defaultRole = roleRepository.findByRole(UserRole.USER.name())
-                .orElseThrow(() -> new RuntimeException("Role not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Role USER not found"));
         User user = new User(newUser.username(), newUser.email(), encodedPassword, defaultRole);
-        this.userRepository.save(user);
-        return ResponseEntity.ok("User registered successfully");
+        userRepository.save(user);
     }
 
-    public ResponseEntity<String> addRole(ChangeRoleDTO dto) {
+    public void addRole(ChangeRoleDTO dto) {
         Role newRole = roleRepository.findByRole(dto.role())
-                .orElseThrow(() -> new RuntimeException("Role not found"));
-        User user = (User) userRepository.findByUsername(dto.username());
-        if( user.getRoles().contains(newRole)){
-            return ResponseEntity.badRequest().body("User already has this role");
+                .orElseThrow(() -> new EntityNotFoundException("Role " + dto.role() + " not found"));
+        User user = findUserByUsername(dto.username());
+
+        if (user.getRoles().contains(newRole)) {
+            throw new BusinessRuleException("User already has role " + dto.role());
         }
+
         user.addRole(newRole);
         userRepository.save(user);
-        return ResponseEntity.ok("User role updated successfully");
     }
 
-    public ResponseEntity<String> removeRole(ChangeRoleDTO dto) {
+    public void removeRole(ChangeRoleDTO dto) {
         Role roleToRemove = roleRepository.findByRole(dto.role())
-                .orElseThrow(() -> new RuntimeException("Role not found"));
-        User user = (User) userRepository.findByUsername(dto.username());
+                .orElseThrow(() -> new EntityNotFoundException("Role " + dto.role() + " not found"));
+        User user = findUserByUsername(dto.username());
+
         if (roleToRemove.getRole().equals(UserRole.MASTER.name())) {
-            return ResponseEntity.badRequest().body("Cannot remove MASTER role");
+            throw new BusinessRuleException("Cannot remove MASTER role");
         }
         if (roleToRemove.getRole().equals(UserRole.USER.name())) {
-            return ResponseEntity.badRequest().body("Cannot remove default USER role");
+            throw new BusinessRuleException("Cannot remove default USER role");
         }
-        if( !user.getRoles().contains(roleToRemove)){
-            return ResponseEntity.badRequest().body("User does not have this role");
+        if (!user.getRoles().contains(roleToRemove)) {
+            throw new BusinessRuleException("User does not have role " + dto.role());
         }
+
         user.removeRole(roleToRemove);
         userRepository.save(user);
-        return ResponseEntity.ok("User role updated successfully");
     }
 
-    public ResponseEntity<Page<UserResponseDTO>> getAllUsers(Pageable pageable) {
+    public Page<UserResponseDTO> getAllUsers(Pageable pageable) {
         Page<User> users = userRepository.findAll(pageable);
-        if (users.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        }
-        Page<UserResponseDTO> response = users.map(user -> new UserResponseDTO(
+        return users.map(user -> new UserResponseDTO(
                 user.getId(),
                 user.getUsername(),
                 user.getEmail(),
+                user.isEnabled(),
                 user.getRoles().stream().map(Role::getRole).toList()
         ));
-        return ResponseEntity.ok(response);
+    }
+
+    public void deactivateUser(UserBasicInfoDTO userDTO) {
+        User user = findUserByUsername(userDTO.username());
+
+        if (!user.getIsActive()) {
+            throw new InvalidOperationException("User " + userDTO.username() + " is already deactivated");
+        }
+
+        user.setIsActive(false);
+        user.setDeactivatedAt(LocalDateTime.now());
+        userRepository.save(user);
+    }
+
+    public void activateUser(UserBasicInfoDTO userDTO) {
+        User user = findUserByUsername(userDTO.username());
+
+        if (user.getIsActive()) {
+            throw new InvalidOperationException("User " + userDTO.username() + " is already active");
+        }
+
+        user.setIsActive(true);
+        user.setDeactivatedAt(null);
+        userRepository.save(user);
+    }
+
+    // Helper methods
+    private User findUserByUsername(String username) {
+        User user = (User) userRepository.findByUsername(username);
+        if (user == null) {
+            throw new EntityNotFoundException("User " + username + " not found");
+        }
+        return user;
     }
 }

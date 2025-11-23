@@ -17,7 +17,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 public class SecurityConfig {
 
-    private SecurityFilter securityFilter;
+    private final SecurityFilter securityFilter;
     public SecurityConfig(SecurityFilter securityFilter) {
         this.securityFilter = securityFilter;
     }
@@ -32,6 +32,7 @@ public class SecurityConfig {
                     .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                     .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
                     .requestMatchers(HttpMethod.PATCH, "/user/role/**").hasAnyAuthority("ADMIN", "MASTER")
+                    .requestMatchers(HttpMethod.PATCH, "/user/status/**").hasAnyAuthority("ADMIN", "MASTER")
                     .requestMatchers(HttpMethod.GET, "/user/all").hasAnyAuthority("ADMIN", "MASTER")
                     .anyRequest().authenticated()
             )
