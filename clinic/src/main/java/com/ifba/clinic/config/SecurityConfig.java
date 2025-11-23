@@ -28,12 +28,15 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(authorize -> authorize
-                    .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll() // Swagger UI endpoints
-                    .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
-                    .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
-                    .requestMatchers(HttpMethod.PATCH, "/user/role/**").hasAnyAuthority("ADMIN", "MASTER")
-                    .requestMatchers(HttpMethod.PATCH, "/user/status/**").hasAnyAuthority("ADMIN", "MASTER")
-                    .requestMatchers(HttpMethod.GET, "/user/all").hasAnyAuthority("ADMIN", "MASTER")
+                    // recursos públicos / docs
+                    .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                    // endpoints de autenticação públicos
+                    .requestMatchers(HttpMethod.POST, "/auth/login", "/auth/register").permitAll()
+                    // qualquer usuário autenticado pode alterar sua própria senha
+                    .requestMatchers(HttpMethod.PATCH, "/user/change-password").authenticated()
+                    // restante dos endpoints de /user exigem ADMIN ou MASTER
+                    .requestMatchers("/user/**").hasAnyAuthority("ADMIN", "MASTER")
+                    // qualquer outro request exige autenticação
                     .anyRequest().authenticated()
             )
             .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class);
