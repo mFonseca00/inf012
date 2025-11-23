@@ -7,6 +7,7 @@ import com.ifba.clinic.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,15 +23,17 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    @Operation(summary = "Realizar login",description = "Autentica um usuário e retorna um token JWT.")
+    @Operation(summary = "Login de usuário", description = "Autentica um usuário e retorna um token JWT.")
     public ResponseEntity<TokenDTO> login(@RequestBody @Valid LoginDTO login) {
-        return userService.login(login);
+        String token = userService.login(login);
+        return ResponseEntity.ok(new TokenDTO(token));
     }
 
     @PostMapping("/register")
-    @Operation(summary = "Registrar novo usuário",description = "Registra um novo usuário com a role padrão USER.")
-    public ResponseEntity<String> login(@RequestBody @Valid UserRegDTO newUser) {
-        return userService.register(newUser);
+    @Operation(summary = "Registro de usuário", description = "Registra um novo usuário no sistema.")
+    public ResponseEntity<String> register(@RequestBody @Valid UserRegDTO newUser) {
+        userService.register(newUser);
+        return ResponseEntity.status(HttpStatus.CREATED).body("User registered successfully");
     }
 
 }
