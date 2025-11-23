@@ -2,10 +2,13 @@ package com.ifba.clinic.service;
 
 import com.ifba.clinic.dto.user.*;
 import com.ifba.clinic.exception.*;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -65,10 +68,10 @@ public class UserService {
                 .orElseThrow(() -> new EntityNotFoundException("Role " + dto.role() + " not found"));
         User user = findUserByUsername(dto.username());
 
-        if (roleToRemove.getRole().equals(UserRole.MASTER.name())) {
+        if (roleToRemove.getAuthority().equals(UserRole.MASTER.name())) {
             throw new BusinessRuleException("Cannot remove MASTER role");
         }
-        if (roleToRemove.getRole().equals(UserRole.USER.name())) {
+        if (roleToRemove.getAuthority().equals(UserRole.USER.name())) {
             throw new BusinessRuleException("Cannot remove default USER role");
         }
         if (!user.getRoles().contains(roleToRemove)) {
@@ -86,7 +89,7 @@ public class UserService {
                 user.getUsername(),
                 user.getEmail(),
                 user.isEnabled(),
-                user.getRoles().stream().map(Role::getRole).toList()
+                user.getRoles().stream().map(Role::getAuthority).toList()
         ));
     }
 
@@ -111,6 +114,44 @@ public class UserService {
 
         user.setIsActive(true);
         user.setDeactivatedAt(null);
+        userRepository.save(user);
+    }
+
+    public UserResponseDTO getUser(String username) {
+        User user = findUserByUsername(username);
+        return new UserResponseDTO(
+                user.getId(),
+                user.getUsername(),
+                user.getEmail(),
+                user.isEnabled(),
+                user.getRoles().stream().map(Role::getAuthority).toList()
+        );
+    }
+
+    public void update(UserDataUpdateDTO dto){
+        User user = findUserByUsername(dto.username());
+        if (dto.email() != null && !dto.email().isBlank()) {
+            user.setEmail(dto.email());
+        }
+        if (dto.password() != null && !dto.password().isBlank()) {
+            String encoded = new BCryptPasswordEncoder().encode(dto.password());
+            user.setPassword(encoded);
+        }
+        if (dto.roles() != null && !dto.roles().isEmpty()) {
+            var resolvedRoles = dto.roles().stream()
+                    .map(r -> roleRepository.findByRole(r.getAuthority())
+                            .orElseThrow(() -> new EntityNotFoundException("Role " + r.getAuthority() + " not found")))
+                    .toList();
+            user.getRoles().clear();
+            user.getRoles().addAll(new java.util.HashSet<>(resolvedRoles));
+        }
+        userRepository.save(user);
+    }
+
+    public void changePassword(String username, ChangePasswordDTO passwordDTO) {
+        User user = findUserByUsername(username);
+        String encodedPassword = new BCryptPasswordEncoder().encode(passwordDTO.newPassword());
+        user.setPassword(encodedPassword);
         userRepository.save(user);
     }
 

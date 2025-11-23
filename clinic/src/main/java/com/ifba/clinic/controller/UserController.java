@@ -3,9 +3,9 @@ package com.ifba.clinic.controller;
 import com.ifba.clinic.dto.user.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import com.ifba.clinic.service.UserService;
@@ -49,6 +49,13 @@ public class UserController {
         return ResponseEntity.ok(users);
     }
 
+    @GetMapping("/{username}")
+    @Operation(summary = "Obter dados de um usuário com base no username", description =  "Retorna os dados do usuário com base em um username. Requer privilégios de ADMIN ou MASTER.")
+    public ResponseEntity<UserResponseDTO> getUser(@PathVariable @Valid String username) {
+        UserResponseDTO user = userService.getUser(username);
+        return ResponseEntity.ok(user);
+    }
+
     @PatchMapping("/deactivate")
     @Operation(summary = "Desativar usuário", description = "Desativa um usuário existente. Requer privilégios de ADMIN ou MASTER.")
     public ResponseEntity<String> deactivateUser(@RequestBody @Valid UserBasicInfoDTO userDTO) {
@@ -61,5 +68,19 @@ public class UserController {
     public ResponseEntity<String> activateUser(@RequestBody @Valid UserBasicInfoDTO userDTO) {
         userService.activateUser(userDTO);
         return ResponseEntity.ok("User activated successfully");
+    }
+
+    @PatchMapping("/update")
+    @Operation(summary = "Atualizar dados do usuário", description = "Atualiza os dados de um usuário existente. Requer privilégios de ADMIN ou MASTER.")
+    public ResponseEntity<String> updateUser(@RequestBody @Valid UserDataUpdateDTO userDTO){
+        userService.update(userDTO);
+        return ResponseEntity.ok("User updated successfully");
+    }
+
+    @PatchMapping("/change-password")
+    @Operation(summary = "Alterar senha do usuário", description = "Altera a senha de um usuário existente. Requer login do usuário.")
+    public ResponseEntity<String> changePassword(@RequestBody @Valid ChangePasswordDTO passwordDTO, Authentication auth){ // Authenticação injetada pelo Spring Security
+        userService.changePassword(auth.getName(), passwordDTO);
+        return ResponseEntity.ok("Password changed successfully");
     }
 }
