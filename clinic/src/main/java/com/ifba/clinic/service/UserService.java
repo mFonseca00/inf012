@@ -1,24 +1,29 @@
 package com.ifba.clinic.service;
 
-import com.ifba.clinic.dto.user.*;
-import com.ifba.clinic.exception.*;
-import jakarta.validation.Valid;
+import java.time.LocalDateTime;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.ifba.clinic.dto.user.ChangePasswordDTO;
+import com.ifba.clinic.dto.user.ChangeRoleDTO;
+import com.ifba.clinic.dto.user.LoginDTO;
+import com.ifba.clinic.dto.user.UserBasicInfoDTO;
+import com.ifba.clinic.dto.user.UserDataUpdateDTO;
+import com.ifba.clinic.dto.user.UserRegDTO;
+import com.ifba.clinic.dto.user.UserResponseDTO;
+import com.ifba.clinic.exception.BusinessRuleException;
+import com.ifba.clinic.exception.EntityNotFoundException;
+import com.ifba.clinic.exception.InvalidOperationException;
 import com.ifba.clinic.model.entity.Role;
 import com.ifba.clinic.model.entity.User;
 import com.ifba.clinic.model.enums.UserRole;
 import com.ifba.clinic.repository.RoleRepository;
 import com.ifba.clinic.repository.UserRepository;
-
-import java.time.LocalDateTime;
 
 @Service
 public class UserService {
