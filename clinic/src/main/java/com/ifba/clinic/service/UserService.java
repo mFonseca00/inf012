@@ -48,6 +48,11 @@ public class UserService {
     }
 
     public void register(UserRegDTO newUser) {
+        User existingUser = (User) userRepository.findByUsername(newUser.username());
+        if (existingUser != null) {
+            throw new BusinessRuleException("Username " + newUser.username() + " is already taken");
+        }
+        
         String encodedPassword = new BCryptPasswordEncoder().encode(newUser.password());
         Role defaultRole = roleRepository.findByRole(UserRole.USER.name())
                 .orElseThrow(() -> new EntityNotFoundException("Role USER not found"));
