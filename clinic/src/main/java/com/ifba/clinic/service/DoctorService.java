@@ -16,5 +16,8 @@ public class DoctorService {
     }
 
     // Para manipulação de doctor, chamar service de address para manipulação do address
+    public void register(){
+
+    }
 
 }

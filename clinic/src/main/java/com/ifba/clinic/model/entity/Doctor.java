@@ -20,29 +20,19 @@ public class Doctor {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank
     private String name;
 
-    @NotBlank
-    @Email(message = "Email inválido")
     private String email;
 
-    @NotBlank (message = "Numero de telefone é obrigatório")
-    @Pattern(regexp = "\\(\\d{2}\\) \\d{4,5}-\\d{4}", message = "Número de telefone inválido. Formato esperado: (XX) XXXXX-XXXX")
     private String phoneNumber;
 
-    @NotBlank
-    @Pattern(regexp = "^\\d{6}-\\d{2}\\/[A-Z]{2}$", message = "CRM inválido. Formato esperado: XXXXXX-XX/UF")
     @Column(unique = true)
     private String crm;
 
-    @NotNull
     @Enumerated(EnumType.STRING)
     @Column(name = "speciality", columnDefinition = "speciality_enum")
     private Speciality speciality;
 
-    @NotNull
-    @Valid
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "address_id")
     private Address address;
