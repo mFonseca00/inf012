@@ -7,8 +7,6 @@ import org.springframework.stereotype.Repository;
 
 import com.ifba.clinic.model.entity.Address;
 
-import java.util.Optional;
-
 @Repository
 public interface AddressRepository extends JpaRepository<Address, Long>{
     @Query("SELECT a FROM Address a WHERE " +
