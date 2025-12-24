@@ -6,28 +6,24 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class AddressDTO {
+public record AddressDTO (
+    @NotBlank
+    String street,
+
+    String number,
+
+    String complement,
 
     @NotBlank
-    private String street;
-
-    private String number;
-
-    private String complement;
+    String district,
 
     @NotBlank
-    private String district;
+    String city,
 
     @NotBlank
-    private String city;
-
-    @NotBlank
-    private String state;
+    String state,
 
     @NotBlank
     @Pattern(regexp = "\\d{5}-\\d{3}", message = "CEP inválido. Formato esperado: XXXXX-XXX")
-    private String cep;
-}
+    String cep
+) { }

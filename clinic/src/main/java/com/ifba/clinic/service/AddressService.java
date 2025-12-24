@@ -16,39 +16,31 @@ public class AddressService {
     }
 
     public void register(AddressDTO newAddress){
-        Address existingAddress = addressRepository.findByAddressFields(
-                newAddress.getStreet(),
-                newAddress.getDistrict(),
-                newAddress.getCity(),
-                newAddress.getState(),
-                newAddress.getCep(),
-                newAddress.getNumber(),
-                newAddress.getComplement()
-        );
-        if (existingAddress != null) {
+
+        if (this.findAddress(newAddress) != null) {
             throw new IllegalArgumentException("Endereço já cadastrado");
         }
         Address address = new Address(
-            newAddress.getStreet(),
-            newAddress.getNumber(),
-            newAddress.getComplement(),
-            newAddress.getDistrict(),
-            newAddress.getCity(),
-            newAddress.getState(),
-            newAddress.getCep()
+            newAddress.street(),
+            newAddress.number(),
+            newAddress.complement(),
+            newAddress.district(),
+            newAddress.city(),
+            newAddress.state(),
+            newAddress.cep()
         );
         addressRepository.save(address);
     }
 
     public Address findAddress(AddressDTO address){
         return addressRepository.findByAddressFields(
-                address.getStreet(),
-                address.getDistrict(),
-                address.getCity(),
-                address.getState(),
-                address.getCep(),
-                address.getNumber(),
-                address.getComplement()
+                address.street(),
+                address.district(),
+                address.city(),
+                address.state(),
+                address.cep(),
+                address.number(),
+                address.complement()
         );
     }
 }
