@@ -4,6 +4,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -32,4 +34,13 @@ public class Address {
 
     private String cep;
 
+    public Address(String street, String number, String complement, String district, String city, String state, String cep) {
+        this.street = street;
+        this.number = number;
+        this.complement = complement;
+        this.district = district;
+        this.city = city;
+        this.state = state;
+        this.cep = cep;
+    }
 }
