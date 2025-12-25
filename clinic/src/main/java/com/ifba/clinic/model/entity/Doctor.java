@@ -2,12 +2,16 @@ package com.ifba.clinic.model.entity;
 
 import com.ifba.clinic.model.enums.Speciality;
 
-import jakarta.persistence.*;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -38,4 +42,15 @@ public class Doctor {
     private Address address;
 
     private Boolean isActive = true;
+
+    public Doctor(Address address, String crm, String email, String name, String phoneNumber, Speciality speciality) {
+        this.address = address;
+        this.crm = crm;
+        this.email = email;
+        this.name = name;
+        this.phoneNumber = phoneNumber;
+        this.speciality = speciality;
+    }
+
+    
 }

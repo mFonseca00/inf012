@@ -11,11 +11,12 @@ public class AddressService {
 
     private final AddressRepository addressRepository;
 
+    @SuppressWarnings("unused")
     AddressService(AddressRepository addressRepository){
         this.addressRepository = addressRepository;
     }
 
-    public void register(AddressDTO newAddress){
+    public Address register(AddressDTO newAddress){
 
         if (this.findAddress(newAddress) != null) {
             throw new IllegalArgumentException("Endereço já cadastrado");
@@ -30,6 +31,7 @@ public class AddressService {
             newAddress.cep()
         );
         addressRepository.save(address);
+        return address;
     }
 
     public Address findAddress(AddressDTO address){
