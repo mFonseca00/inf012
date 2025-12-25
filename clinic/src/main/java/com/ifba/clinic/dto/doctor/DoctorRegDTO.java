@@ -1,7 +1,8 @@
 package com.ifba.clinic.dto.doctor;
 
-import com.ifba.clinic.model.entity.Address;
+import com.ifba.clinic.dto.address.AddressDTO;
 import com.ifba.clinic.model.enums.Speciality;
+
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -29,5 +30,5 @@ public record DoctorRegDTO(
 
         @NotNull
         @Valid
-        Address address
+        AddressDTO address
 ) { }
