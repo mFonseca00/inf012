@@ -5,8 +5,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ifba.clinic.dto.patient.PatientCreationDTO;
-import com.ifba.clinic.dto.patient.PatientDTO;
+import com.ifba.clinic.dto.patient.PatientRegDTO;
 import com.ifba.clinic.service.PatientService;
 
 import jakarta.validation.Valid;
@@ -21,9 +20,5 @@ public class PatientController {
         this.patientService = patientService;
     }
 
-    @GetMapping("/create")
-    public PatientDTO createPatient(@RequestBody @Valid PatientCreationDTO patient) {
 
-        return null;
-    }
 }

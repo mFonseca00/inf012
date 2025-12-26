@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class PatientCreationDTO {
+public class PatientRegDTO {
 
     @NotBlank
     private String name;
