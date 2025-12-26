@@ -70,7 +70,7 @@ public class DoctorService {
         }
     }
 
-    public void delete(DoctorinactivationDTO doctorDTO) {
+    public void inactivate(DoctorinactivationDTO doctorDTO) {
         Doctor doctor = doctorRepository.findByCrm(doctorDTO.crm());
         if (doctor == null) {
             throw new EntityNotFoundException("Médico de CRM " + doctorDTO.crm() + " não encontrado");
