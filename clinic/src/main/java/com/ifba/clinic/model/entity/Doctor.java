@@ -34,7 +34,7 @@ public class Doctor {
     private String crm;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "speciality", columnDefinition = "speciality_enum")
+    @Column(name = "speciality")
     private Speciality speciality;
 
     @ManyToOne(fetch = FetchType.LAZY)
