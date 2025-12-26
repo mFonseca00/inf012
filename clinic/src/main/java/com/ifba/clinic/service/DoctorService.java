@@ -2,7 +2,7 @@ package com.ifba.clinic.service;
 
 import com.ifba.clinic.dto.doctor.DoctorRsponseDTO;
 import com.ifba.clinic.dto.doctor.DoctorUpdateDTO;
-import com.ifba.clinic.dto.doctor.DoctorinactivationDTO;
+import com.ifba.clinic.dto.doctor.DoctorInactivationDTO;
 import com.ifba.clinic.exception.BusinessRuleException;
 import com.ifba.clinic.exception.EntityNotFoundException;
 import com.ifba.clinic.exception.InvalidOperationException;
@@ -70,7 +70,7 @@ public class DoctorService {
         }
     }
 
-    public void inactivate(DoctorinactivationDTO doctorDTO) {
+    public void inactivate(DoctorInactivationDTO doctorDTO) {
         Doctor doctor = doctorRepository.findByCrm(doctorDTO.crm());
         if (doctor == null) {
             throw new EntityNotFoundException("Médico de CRM " + doctorDTO.crm() + " não encontrado");

@@ -43,6 +43,6 @@ public class Appointment {
     private LocalDateTime appointmentDate;
     
     @Enumerated(EnumType.STRING)
-    @Column(name = "appointment_status", columnDefinition = "appointment_status_enum")
+    @Column(name = "appointment_status")
     private AppointmentStatus appointmentStatus = AppointmentStatus.ATIVO;
 }

@@ -6,21 +6,22 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ifba.clinic.dto.doctor.DoctorInactivationDTO;
 import com.ifba.clinic.dto.doctor.DoctorRegDTO;
 import com.ifba.clinic.dto.doctor.DoctorRsponseDTO;
 import com.ifba.clinic.dto.doctor.DoctorUpdateDTO;
-import com.ifba.clinic.dto.doctor.DoctorinactivationDTO;
 import com.ifba.clinic.service.DoctorService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Pattern;
 
 @RestController
 @RequestMapping("/doctor")
@@ -44,12 +45,12 @@ public class DoctorController {
     @Operation(summary = "Atualizar dados do médico", description = "Atualiza os dados de um médico existente.")
     public ResponseEntity<String> update(@RequestBody @Valid DoctorUpdateDTO doctorDTO) {
         doctorService.update(doctorDTO);
-        return ResponseEntity.ok("Médico atualizado com sucesso");
+        return ResponseEntity.ok("Registro de médico atualizado com sucesso");
     }
 
     @PatchMapping("/inactivate")
     @Operation(summary = "Inativar médico", description = "Inativa um médico existente.")
-    public ResponseEntity<String> inactivate(@RequestBody @Valid DoctorinactivationDTO doctorDTO) {
+    public ResponseEntity<String> inactivate(@RequestBody @Valid DoctorInactivationDTO doctorDTO) {
         doctorService.inactivate(doctorDTO);
         return ResponseEntity.ok("Médico inativado com sucesso");
     }
@@ -64,9 +65,12 @@ public class DoctorController {
         return ResponseEntity.ok(doctors);
     }
 
-    @GetMapping("/{crm}")
+    @GetMapping
     @Operation(summary = "Obter médico por CRM", description = "Retorna os dados do médico com base no CRM.")
-    public ResponseEntity<DoctorRsponseDTO> getDoctor(@PathVariable String crm) {
+    public ResponseEntity<DoctorRsponseDTO> getDoctor(
+        @RequestParam 
+        @Pattern(regexp = "^\\d{6}-\\d{2}\\/[A-Z]{2}$", message = "CRM inválido")
+        String crm) {
         DoctorRsponseDTO doctor = doctorService.getDoctor(crm);
         return ResponseEntity.ok(doctor);
     }
