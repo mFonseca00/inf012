@@ -9,31 +9,25 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class PatientRegDTO {
+public record PatientRegDTO (
 
-    @NotBlank
-    private String name;
+    @NotBlank(message = "Nome é obrigatório")
+    String name,
 
-    @NotBlank
+    @NotBlank(message = "Email é obrigatório")
     @Email(message = "Email inválido")
-    private String email;
+    String email,
 
     @NotBlank (message = "Numero de telefone é obrigatório")
     @Pattern(regexp = "\\(\\d{2}\\) \\d{4,5}-\\d{4}", message = "Número de telefone inválido. Formato esperado: (XX) XXXXX-XXXX")
-    private String phoneNumber;
+    String phoneNumber,
 
     @NotBlank(message = "CPF é obrigatório")
     @CPF(message = "CPF inválido")
-    private String cpf;
+    String cpf,
 
-    @NotNull
+    @NotNull(message = "Endereço é obrigatório")
     @Valid
-    private AddressDTO address;
-}
+    AddressDTO address
+){ }
