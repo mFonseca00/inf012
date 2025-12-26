@@ -38,14 +38,14 @@ public class UserController {
     @Operation(summary = "Adicionar papel ao usuário", description = "Adiciona um papel (role) a um usuário existente. Requer privilégios de ADMIN ou MASTER.")
     public ResponseEntity<String> addRole(@RequestBody @Valid ChangeRoleDTO dto) {
         userService.addRole(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body("Role added successfully");
+        return ResponseEntity.status(HttpStatus.CREATED).body("Role adicionada com sucesso");
     }
 
     @PatchMapping("/remove-role")
     @Operation(summary = "Remover papel do usuário", description = "Remove um papel (role) de um usuário existente. Requer privilégios de ADMIN ou MASTER.")
     public ResponseEntity<String> removeRole(@RequestBody @Valid ChangeRoleDTO dto) {
         userService.removeRole(dto);
-        return ResponseEntity.ok("Role removed successfully");
+        return ResponseEntity.ok("Role removida com sucesso");
     }
 
     @GetMapping("/all")
@@ -69,27 +69,27 @@ public class UserController {
     @Operation(summary = "Desativar usuário", description = "Desativa um usuário existente. Requer privilégios de ADMIN ou MASTER.")
     public ResponseEntity<String> deactivateUser(@RequestBody @Valid UserBasicInfoDTO userDTO) {
         userService.deactivateUser(userDTO);
-        return ResponseEntity.ok("User deactivated successfully");
+        return ResponseEntity.ok("Usuário desativado com sucesso");
     }
 
     @PatchMapping("/activate")
     @Operation(summary = "Ativar usuário", description = "Ativa um usuário existente. Requer privilégios de ADMIN ou MASTER.")
     public ResponseEntity<String> activateUser(@RequestBody @Valid UserBasicInfoDTO userDTO) {
         userService.activateUser(userDTO);
-        return ResponseEntity.ok("User activated successfully");
+        return ResponseEntity.ok("Usuário ativado com sucesso");
     }
 
     @PatchMapping("/update")
     @Operation(summary = "Atualizar dados do usuário", description = "Atualiza os dados de um usuário existente. Requer privilégios de ADMIN ou MASTER.")
     public ResponseEntity<String> updateUser(@RequestBody @Valid UserDataUpdateDTO userDTO){
         userService.update(userDTO);
-        return ResponseEntity.ok("User updated successfully");
+        return ResponseEntity.ok("Usuário atualizado com sucesso");
     }
 
     @PatchMapping("/change-password")
     @Operation(summary = "Alterar senha do usuário", description = "Altera a senha de um usuário existente. Requer login do usuário.")
     public ResponseEntity<String> changePassword(@RequestBody @Valid ChangePasswordDTO passwordDTO, Authentication auth){ // Authenticação injetada pelo Spring Security
         userService.changePassword(auth.getName(), passwordDTO);
-        return ResponseEntity.ok("Password changed successfully");
+        return ResponseEntity.ok("Senha alterada com sucesso");
     }
 }

@@ -52,18 +52,18 @@ public class UserService {
         validateUniqueEmail(newUser.email());
         String encodedPassword = new BCryptPasswordEncoder().encode(newUser.password());
         Role defaultRole = roleRepository.findByRole(UserRole.USER.name())
-                .orElseThrow(() -> new EntityNotFoundException("Role USER not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Role USER não encontrada"));
         User user = new User(newUser.username(), newUser.email(), encodedPassword, defaultRole);
         userRepository.save(user);
     }
 
     public void addRole(ChangeRoleDTO dto) {
         Role newRole = roleRepository.findByRole(dto.role())
-                .orElseThrow(() -> new EntityNotFoundException("Role " + dto.role() + " not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Role " + dto.role() + " não encontrada"));
         User user = findUserByUsername(dto.username());
 
         if (user.getRoles().contains(newRole)) {
-            throw new BusinessRuleException("User already has role " + dto.role());
+            throw new BusinessRuleException("Usuário já possui a role " + dto.role());
         }
 
         user.addRole(newRole);
@@ -72,17 +72,17 @@ public class UserService {
 
     public void removeRole(ChangeRoleDTO dto) {
         Role roleToRemove = roleRepository.findByRole(dto.role())
-                .orElseThrow(() -> new EntityNotFoundException("Role " + dto.role() + " not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Role " + dto.role() + " não encontrada"));
         User user = findUserByUsername(dto.username());
 
         if (roleToRemove.getAuthority().equals(UserRole.MASTER.name())) {
-            throw new BusinessRuleException("Cannot remove MASTER role");
+            throw new BusinessRuleException("Não é possível remover a role MASTER");
         }
         if (roleToRemove.getAuthority().equals(UserRole.USER.name())) {
-            throw new BusinessRuleException("Cannot remove default USER role");
+            throw new BusinessRuleException("Não é possível remover a role USER padrão");
         }
         if (!user.getRoles().contains(roleToRemove)) {
-            throw new BusinessRuleException("User does not have role " + dto.role());
+            throw new BusinessRuleException("Usuário não possui a role " + dto.role());
         }
 
         user.removeRole(roleToRemove);
@@ -104,7 +104,7 @@ public class UserService {
         User user = findUserByUsername(userDTO.username());
 
         if (!user.getIsActive()) {
-            throw new InvalidOperationException("User " + userDTO.username() + " is already deactivated");
+            throw new InvalidOperationException("Usuário " + userDTO.username() + " já está desativado");
         }
 
         user.setIsActive(false);
@@ -116,7 +116,7 @@ public class UserService {
         User user = findUserByUsername(userDTO.username());
 
         if (user.getIsActive()) {
-            throw new InvalidOperationException("User " + userDTO.username() + " is already active");
+            throw new InvalidOperationException("Usuário " + userDTO.username() + " já está ativo");
         }
 
         user.setIsActive(true);
@@ -148,7 +148,7 @@ public class UserService {
         if (dto.roles() != null && !dto.roles().isEmpty()) {
             var resolvedRoles = dto.roles().stream()
                     .map(r -> roleRepository.findByRole(r.getAuthority())
-                            .orElseThrow(() -> new EntityNotFoundException("Role " + r.getAuthority() + " not found")))
+                            .orElseThrow(() -> new EntityNotFoundException("Role " + r.getAuthority() + " não encontrada")))
                     .toList();
             user.getRoles().clear();
             user.getRoles().addAll(new java.util.HashSet<>(resolvedRoles));
@@ -167,20 +167,20 @@ public class UserService {
     private User findUserByUsername(String username) {
         User user = (User) userRepository.findByUsername(username);
         if (user == null) {
-            throw new EntityNotFoundException("User " + username + " not found");
+            throw new EntityNotFoundException("Usuário " + username + " não encontrado");
         }
         return user;
     }
 
     private void validateUniqueUsername(String username) {
         if (userRepository.existsByUsername(username)) {
-            throw new BusinessRuleException("Username " + username + " is already taken");
+            throw new BusinessRuleException("Username " + username + " já está em uso");
         }
     }
 
     private void validateUniqueEmail(String email) {
         if (userRepository.existsByEmail(email)) {
-            throw new BusinessRuleException("Email " + email + " is already registered");
+            throw new BusinessRuleException("Email " + email + " já está cadastrado");
         }
     }
 
