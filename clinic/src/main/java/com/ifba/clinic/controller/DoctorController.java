@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ifba.clinic.dto.doctor.DoctorInactivationDTO;
 import com.ifba.clinic.dto.doctor.DoctorRegDTO;
-import com.ifba.clinic.dto.doctor.DoctorRsponseDTO;
+import com.ifba.clinic.dto.doctor.DoctorResponseDTO;
 import com.ifba.clinic.dto.doctor.DoctorUpdateDTO;
 import com.ifba.clinic.service.DoctorService;
 
@@ -57,8 +57,8 @@ public class DoctorController {
 
     @GetMapping("/all")
     @Operation(summary = "Listar todos os médicos", description = "Retorna uma lista paginada de todos os médicos.")
-    public ResponseEntity<Page<DoctorRsponseDTO>> getAllDoctors(Pageable pageable) {
-        Page<DoctorRsponseDTO> doctors = doctorService.getAllDoctors(pageable);
+    public ResponseEntity<Page<DoctorResponseDTO>> getAllDoctors(Pageable pageable) {
+        Page<DoctorResponseDTO> doctors = doctorService.getAllDoctors(pageable);
         if (doctors.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
@@ -67,11 +67,11 @@ public class DoctorController {
 
     @GetMapping
     @Operation(summary = "Obter médico por CRM", description = "Retorna os dados do médico com base no CRM.")
-    public ResponseEntity<DoctorRsponseDTO> getDoctor(
+    public ResponseEntity<DoctorResponseDTO> getDoctor(
         @RequestParam 
         @Pattern(regexp = "^\\d{6}-\\d{2}\\/[A-Z]{2}$", message = "CRM inválido")
         String crm) {
-        DoctorRsponseDTO doctor = doctorService.getDoctor(crm);
+        DoctorResponseDTO doctor = doctorService.getDoctor(crm);
         return ResponseEntity.ok(doctor);
     }
 }

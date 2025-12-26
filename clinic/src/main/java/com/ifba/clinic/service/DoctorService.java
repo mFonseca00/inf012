@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 
 import com.ifba.clinic.dto.doctor.DoctorInactivationDTO;
 import com.ifba.clinic.dto.doctor.DoctorRegDTO;
-import com.ifba.clinic.dto.doctor.DoctorRsponseDTO;
+import com.ifba.clinic.dto.doctor.DoctorResponseDTO;
 import com.ifba.clinic.dto.doctor.DoctorUpdateDTO;
 import com.ifba.clinic.exception.BusinessRuleException;
 import com.ifba.clinic.exception.EntityNotFoundException;
@@ -81,9 +81,9 @@ public class DoctorService {
         doctorRepository.save(doctor);
     }
 
-    public Page<DoctorRsponseDTO> getAllDoctors(Pageable pageable) {
+    public Page<DoctorResponseDTO> getAllDoctors(Pageable pageable) {
         Page<Doctor> doctors = doctorRepository.findAll(pageable);
-        return doctors.map(doctor -> new DoctorRsponseDTO(
+        return doctors.map(doctor -> new DoctorResponseDTO(
                 doctor.getName(),
                 doctor.getEmail(),
                 doctor.getCrm(),
@@ -91,12 +91,12 @@ public class DoctorService {
         ));
     }
 
-    public DoctorRsponseDTO getDoctor(String crm) {
+    public DoctorResponseDTO getDoctor(String crm) {
         Doctor doctor = doctorRepository.findByCrm(crm);
         if (doctor == null) {
             throw new EntityNotFoundException("Médico de CRM " + crm + " não encontrado");
         }
-        return new DoctorRsponseDTO(
+        return new DoctorResponseDTO(
                 doctor.getName(),
                 doctor.getEmail(),
                 doctor.getCrm(),
