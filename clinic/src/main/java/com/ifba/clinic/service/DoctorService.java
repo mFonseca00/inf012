@@ -1,16 +1,16 @@
 package com.ifba.clinic.service;
 
-import com.ifba.clinic.dto.doctor.DoctorRsponseDTO;
-import com.ifba.clinic.dto.doctor.DoctorUpdateDTO;
-import com.ifba.clinic.dto.doctor.DoctorInactivationDTO;
-import com.ifba.clinic.exception.BusinessRuleException;
-import com.ifba.clinic.exception.EntityNotFoundException;
-import com.ifba.clinic.exception.InvalidOperationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.ifba.clinic.dto.doctor.DoctorInactivationDTO;
 import com.ifba.clinic.dto.doctor.DoctorRegDTO;
+import com.ifba.clinic.dto.doctor.DoctorRsponseDTO;
+import com.ifba.clinic.dto.doctor.DoctorUpdateDTO;
+import com.ifba.clinic.exception.BusinessRuleException;
+import com.ifba.clinic.exception.EntityNotFoundException;
+import com.ifba.clinic.exception.InvalidOperationException;
 import com.ifba.clinic.model.entity.Address;
 import com.ifba.clinic.model.entity.Doctor;
 import com.ifba.clinic.repository.DoctorRepository;
@@ -65,7 +65,6 @@ public class DoctorService {
         }
         doctorRepository.save(doctor);
         if(!doctorRepository.existsByAddress(oldAddress)) {
-            // Remover endereço antigo se não estiver mais associado a nenhum médico
             addressService.delete(oldAddress.getId());
         }
     }
