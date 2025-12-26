@@ -45,4 +45,8 @@ public class AddressService {
                 address.complement()
         );
     }
+
+    public void delete(Long addressId) {
+        addressRepository.deleteById(addressId);
+    }
 }
