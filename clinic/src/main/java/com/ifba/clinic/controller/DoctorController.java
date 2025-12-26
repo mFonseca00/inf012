@@ -50,7 +50,7 @@ public class DoctorController {
     @PatchMapping("/inactivate")
     @Operation(summary = "Inativar médico", description = "Inativa um médico existente.")
     public ResponseEntity<String> inactivate(@RequestBody @Valid DoctorinactivationDTO doctorDTO) {
-        doctorService.delete(doctorDTO);
+        doctorService.inactivate(doctorDTO);
         return ResponseEntity.ok("Médico inativado com sucesso");
     }
 
