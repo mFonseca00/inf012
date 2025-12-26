@@ -60,7 +60,7 @@ public class UserController {
 
     @GetMapping("/{username}")
     @Operation(summary = "Obter dados de um usuário com base no username", description =  "Retorna os dados do usuário com base em um username. Requer privilégios de ADMIN ou MASTER.")
-    public ResponseEntity<UserResponseDTO> getUser(@PathVariable @Valid String username) {
+    public ResponseEntity<UserResponseDTO> getUser(@PathVariable String username) {
         UserResponseDTO user = userService.getUser(username);
         return ResponseEntity.ok(user);
     }

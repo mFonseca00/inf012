@@ -66,7 +66,7 @@ public class DoctorController {
 
     @GetMapping("/{crm}")
     @Operation(summary = "Obter médico por CRM", description = "Retorna os dados do médico com base no CRM.")
-    public ResponseEntity<DoctorRsponseDTO> getDoctor(@PathVariable @Valid String crm) {
+    public ResponseEntity<DoctorRsponseDTO> getDoctor(@PathVariable String crm) {
         DoctorRsponseDTO doctor = doctorService.getDoctor(crm);
         return ResponseEntity.ok(doctor);
     }
