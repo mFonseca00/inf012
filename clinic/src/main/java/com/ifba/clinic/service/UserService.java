@@ -48,11 +48,8 @@ public class UserService {
     }
 
     public void register(UserRegDTO newUser) {
-        User existingUser = (User) userRepository.findByUsername(newUser.username());
-        if (existingUser != null) {
-            throw new BusinessRuleException("Username " + newUser.username() + " is already taken");
-        }
-        
+        validateUniqueUsername(newUser.username());
+        validateUniqueEmail(newUser.email());
         String encodedPassword = new BCryptPasswordEncoder().encode(newUser.password());
         Role defaultRole = roleRepository.findByRole(UserRole.USER.name())
                 .orElseThrow(() -> new EntityNotFoundException("Role USER not found"));
@@ -141,6 +138,7 @@ public class UserService {
     public void update(UserDataUpdateDTO dto){
         User user = findUserByUsername(dto.username());
         if (dto.email() != null && !dto.email().isBlank()) {
+            validateUniqueEmail(dto.email());
             user.setEmail(dto.email());
         }
         if (dto.password() != null && !dto.password().isBlank()) {
@@ -173,4 +171,17 @@ public class UserService {
         }
         return user;
     }
+
+    private void validateUniqueUsername(String username) {
+        if (userRepository.existsByUsername(username)) {
+            throw new BusinessRuleException("Username " + username + " is already taken");
+        }
+    }
+
+    private void validateUniqueEmail(String email) {
+        if (userRepository.existsByEmail(email)) {
+            throw new BusinessRuleException("Email " + email + " is already registered");
+        }
+    }
+
 }
