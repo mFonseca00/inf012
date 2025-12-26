@@ -3,6 +3,9 @@ package com.ifba.clinic.service;
 import com.ifba.clinic.dto.doctor.DoctorRsponseDTO;
 import com.ifba.clinic.dto.doctor.DoctorUpdateDTO;
 import com.ifba.clinic.dto.doctor.DoctorinactivationDTO;
+import com.ifba.clinic.exception.BusinessRuleException;
+import com.ifba.clinic.exception.EntityNotFoundException;
+import com.ifba.clinic.exception.InvalidOperationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -26,7 +29,7 @@ public class DoctorService {
 
     public void register(DoctorRegDTO doctorDTO){
         if (doctorRepository.existsByCrm(doctorDTO.crm())) {
-            throw new IllegalArgumentException("CRM já cadastrado");
+            throw new BusinessRuleException("CRM " + doctorDTO.crm() + " já cadastrado");
         }
         Address address = addressService.findAddress(doctorDTO.address());
         if (address == null) {
@@ -44,7 +47,7 @@ public class DoctorService {
     public void update(DoctorUpdateDTO doctorDTO) {
         Doctor doctor = doctorRepository.findByCrm(doctorDTO.crm());
         if (doctor == null) {
-            throw new IllegalArgumentException("Médico não encontrado");
+            throw new EntityNotFoundException("Médico de CRM " + doctorDTO.crm() + " não encontrado");
         }
         Address currentAddress = addressService.findAddress(doctorDTO.address());
         Address oldAddress = doctor.getAddress();
@@ -70,7 +73,10 @@ public class DoctorService {
     public void delete(DoctorinactivationDTO doctorDTO) {
         Doctor doctor = doctorRepository.findByCrm(doctorDTO.crm());
         if (doctor == null) {
-            throw new IllegalArgumentException("Médico não encontrado");
+            throw new EntityNotFoundException("Médico de CRM " + doctorDTO.crm() + " não encontrado");
+        }
+        if (!doctor.getIsActive()) {
+            throw new InvalidOperationException("Médico de CRM " + doctorDTO.crm() + " já está inativo");
         }
         doctor.setIsActive(false);
         doctorRepository.save(doctor);
@@ -89,7 +95,7 @@ public class DoctorService {
     public DoctorRsponseDTO getDoctor(String crm) {
         Doctor doctor = doctorRepository.findByCrm(crm);
         if (doctor == null) {
-            throw new IllegalArgumentException("Médico não encontrado");
+            throw new EntityNotFoundException("Médico de CRM " + crm + " não encontrado");
         }
         return new DoctorRsponseDTO(
                 doctor.getName(),
