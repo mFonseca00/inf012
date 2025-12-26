@@ -28,9 +28,8 @@ public class DoctorService {
     }
 
     public void register(DoctorRegDTO doctorDTO){
-        if (doctorRepository.existsByCrm(doctorDTO.crm())) {
-            throw new BusinessRuleException("CRM " + doctorDTO.crm() + " já cadastrado");
-        }
+        validateUniqueCRM(doctorDTO.crm());
+        validateUniqueEmail(doctorDTO.email());
         Address address = addressService.findAddress(doctorDTO.address());
         if (address == null) {
             address = addressService.register(doctorDTO.address());
@@ -104,4 +103,16 @@ public class DoctorService {
         );
     }
 
+    // Helper methods
+    private void validateUniqueCRM(String crm) {
+        if (doctorRepository.existsByCrm(crm)) {
+            throw new BusinessRuleException("CRM " + crm + " já cadastrado");
+        }
+    }
+
+    private void validateUniqueEmail(String email) {
+        if(doctorRepository.existsByEmail(email)) {
+            throw new BusinessRuleException("Email " + email + " já cadastrado");
+        }
+    }
 }

@@ -1,5 +1,15 @@
 package com.ifba.clinic.service;
 
+import com.ifba.clinic.dto.patient.PatientInactivationDTO;
+import com.ifba.clinic.dto.patient.PatientRegDTO;
+import com.ifba.clinic.dto.patient.PatientResponseDTO;
+import com.ifba.clinic.dto.patient.PatientUpdateDTO;
+import com.ifba.clinic.exception.BusinessRuleException;
+import com.ifba.clinic.exception.EntityNotFoundException;
+import com.ifba.clinic.model.entity.Address;
+import com.ifba.clinic.model.entity.Patient;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.ifba.clinic.repository.PatientRepository;
@@ -8,11 +18,99 @@ import com.ifba.clinic.repository.PatientRepository;
 public class PatientService {
 
     private final PatientRepository patientRepository;
+    private final AddressService addressService;
 
-    PatientService(PatientRepository patientRepository){
+    @SuppressWarnings("unused")
+    PatientService(PatientRepository patientRepository, AddressService addressService){
         this.patientRepository = patientRepository;
+        this.addressService = addressService;
     }
 
-    // Para manipulação de patient, chamar service de address para manipulação do address
+    public void register(PatientRegDTO patientDTO){
+        validateUniqueCPF(patientDTO.cpf());
+        validateUniqueEmail(patientDTO.email());
+        Address address =addressService.findAddress(patientDTO.address());
+        if (address == null){
+            address = addressService.register(patientDTO.address());
+        }
+        Patient patient = new Patient(
+            patientDTO.name(),
+            patientDTO.email(),
+            patientDTO.phoneNumber(),
+            patientDTO.cpf(),
+            address
+        );
+        patientRepository.save(patient);
+    }
+
+    public void update(PatientUpdateDTO patientDTO) {
+        Patient patient = patientRepository.findByCpf(patientDTO.cpf());
+        if (patient == null) {
+            throw new EntityNotFoundException("Paciente de CPF " + patientDTO.cpf() + " não encontrado");
+        }
+        Address currentAddress = addressService.findAddress(patientDTO.address());
+        Address oldAddress = patient.getAddress();
+        if (currentAddress == null) {
+            currentAddress = addressService.register(patientDTO.address());
+        }
+        if (!oldAddress.equals(currentAddress)) {
+            patient.setAddress(currentAddress);
+        }
+        if (!patient.getName().equals(patientDTO.name())) {
+            patient.setName(patientDTO.name());
+        }
+        if (!patient.getPhoneNumber().equals(patientDTO.phoneNumber())) {
+            patient.setPhoneNumber(patientDTO.phoneNumber());
+        }
+        patientRepository.save(patient);
+        if(!patientRepository.existsByAddress(oldAddress)) {
+            addressService.delete(oldAddress.getId());
+        }
+    }
+
+    public void inactivate(PatientInactivationDTO patientDTO) {
+        Patient patient = patientRepository.findByCpf(patientDTO.cpf());
+        if (patient == null) {
+            throw new EntityNotFoundException("Paciente de CPF " + patientDTO.cpf() + " não encontrado");
+        }
+        if (!patient.getIsActive()) {
+            throw new BusinessRuleException("Paciente de CPF " + patientDTO.cpf() + " já está inativo");
+        }
+        patient.setIsActive(false);
+        patientRepository.save(patient);
+    }
+
+    public Page<PatientResponseDTO> getAllPatients(Pageable pageable) {
+        Page<Patient> patients = patientRepository.findAll(pageable);
+        return patients.map(patient -> new PatientResponseDTO(
+            patient.getName(),
+            patient.getEmail(),
+            patient.getCpf()
+        ));
+    }
+
+    public PatientResponseDTO getPatientByCPF(String cpf) {
+        Patient patient = patientRepository.findByCpf(cpf);
+        if (patient == null) {
+            throw new EntityNotFoundException("Paciente de CPF " + cpf + " não encontrado");
+        }
+        return new PatientResponseDTO(
+            patient.getName(),
+            patient.getEmail(),
+            patient.getCpf()
+        );
+    }
+
+    // Helper methods
+    private void validateUniqueCPF(String cpf) {
+        if (patientRepository.existsByCpf(cpf)) {
+            throw new BusinessRuleException("CPF " + cpf + " já cadastrado");
+        }
+    }
+    private void validateUniqueEmail(String email) {
+        if(patientRepository.existsByCpf(email)) {
+            throw new BusinessRuleException("Email " + email + " já cadastrado");
+        }
+    }
 
 }
