@@ -90,7 +90,8 @@ public class PatientService {
     }
 
     public PatientResponseDTO getPatientByCPF(String cpf) {
-        Patient patient = patientRepository.findByCpf(cpf);
+        String formattedCpf = formatCPF(cpf);
+        Patient patient = patientRepository.findByCpf(formattedCpf);
         if (patient == null) {
             throw new EntityNotFoundException("Paciente de CPF " + cpf + " não encontrado");
         }
@@ -112,5 +113,14 @@ public class PatientService {
             throw new BusinessRuleException("Email " + email + " já cadastrado");
         }
     }
-
+    private String formatCPF(String cpf) {
+        String cleanCpf = cpf.replaceAll("[.\\-\\s]", "");
+        if (cleanCpf.length() == 11 && cleanCpf.matches("\\d{11}")) {
+            return cleanCpf.substring(0, 3) + "." +
+                    cleanCpf.substring(3, 6) + "." +
+                    cleanCpf.substring(6, 9) + "-" +
+                    cleanCpf.substring(9, 11);
+        }
+        return cpf;
+    }
 }
