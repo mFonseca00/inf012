@@ -21,12 +21,10 @@ public class AppointmentCancelation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "appointment_id", nullable = false)
     private Appointment appointment;
 
-    @NotBlank
     private String reason;
 
 }
