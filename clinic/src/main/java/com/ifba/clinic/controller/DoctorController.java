@@ -68,8 +68,8 @@ public class DoctorController {
     @GetMapping
     @Operation(summary = "Obter médico por CRM", description = "Retorna os dados do médico com base no CRM.")
     public ResponseEntity<DoctorResponseDTO> getDoctor(
-        @RequestParam 
-        @Pattern(regexp = "^\\d{6}-\\d{2}\\/[A-Z]{2}$", message = "CRM inválido")
+        @RequestParam
+        @Pattern(regexp = "^(\\d{6}-\\d{2}\\/[A-Z]{2}|\\d{8}[A-Z]{2})$", message = "CRM inválido")
         String crm) {
         DoctorResponseDTO doctor = doctorService.getDoctor(crm);
         return ResponseEntity.ok(doctor);
