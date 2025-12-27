@@ -91,7 +91,8 @@ public class DoctorService {
     }
 
     public DoctorResponseDTO getDoctor(String crm) {
-        Doctor doctor = doctorRepository.findByCrm(crm);
+        String formattedCrm = formatCRM(crm);
+        Doctor doctor = doctorRepository.findByCrm(formattedCrm);
         if (doctor == null) {
             throw new EntityNotFoundException("Médico de CRM " + crm + " não encontrado");
         }
@@ -109,10 +110,18 @@ public class DoctorService {
             throw new BusinessRuleException("CRM " + crm + " já cadastrado");
         }
     }
-
     private void validateUniqueEmail(String email) {
         if(doctorRepository.existsByEmail(email)) {
             throw new BusinessRuleException("Email " + email + " já cadastrado");
         }
+    }
+    private String formatCRM(String crm) {
+        String cleanCrm = crm.replaceAll("[.\\-\\/\\s]", "");
+        if (cleanCrm.length() == 10 && cleanCrm.matches("\\d{8}[A-Z]{2}")) {
+            return cleanCrm.substring(0, 6) + "-" +
+                    cleanCrm.substring(6, 8) + "/" +
+                    cleanCrm.substring(8, 10);
+        }
+        return crm;
     }
 }
