@@ -83,9 +83,11 @@ public class PatientService {
     public Page<PatientResponseDTO> getAllPatients(Pageable pageable) {
         Page<Patient> patients = patientRepository.findAll(pageable);
         return patients.map(patient -> new PatientResponseDTO(
+            patient.getId(),
             patient.getName(),
             patient.getEmail(),
-            patient.getCpf()
+            patient.getCpf(),
+            patient.getIsActive()
         ));
     }
 
@@ -96,9 +98,11 @@ public class PatientService {
             throw new EntityNotFoundException("Paciente de CPF " + cpf + " não encontrado");
         }
         return new PatientResponseDTO(
+            patient.getId(),
             patient.getName(),
             patient.getEmail(),
-            patient.getCpf()
+            patient.getCpf(),
+            patient.getIsActive()
         );
     }
 

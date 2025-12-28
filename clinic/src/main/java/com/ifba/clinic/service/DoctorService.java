@@ -83,10 +83,12 @@ public class DoctorService {
     public Page<DoctorResponseDTO> getAllDoctors(Pageable pageable) {
         Page<Doctor> doctors = doctorRepository.findAll(pageable);
         return doctors.map(doctor -> new DoctorResponseDTO(
+                doctor.getId(),
                 doctor.getName(),
                 doctor.getEmail(),
                 doctor.getCrm(),
-                doctor.getSpeciality()
+                doctor.getSpeciality(),
+                doctor.getIsActive()
         ));
     }
 
@@ -97,10 +99,12 @@ public class DoctorService {
             throw new EntityNotFoundException("Médico de CRM " + crm + " não encontrado");
         }
         return new DoctorResponseDTO(
+                doctor.getId(),
                 doctor.getName(),
                 doctor.getEmail(),
                 doctor.getCrm(),
-                doctor.getSpeciality()
+                doctor.getSpeciality(),
+                doctor.getIsActive()
         );
     }
 
