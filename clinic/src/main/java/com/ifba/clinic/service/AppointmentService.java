@@ -1,11 +1,15 @@
 package com.ifba.clinic.service;
 
+import com.ifba.clinic.dto.appointment.AppointmentCancelationDTO;
 import com.ifba.clinic.dto.appointment.AppointmentRegDTO;
 import com.ifba.clinic.exception.BusinessRuleException;
 import com.ifba.clinic.exception.EntityNotFoundException;
 import com.ifba.clinic.model.entity.Appointment;
+import com.ifba.clinic.model.entity.AppointmentCancelation;
 import com.ifba.clinic.model.entity.Doctor;
 import com.ifba.clinic.model.entity.Patient;
+import com.ifba.clinic.model.enums.AppointmentStatus;
+import com.ifba.clinic.repository.AppointmentCancelationRepository;
 import com.ifba.clinic.repository.AppointmentRepository;
 import com.ifba.clinic.repository.DoctorRepository;
 import com.ifba.clinic.repository.PatientRepository;
