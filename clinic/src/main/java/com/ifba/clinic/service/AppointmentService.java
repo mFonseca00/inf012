@@ -22,14 +22,16 @@ public class AppointmentService {
     private final AppointmentRepository appointmentRepository;
     private final PatientRepository patientRepository;
     private final DoctorRepository doctorRepository;
+    private final AppointmentCancelationRepository appointmentCancelationRepository;
 
-    AppointmentService(AppointmentRepository appointmentRepository, PatientRepository patientRepository, DoctorRepository doctorRepository) {
+    AppointmentService(AppointmentRepository appointmentRepository, PatientRepository patientRepository, DoctorRepository doctorRepository, AppointmentCancelationRepository appointmentCancelationRepository) {
         this.appointmentRepository = appointmentRepository;
         this.patientRepository = patientRepository;
         this.doctorRepository = doctorRepository;
+        this.appointmentCancelationRepository = appointmentCancelationRepository;
     }
 
-    public Appointment scheduleAppointment(AppointmentRegDTO dto) {
+    public void scheduleAppointment(AppointmentRegDTO dto) {
         validateMinimumAdvanceTime(dto.appointmentDate());
         validateClinicOperatingHours(dto.appointmentDate());
         
@@ -42,7 +44,32 @@ public class AppointmentService {
             dto.appointmentDate()
         );
         
-        return appointmentRepository.save(appointment);
+        appointmentRepository.save(appointment);
+    }
+
+    public void cancelAppointment(AppointmentCancelationDTO dto) {
+        Appointment appointment = appointmentRepository.findById(dto.appointmentId())
+            .orElseThrow(() -> new EntityNotFoundException(
+                "Consulta não encontrada com ID: " + dto.appointmentId()
+            ));
+        if (appointment.getAppointmentStatus() != AppointmentStatus.ATIVO) {
+            throw new BusinessRuleException(
+                "Esta consulta já foi cancelada anteriormente"
+            );
+        }
+        
+        validateMinimumCancelationTime(appointment.getAppointmentDate());
+        validateCancelationStatus(dto.newStatus());
+        
+        appointment.setAppointmentStatus(dto.newStatus());
+        appointmentRepository.save(appointment);
+        
+        AppointmentCancelation cancelation = new AppointmentCancelation(
+            appointment,
+            dto.reason()
+        );
+        
+        appointmentCancelationRepository.save(cancelation);
     }
 
     // Helper Methods
@@ -72,6 +99,27 @@ public class AppointmentService {
         if (endTime.getHour() > 19 || (endTime.getHour() == 19 && endTime.getMinute() > 0)) {
             throw new BusinessRuleException(
                 "A consulta não pode ser agendada neste horário pois terminaria após o fechamento da clínica (19:00)"
+            );
+        }
+    }
+
+    private void validateMinimumCancelationTime(LocalDateTime appointmentDate) {
+        LocalDateTime minimumTime = LocalDateTime.now().plusHours(24);
+        if (appointmentDate.isBefore(minimumTime)) {
+            throw new BusinessRuleException(
+                "Consultas só podem ser canceladas com antecedência mínima de 24 horas"
+            );
+        }
+    }
+
+    private void validateCancelationStatus(AppointmentStatus newStatus) {
+        if (newStatus != AppointmentStatus.CANCELADO && 
+            newStatus != AppointmentStatus.DESISTENCIA && 
+            newStatus != AppointmentStatus.OUTRO) {
+            throw new BusinessRuleException(
+                "Status de cancelamento inválido. " +
+                "Motivo de cancelamento deve ser: CANCELADO (médico cancelou), " +
+                "DESISTENCIA (paciente desistiu) ou OUTRO (outros motivos)"
             );
         }
     }
