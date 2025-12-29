@@ -3,7 +3,8 @@ version: '3.8'
 
 services:
   db:
-    image: postgres:15-alpine
+    # image: postgres:15-alpine
+    image: ankane/pgvector
     container_name: clinic_db
     environment:
       POSTGRES_USER: clinic

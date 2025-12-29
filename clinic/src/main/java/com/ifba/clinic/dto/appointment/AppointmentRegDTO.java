@@ -10,7 +10,6 @@ public record AppointmentRegDTO(
         @NotNull(message = "ID do paciente é obrigatório")
         Long patientId,
 
-        @NotNull(message = "ID do médico é obrigatório")
         Long doctorId,
 
         @NotNull(message = "Data e hora da consulta é obrigatória")
