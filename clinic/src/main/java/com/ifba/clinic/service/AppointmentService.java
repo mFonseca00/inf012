@@ -2,6 +2,7 @@ package com.ifba.clinic.service;
 
 import com.ifba.clinic.dto.appointment.AppointmentCancelationDTO;
 import com.ifba.clinic.dto.appointment.AppointmentRegDTO;
+import com.ifba.clinic.dto.appointment.AppointmentResponseDTO;
 import com.ifba.clinic.exception.BusinessRuleException;
 import com.ifba.clinic.exception.EntityNotFoundException;
 import com.ifba.clinic.model.entity.Appointment;
@@ -13,6 +14,8 @@ import com.ifba.clinic.repository.AppointmentCancelationRepository;
 import com.ifba.clinic.repository.AppointmentRepository;
 import com.ifba.clinic.repository.DoctorRepository;
 import com.ifba.clinic.repository.PatientRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
@@ -74,6 +77,35 @@ public class AppointmentService {
         );
         
         appointmentCancelationRepository.save(cancelation);
+    }
+
+    public Page<AppointmentResponseDTO> getAllAppointments(Pageable pageable) {
+        Page<Appointment> appointments = appointmentRepository.findAll(pageable);
+        return appointments.map(appointment -> new AppointmentResponseDTO(
+                appointment.getId(),
+                appointment.getPatient().getId(),
+                appointment.getPatient().getName(),
+                appointment.getDoctor().getId(),
+                appointment.getDoctor().getName(),
+                appointment.getAppointmentDate(),
+                appointment.getAppointmentStatus()
+        ));
+    }
+
+    public AppointmentResponseDTO getAppointment(Long id) {
+        Appointment appointment = appointmentRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Consulta não encontrada com ID: " + id
+                ));
+        return new AppointmentResponseDTO(
+                appointment.getId(),
+                appointment.getPatient().getId(),
+                appointment.getPatient().getName(),
+                appointment.getDoctor().getId(),
+                appointment.getDoctor().getName(),
+                appointment.getAppointmentDate(),
+                appointment.getAppointmentStatus()
+        );
     }
 
     // Helper Methods
