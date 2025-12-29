@@ -27,4 +27,8 @@ public class AppointmentCancelation {
 
     private String reason;
 
+    public AppointmentCancelation(Appointment appointment, String reason) {
+        this.appointment = appointment;
+        this.reason = reason;
+    }
 }
