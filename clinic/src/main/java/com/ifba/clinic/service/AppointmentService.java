@@ -1,5 +1,14 @@
 package com.ifba.clinic.service;
 
+import java.time.DayOfWeek;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Random;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
 import com.ifba.clinic.dto.appointment.AppointmentCancelationDTO;
 import com.ifba.clinic.dto.appointment.AppointmentRegDTO;
 import com.ifba.clinic.dto.appointment.AppointmentResponseDTO;
@@ -14,14 +23,6 @@ import com.ifba.clinic.repository.AppointmentCancelationRepository;
 import com.ifba.clinic.repository.AppointmentRepository;
 import com.ifba.clinic.repository.DoctorRepository;
 import com.ifba.clinic.repository.PatientRepository;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-
-import java.time.DayOfWeek;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Random;
 
 @Service
 public class AppointmentService {
@@ -31,6 +32,7 @@ public class AppointmentService {
     private final DoctorRepository doctorRepository;
     private final AppointmentCancelationRepository appointmentCancelationRepository;
 
+    @SuppressWarnings("unused")
     AppointmentService(AppointmentRepository appointmentRepository, PatientRepository patientRepository, DoctorRepository doctorRepository, AppointmentCancelationRepository appointmentCancelationRepository) {
         this.appointmentRepository = appointmentRepository;
         this.patientRepository = patientRepository;
