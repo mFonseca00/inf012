@@ -1,4 +1,4 @@
-package com.ifba.mail.dto;
+package com.ifba.clinic.dto.email;
 
 public record EmailDTO(
         Long userId,

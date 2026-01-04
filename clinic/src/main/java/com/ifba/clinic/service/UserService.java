@@ -2,6 +2,7 @@ package com.ifba.clinic.service;
 
 import java.time.LocalDateTime;
 
+import com.ifba.clinic.producer.UserProducer;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -32,13 +33,15 @@ public class UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final TokenService tokenService;
+    private final UserProducer userProducer;
 
     public UserService(AuthenticationManager authenticationManager, UserRepository userRepository,
-                       RoleRepository roleRepository, TokenService tokenService) {
+                       RoleRepository roleRepository, TokenService tokenService, UserProducer userProducer) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.tokenService = tokenService;
+        this.userProducer = userProducer;
     }
 
     public String login(LoginDTO login) {
@@ -54,6 +57,7 @@ public class UserService {
         Role defaultRole = roleRepository.findByRole(UserRole.USER.name())
                 .orElseThrow(() -> new EntityNotFoundException("Role USER não encontrada"));
         User user = new User(newUser.username(), newUser.email(), encodedPassword, defaultRole);
+        userProducer.publishEmailMessage(user);
         userRepository.save(user);
     }
 
