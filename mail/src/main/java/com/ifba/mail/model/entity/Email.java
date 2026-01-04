@@ -19,18 +19,17 @@ public class Email {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String ownerId;
+    private Long userId;
 
     private String emailTo;
 
-    private String emailFrom;
-
     private String subject;
 
-    @Column(columnDefinition = "BODY")
+    @Column(columnDefinition = "TEXT")
     private String body;
 
     private LocalDateTime sentDate = LocalDateTime.now();
 
+    @Enumerated(EnumType.STRING)
     private EmailStatus status;
 }
