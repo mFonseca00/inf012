@@ -23,7 +23,6 @@ import com.ifba.clinic.exception.InvalidOperationException;
 import com.ifba.clinic.model.entity.Role;
 import com.ifba.clinic.model.entity.User;
 import com.ifba.clinic.model.enums.UserRole;
-import com.ifba.clinic.producer.UserProducer;
 import com.ifba.clinic.repository.RoleRepository;
 import com.ifba.clinic.repository.UserRepository;
 
@@ -34,15 +33,15 @@ public class UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final TokenService tokenService;
-    private final UserProducer userProducer;
+    private final EmailService emailService;
 
     public UserService(AuthenticationManager authenticationManager, UserRepository userRepository,
-                       RoleRepository roleRepository, TokenService tokenService, UserProducer userProducer) {
+                       RoleRepository roleRepository, TokenService tokenService, EmailService emailService) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.tokenService = tokenService;
-        this.userProducer = userProducer;
+        this.emailService = emailService;
     }
 
     public String login(LoginDTO login) {
@@ -58,7 +57,7 @@ public class UserService {
         Role defaultRole = roleRepository.findByRole(UserRole.USER.name())
                 .orElseThrow(() -> new EntityNotFoundException("Role USER não encontrada"));
         User user = new User(newUser.username(), newUser.email(), encodedPassword, defaultRole);
-        userProducer.publishEmailMessage(user);
+        emailService.sendUserRegistrationEmail(user.getId(),user.getEmail());
         userRepository.save(user);
     }
 
@@ -165,17 +164,20 @@ public class UserService {
         User user = findUserByUsername(username);
         String encodedPassword = new BCryptPasswordEncoder().encode(passwordDTO.newPassword());
         user.setPassword(encodedPassword);
+        emailService.sendPasswordChangeConfirmationEmail(user.getId(), user.getEmail());
         userRepository.save(user);
     }
 
     public User findOrCreateUser(UserFromEntityDTO userDTO) {
-        if (userDTO.username() == null || userDTO.username().isBlank()) {
+        if (userDTO.username() != null && !userDTO.username().isBlank()) {
+        } else {
             String username = generateUsernameFromName(userDTO.name());
             validateUniqueEmail(userDTO.email());
             String tempPassword = new BCryptPasswordEncoder().encode("temp123");
             Role defaultRole = roleRepository.findByRole(UserRole.USER.name())
                     .orElseThrow(() -> new EntityNotFoundException("Role USER não encontrada"));
             User newUser = new User(username, userDTO.email(), tempPassword, defaultRole);
+            emailService.sendUserAutoRegistrationEmail(newUser.getId(),newUser.getEmail());
             return userRepository.save(newUser);
         }
         User user = (User) userRepository.findByUsername(userDTO.username());
@@ -201,7 +203,7 @@ public class UserService {
         }
         return ensureUniqueUsername(username);
     }
-    
+
     private String ensureUniqueUsername(String baseUsername) {
         String username = baseUsername;
         int counter = 1;
