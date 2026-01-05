@@ -1,34 +1,44 @@
 package com.ifba.clinic.service;
 
-import com.ifba.clinic.dto.patient.PatientInactivationDTO;
-import com.ifba.clinic.dto.patient.PatientRegDTO;
-import com.ifba.clinic.dto.patient.PatientResponseDTO;
-import com.ifba.clinic.dto.patient.PatientUpdateDTO;
-import com.ifba.clinic.exception.BusinessRuleException;
-import com.ifba.clinic.exception.EntityNotFoundException;
-import com.ifba.clinic.model.entity.Address;
-import com.ifba.clinic.model.entity.Patient;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.ifba.clinic.dto.patient.PatientInactivationDTO;
+import com.ifba.clinic.dto.patient.PatientRegDTO;
+import com.ifba.clinic.dto.patient.PatientResponseDTO;
+import com.ifba.clinic.dto.patient.PatientUpdateDTO;
+import com.ifba.clinic.dto.user.UserFromEntityDTO;
+import com.ifba.clinic.exception.BusinessRuleException;
+import com.ifba.clinic.exception.EntityNotFoundException;
+import com.ifba.clinic.model.entity.Address;
+import com.ifba.clinic.model.entity.Patient;
+import com.ifba.clinic.model.entity.User;
 import com.ifba.clinic.repository.PatientRepository;
 
 @Service
 public class PatientService {
 
     private final PatientRepository patientRepository;
+    private final UserService userService;
     private final AddressService addressService;
 
     @SuppressWarnings("unused")
-    PatientService(PatientRepository patientRepository, AddressService addressService){
+    PatientService(PatientRepository patientRepository, AddressService addressService, UserService userService){
         this.patientRepository = patientRepository;
+        this.userService = userService;
         this.addressService = addressService;
     }
 
     public void register(PatientRegDTO patientDTO){
         validateUniqueCPF(patientDTO.cpf());
         validateUniqueEmail(patientDTO.email());
+        UserFromEntityDTO userDTO = new UserFromEntityDTO(
+            patientDTO.username(),
+            patientDTO.name(),
+            patientDTO.email()
+        );
+        User user = userService.findOrCreateUser(userDTO);
         Address address =addressService.findAddress(patientDTO.address());
         if (address == null){
             address = addressService.register(patientDTO.address());
@@ -38,7 +48,8 @@ public class PatientService {
             patientDTO.email(),
             patientDTO.phoneNumber(),
             patientDTO.cpf(),
-            address
+            address,
+            user
         );
         patientRepository.save(patient);
     }

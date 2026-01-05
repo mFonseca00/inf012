@@ -8,28 +8,38 @@ import com.ifba.clinic.dto.doctor.DoctorInactivationDTO;
 import com.ifba.clinic.dto.doctor.DoctorRegDTO;
 import com.ifba.clinic.dto.doctor.DoctorResponseDTO;
 import com.ifba.clinic.dto.doctor.DoctorUpdateDTO;
+import com.ifba.clinic.dto.user.UserFromEntityDTO;
 import com.ifba.clinic.exception.BusinessRuleException;
 import com.ifba.clinic.exception.EntityNotFoundException;
 import com.ifba.clinic.exception.InvalidOperationException;
 import com.ifba.clinic.model.entity.Address;
 import com.ifba.clinic.model.entity.Doctor;
+import com.ifba.clinic.model.entity.User;
 import com.ifba.clinic.repository.DoctorRepository;
 
 @Service
 public class DoctorService {
 
     private final DoctorRepository doctorRepository;
+    private final UserService userService;
     private final AddressService addressService;
 
     @SuppressWarnings("unused")
-    DoctorService(DoctorRepository doctorRepository, AddressService addressService){
+    DoctorService(DoctorRepository doctorRepository, AddressService addressService, UserService userService){
         this.doctorRepository = doctorRepository;
+        this.userService = userService;
         this.addressService = addressService;
     }
 
     public void register(DoctorRegDTO doctorDTO){
         validateUniqueCRM(doctorDTO.crm());
         validateUniqueEmail(doctorDTO.email());
+        UserFromEntityDTO userDTO = new UserFromEntityDTO(
+            doctorDTO.username(),
+            doctorDTO.name(),
+            doctorDTO.email()
+        );
+        User user = userService.findOrCreateUser(userDTO);
         Address address = addressService.findAddress(doctorDTO.address());
         if (address == null) {
             address = addressService.register(doctorDTO.address());
@@ -39,7 +49,9 @@ public class DoctorService {
             doctorDTO.email(),
             doctorDTO.name(),
             doctorDTO.phoneNumber(),
-            doctorDTO.speciality());
+            doctorDTO.speciality(),
+            user
+        );
         doctorRepository.save(doctor);
     }
 
