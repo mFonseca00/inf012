@@ -1,5 +1,7 @@
 package com.ifba.clinic.service;
 
+import java.time.LocalDateTime;
+
 import org.springframework.stereotype.Service;
 
 import com.ifba.clinic.dto.email.EmailDTO;
@@ -14,9 +16,9 @@ public class EmailService {
         this.emailProducer = emailProducer;
     }
 
-    public void sendUserRegistrationEmail(Long id, String email) {
+    public void sendUserRegistrationEmail(Long userId, String email) {
         EmailDTO emailDTO = new EmailDTO(
-                id,
+                userId,
                 email,
                 "Bem-vindo à Clínica IFBA",
                 "Olá,\n\n" +
@@ -28,9 +30,9 @@ public class EmailService {
         emailProducer.publishEmailMessage(emailDTO);
     }
 
-    void sendPasswordChangeConfirmationEmail(Long id, String email) {
+    public void sendPasswordChangeConfirmationEmail(Long userId, String email) {
         EmailDTO emailDTO = new EmailDTO(
-                id,
+                userId,
                 email,
                 "Confirmação de Alteração de Senha - Clínica IFBA",
                 "Olá,\n\n" +
@@ -42,9 +44,9 @@ public class EmailService {
         emailProducer.publishEmailMessage(emailDTO);
     }
 
-    void sendUserAutoRegistrationEmail(Long id, String email) {
+    public void sendUserAutoRegistrationEmail(Long userId, String email) {
         EmailDTO emailDTO = new EmailDTO(
-                id,
+                userId,
                 email,
                 "Cadastro Automático Realizado - Clínica IFBA",
                 "Olá,\n\n" +
@@ -57,4 +59,107 @@ public class EmailService {
         emailProducer.publishEmailMessage(emailDTO);
     }
 
+    public void sendAppointmentConfirmationToPatient(Long userId, String email, String patientName, 
+            String doctorName, LocalDateTime appointmentDate) {
+        EmailDTO emailDTO = new EmailDTO(
+                userId,
+                email,
+                "Consulta Agendada - Clínica IFBA",
+                String.format(
+                        "Olá %s,\n\n" +
+                        "Sua consulta foi agendada com sucesso!\n\n" +
+                        "Detalhes da consulta:\n" +
+                        "Médico(a): Dr(a). %s\n" +
+                        "Data: %s\n" +
+                        "Horário: %s\n\n" +
+                        "Por favor, chegue com 15 minutos de antecedência.\n\n" +
+                        "Atenciosamente,\n" +
+                        "Equipe Clínica IFBA",
+                        patientName,
+                        doctorName,
+                        appointmentDate.toLocalDate().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")),
+                        appointmentDate.toLocalTime().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm"))
+                )
+        );
+        emailProducer.publishEmailMessage(emailDTO);
+    }
+
+    public void sendAppointmentNotificationToDoctor(Long userId, String email, String doctorName,
+            String patientName, LocalDateTime appointmentDate) {
+        EmailDTO emailDTO = new EmailDTO(
+                userId,
+                email,
+                "Nova Consulta Agendada - Clínica IFBA",
+                String.format(
+                        "Olá Dr(a). %s,\n\n" +
+                        "Uma nova consulta foi agendada em sua agenda.\n\n" +
+                        "Detalhes da consulta:\n" +
+                        "Paciente: %s\n" +
+                        "Data: %s\n" +
+                        "Horário: %s\n\n" +
+                        "Atenciosamente,\n" +
+                        "Equipe Clínica IFBA",
+                        doctorName,
+                        patientName,
+                        appointmentDate.toLocalDate().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")),
+                        appointmentDate.toLocalTime().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm"))
+                )
+        );
+        emailProducer.publishEmailMessage(emailDTO);
+    }
+
+    public void sendAppointmentCancellationToPatient(Long userId, String email, String patientName,
+            String doctorName, LocalDateTime appointmentDate,
+            String reason) {
+        EmailDTO emailDTO = new EmailDTO(
+                userId,
+                email,
+                "Consulta Cancelada - Clínica IFBA",
+                String.format(
+                        "Olá %s,\n\n" +
+                        "Sua consulta foi cancelada.\n\n" +
+                        "Detalhes da consulta cancelada:\n" +
+                        "Médico(a): Dr(a). %s\n" +
+                        "Data: %s\n" +
+                        "Horário: %s\n" +
+                        "Motivo: %s\n\n" +
+                        "Para reagendar, entre em contato conosco.\n\n" +
+                        "Atenciosamente,\n" +
+                        "Equipe Clínica IFBA",
+                        patientName,
+                        doctorName,
+                        appointmentDate.toLocalDate().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")),
+                        appointmentDate.toLocalTime().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm")),
+                        reason
+                )
+        );
+        emailProducer.publishEmailMessage(emailDTO);
+    }
+
+    public void sendAppointmentCancellationToDoctor(Long userId, String email, String doctorName,
+            String patientName, LocalDateTime appointmentDate,
+            String reason) {
+        EmailDTO emailDTO = new EmailDTO(
+                userId,
+                email,
+                "Consulta Cancelada - Clínica IFBA",
+                String.format(
+                        "Olá Dr(a). %s,\n\n" +
+                        "Uma consulta em sua agenda foi cancelada.\n\n" +
+                        "Detalhes da consulta cancelada:\n" +
+                        "Paciente: %s\n" +
+                        "Data: %s\n" +
+                        "Horário: %s\n" +
+                        "Motivo: %s\n\n" +
+                        "Atenciosamente,\n" +
+                        "Equipe Clínica IFBA",
+                        doctorName,
+                        patientName,
+                        appointmentDate.toLocalDate().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")),
+                        appointmentDate.toLocalTime().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm")),
+                        reason
+                )
+        );
+        emailProducer.publishEmailMessage(emailDTO);
+    }
 }

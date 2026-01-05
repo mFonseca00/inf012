@@ -57,8 +57,8 @@ public class UserService {
         Role defaultRole = roleRepository.findByRole(UserRole.USER.name())
                 .orElseThrow(() -> new EntityNotFoundException("Role USER não encontrada"));
         User user = new User(newUser.username(), newUser.email(), encodedPassword, defaultRole);
-        emailService.sendUserRegistrationEmail(user.getId(),user.getEmail());
         userRepository.save(user);
+        emailService.sendUserRegistrationEmail(user.getId(),user.getEmail());
     }
 
     public void addRole(ChangeRoleDTO dto) {
@@ -164,8 +164,8 @@ public class UserService {
         User user = findUserByUsername(username);
         String encodedPassword = new BCryptPasswordEncoder().encode(passwordDTO.newPassword());
         user.setPassword(encodedPassword);
-        emailService.sendPasswordChangeConfirmationEmail(user.getId(), user.getEmail());
         userRepository.save(user);
+        emailService.sendPasswordChangeConfirmationEmail(user.getId(), user.getEmail());
     }
 
     public User findOrCreateUser(UserFromEntityDTO userDTO) {
