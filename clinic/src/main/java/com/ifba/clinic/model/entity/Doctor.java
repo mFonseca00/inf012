@@ -12,6 +12,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -23,6 +24,10 @@ public class Doctor {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    private User user;
 
     private String name;
 
@@ -43,14 +48,15 @@ public class Doctor {
 
     private Boolean isActive = true;
 
-    public Doctor(Address address, String crm, String email, String name, String phoneNumber, Speciality speciality) {
+    public Doctor(Address address, String crm, String email, String name, String phoneNumber, Speciality speciality, User user) {
         this.address = address;
         this.crm = crm;
         this.email = email;
         this.name = name;
         this.phoneNumber = phoneNumber;
         this.speciality = speciality;
+        this.user = user;
     }
 
-    
+    // TODO: Possivel adição futura - Criação de cadastro a partir de cadastro de usuário
 }

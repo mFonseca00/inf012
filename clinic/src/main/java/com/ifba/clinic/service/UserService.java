@@ -2,7 +2,6 @@ package com.ifba.clinic.service;
 
 import java.time.LocalDateTime;
 
-import com.ifba.clinic.producer.UserProducer;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -15,6 +14,7 @@ import com.ifba.clinic.dto.user.ChangeRoleDTO;
 import com.ifba.clinic.dto.user.LoginDTO;
 import com.ifba.clinic.dto.user.UserBasicInfoDTO;
 import com.ifba.clinic.dto.user.UserDataUpdateDTO;
+import com.ifba.clinic.dto.user.UserFromEntityDTO;
 import com.ifba.clinic.dto.user.UserRegDTO;
 import com.ifba.clinic.dto.user.UserResponseDTO;
 import com.ifba.clinic.exception.BusinessRuleException;
@@ -23,6 +23,7 @@ import com.ifba.clinic.exception.InvalidOperationException;
 import com.ifba.clinic.model.entity.Role;
 import com.ifba.clinic.model.entity.User;
 import com.ifba.clinic.model.enums.UserRole;
+import com.ifba.clinic.producer.UserProducer;
 import com.ifba.clinic.repository.RoleRepository;
 import com.ifba.clinic.repository.UserRepository;
 
@@ -167,7 +168,49 @@ public class UserService {
         userRepository.save(user);
     }
 
+    public User findOrCreateUser(UserFromEntityDTO userDTO) {
+        if (userDTO.username() == null || userDTO.username().isBlank()) {
+            String username = generateUsernameFromName(userDTO.name());
+            validateUniqueEmail(userDTO.email());
+            String tempPassword = new BCryptPasswordEncoder().encode("temp123");
+            Role defaultRole = roleRepository.findByRole(UserRole.USER.name())
+                    .orElseThrow(() -> new EntityNotFoundException("Role USER não encontrada"));
+            User newUser = new User(username, userDTO.email(), tempPassword, defaultRole);
+            return userRepository.save(newUser);
+        }
+        User user = (User) userRepository.findByUsername(userDTO.username());
+        if (user == null) {
+            throw new EntityNotFoundException("Usuário " + userDTO.username() + " não encontrado");
+        }
+        return user;
+    }
+
     // Helper methods
+    private String generateUsernameFromName(String name) {
+        String baseName = (name == null || name.isBlank()) ? "user" : name;
+        // Remove acentos e caracteres especiais
+        String normalized = java.text.Normalizer.normalize(baseName, java.text.Normalizer.Form.NFD)
+                .replaceAll("[^\\p{ASCII}]", "");
+        // Converte para lowercase e remove espaços
+        String username = normalized.toLowerCase()
+                .replaceAll("\\s+", ".")
+                .replaceAll("[^a-z0-9.]", "");
+        // Limita o tamanho
+        if (username.length() > 20) {
+            username = username.substring(0, 20);
+        }
+        return ensureUniqueUsername(username);
+    }
+    
+    private String ensureUniqueUsername(String baseUsername) {
+        String username = baseUsername;
+        int counter = 1;
+        while (userRepository.existsByUsername(username)) {
+            username = baseUsername + counter;
+            counter++;
+        }
+        return username;
+    }
     private User findUserByUsername(String username) {
         User user = (User) userRepository.findByUsername(username);
         if (user == null) {

@@ -13,6 +13,8 @@ public record DoctorRegDTO(
         @NotBlank(message = "Nome é obrigatório")
         String name,
 
+        String username,
+
         @NotBlank(message = "Email é obrigatório")
         @Email(message = "Email inválido")
         String email,
