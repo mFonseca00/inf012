@@ -31,13 +31,17 @@ public class AppointmentService {
     private final PatientRepository patientRepository;
     private final DoctorRepository doctorRepository;
     private final AppointmentCancelationRepository appointmentCancelationRepository;
+    private final EmailService emailService;
 
     @SuppressWarnings("unused")
-    AppointmentService(AppointmentRepository appointmentRepository, PatientRepository patientRepository, DoctorRepository doctorRepository, AppointmentCancelationRepository appointmentCancelationRepository) {
+    AppointmentService(AppointmentRepository appointmentRepository, PatientRepository patientRepository,
+        DoctorRepository doctorRepository, AppointmentCancelationRepository appointmentCancelationRepository,
+        EmailService emailService) {
         this.appointmentRepository = appointmentRepository;
         this.patientRepository = patientRepository;
         this.doctorRepository = doctorRepository;
         this.appointmentCancelationRepository = appointmentCancelationRepository;
+        this.emailService = emailService;
     }
 
     public void scheduleAppointment(AppointmentRegDTO dto) {
@@ -54,6 +58,20 @@ public class AppointmentService {
         );
         
         appointmentRepository.save(appointment);
+        emailService.sendAppointmentConfirmationToPatient(
+            patient.getUser().getId(),
+            patient.getEmail(),
+            patient.getName(),
+            doctor.getName(),
+            dto.appointmentDate()
+        );
+        emailService.sendAppointmentNotificationToDoctor(
+            doctor.getUser().getId(),
+            doctor.getEmail(),
+            doctor.getName(),
+            patient.getName(),
+            dto.appointmentDate()
+        );
     }
 
     public void cancelAppointment(AppointmentCancelationDTO dto) {
@@ -79,6 +97,26 @@ public class AppointmentService {
         );
         
         appointmentCancelationRepository.save(cancelation);
+
+        Patient patient = appointment.getPatient();
+        Doctor doctor = appointment.getDoctor();
+        
+        emailService.sendAppointmentCancellationToPatient(
+            patient.getUser().getId(),
+            patient.getEmail(),
+            patient.getName(),
+            doctor.getName(),
+            appointment.getAppointmentDate(),
+            dto.reason()
+        );
+        emailService.sendAppointmentCancellationToDoctor(
+            doctor.getUser().getId(),
+            doctor.getEmail(),
+            doctor.getName(),
+            patient.getName(),
+            appointment.getAppointmentDate(),
+            dto.reason()
+        );
     }
 
     public Page<AppointmentResponseDTO> getAllAppointments(Pageable pageable) {
