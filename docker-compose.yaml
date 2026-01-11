@@ -1,0 +1,74 @@
+version: '3.8'
+
+services:
+  # PostgreSQL para Clinic
+  postgres-clinic:
+    image: ankane/pgvector
+    container_name: clinic_db
+    environment:
+      POSTGRES_DB: clinicdb
+      POSTGRES_USER: clinic
+      POSTGRES_PASSWORD: clinicpass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-clinic-data:/var/lib/postgresql/data
+    networks:
+      - clinic-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # PostgreSQL para Mail
+  postgres-mail:
+    image: ankane/pgvector
+    container_name: clinic_email_db
+    environment:
+      POSTGRES_DB: clinicemaildb
+      POSTGRES_USER: email
+      POSTGRES_PASSWORD: clinicemailpass
+    ports:
+      - "5435:5432"
+    volumes:
+      - postgres-mail-data:/var/lib/postgresql/data
+    networks:
+      - clinic-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # RabbitMQ
+  rabbitmq:
+    image: rabbitmq:3.12-management-alpine
+    container_name: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin123
+    ports:
+      - "5672:5672"   # AMQP protocol
+      - "15672:15672" # Management UI
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      - clinic-network
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  postgres-clinic-data:
+  postgres-mail-data:
+  rabbitmq-data:
+
+networks:
+  clinic-network:
+    driver: bridge
