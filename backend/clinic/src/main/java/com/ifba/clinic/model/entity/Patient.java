@@ -27,6 +27,7 @@ public class Patient {
 
     private String name;
 
+    //TODO: remover campo duplicado
     private String email;
 
     private String phoneNumber;

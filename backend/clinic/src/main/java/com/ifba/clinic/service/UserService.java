@@ -169,8 +169,7 @@ public class UserService {
     }
 
     public User findOrCreateUser(UserFromEntityDTO userDTO) {
-        if (userDTO.username() != null && !userDTO.username().isBlank()) {
-        } else {
+        if (userDTO.username() == null || userDTO.username().isBlank()) {
             String username = generateUsernameFromName(userDTO.name());
             validateUniqueEmail(userDTO.email());
             String tempPassword = new BCryptPasswordEncoder().encode("temp123");
