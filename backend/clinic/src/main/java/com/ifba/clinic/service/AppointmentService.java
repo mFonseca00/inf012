@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.ifba.clinic.dto.appointment.AppointmentCancelationDTO;
+import com.ifba.clinic.dto.appointment.AppointmentConclusionDTO;
 import com.ifba.clinic.dto.appointment.AppointmentRegDTO;
 import com.ifba.clinic.dto.appointment.AppointmentResponseDTO;
 import com.ifba.clinic.exception.BusinessRuleException;
@@ -60,14 +61,14 @@ public class AppointmentService {
         appointmentRepository.save(appointment);
         emailService.sendAppointmentConfirmationToPatient(
             patient.getUser().getId(),
-            patient.getEmail(),
+            patient.getUser().getEmail(),
             patient.getName(),
             doctor.getName(),
             dto.appointmentDate()
         );
         emailService.sendAppointmentNotificationToDoctor(
             doctor.getUser().getId(),
-            doctor.getEmail(),
+            doctor.getUser().getEmail(),
             doctor.getName(),
             patient.getName(),
             dto.appointmentDate()
@@ -103,7 +104,7 @@ public class AppointmentService {
         
         emailService.sendAppointmentCancellationToPatient(
             patient.getUser().getId(),
-            patient.getEmail(),
+            patient.getUser().getEmail(),
             patient.getName(),
             doctor.getName(),
             appointment.getAppointmentDate(),
@@ -111,11 +112,45 @@ public class AppointmentService {
         );
         emailService.sendAppointmentCancellationToDoctor(
             doctor.getUser().getId(),
-            doctor.getEmail(),
+            doctor.getUser().getEmail(),
             doctor.getName(),
             patient.getName(),
             appointment.getAppointmentDate(),
             dto.reason()
+        );
+    }
+
+    public void concludeAppointment(AppointmentConclusionDTO dto) {
+        Appointment appointment = appointmentRepository.findById(dto.appointmentId())
+            .orElseThrow(() -> new EntityNotFoundException(
+                "Consulta não encontrada com ID: " + dto.appointmentId()
+            ));
+        
+        if (appointment.getAppointmentStatus() != AppointmentStatus.ATIVO) {
+            throw new BusinessRuleException(
+                "Apenas consultas ativas podem ser concluídas"
+            );
+        }
+        
+        appointment.setAppointmentStatus(AppointmentStatus.REALIZADA);
+        appointmentRepository.save(appointment);
+        
+        Patient patient = appointment.getPatient();
+        Doctor doctor = appointment.getDoctor();
+        
+        emailService.sendAppointmentCompletionToPatient(
+            patient.getUser().getId(),
+            patient.getUser().getEmail(),
+            patient.getName(),
+            doctor.getName(),
+            appointment.getAppointmentDate()
+        );
+        emailService.sendAppointmentCompletionToDoctor(
+            doctor.getUser().getId(),
+            doctor.getUser().getEmail(),
+            doctor.getName(),
+            patient.getName(),
+            appointment.getAppointmentDate()
         );
     }
 
@@ -190,8 +225,7 @@ public class AppointmentService {
 
     private void validateCancelationStatus(AppointmentStatus newStatus) {
         if (newStatus != AppointmentStatus.CANCELADO && 
-            newStatus != AppointmentStatus.DESISTENCIA && 
-            newStatus != AppointmentStatus.OUTRO) {
+            newStatus != AppointmentStatus.DESISTENCIA) {
             throw new BusinessRuleException(
                 "Status de cancelamento inválido. " +
                 "Motivo de cancelamento deve ser: CANCELADO (médico cancelou), " +

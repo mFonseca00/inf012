@@ -15,7 +15,6 @@ public record DoctorRegDTO(
 
         String username,
 
-        @NotBlank(message = "Email é obrigatório")
         @Email(message = "Email inválido")
         String email,
 

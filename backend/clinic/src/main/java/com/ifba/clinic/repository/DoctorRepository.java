@@ -10,6 +10,5 @@ import com.ifba.clinic.model.entity.Doctor;
 public interface DoctorRepository extends JpaRepository<Doctor, Long> {
     boolean existsByCrm(String crm);
     boolean existsByAddress(Address address);
-    boolean existsByEmail(String email);
     Doctor findByCrm(String crm);
 }

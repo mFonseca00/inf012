@@ -4,7 +4,7 @@ public enum AppointmentStatus {
     ATIVO("Consulta ativa"),
     CANCELADO("Consulta cancelada pelo médico"),
     DESISTENCIA("Consulta cancelada pelo paciente"),
-    OUTRO("Consulta cancelada por outro motivo");
+    REALIZADA("Consulta realizada");
 
     private final String displayName;
 

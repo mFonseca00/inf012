@@ -176,7 +176,7 @@ public class UserService {
             Role defaultRole = roleRepository.findByRole(UserRole.USER.name())
                     .orElseThrow(() -> new EntityNotFoundException("Role USER não encontrada"));
             User newUser = new User(username, userDTO.email(), tempPassword, defaultRole);
-            emailService.sendUserAutoRegistrationEmail(newUser.getId(),newUser.getEmail());
+            emailService.sendUserAutoRegistrationEmail(newUser.getId(),newUser.getEmail(), newUser.getUsername());
             return userRepository.save(newUser);
         }
         User user = (User) userRepository.findByUsername(userDTO.username());

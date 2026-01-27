@@ -8,7 +8,6 @@ import com.ifba.clinic.model.entity.Patient;
 @Repository
 public interface PatientRepository extends JpaRepository<Patient, Long> {
     boolean existsByCpf(String cpf);
-    boolean existsByEmail(String email);
     boolean existsByAddress(Address address);
     Patient findByCpf(String cpf);
 

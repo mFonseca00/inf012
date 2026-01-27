@@ -31,9 +31,6 @@ public class Doctor {
 
     private String name;
 
-    //TODO: remover campo duplicado
-    private String email;
-
     private String phoneNumber;
 
     @Column(unique = true)
@@ -49,10 +46,9 @@ public class Doctor {
 
     private Boolean isActive = true;
 
-    public Doctor(Address address, String crm, String email, String name, String phoneNumber, Speciality speciality, User user) {
+    public Doctor(Address address, String crm, String name, String phoneNumber, Speciality speciality, User user) {
         this.address = address;
         this.crm = crm;
-        this.email = email;
         this.name = name;
         this.phoneNumber = phoneNumber;
         this.speciality = speciality;

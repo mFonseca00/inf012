@@ -20,12 +20,12 @@ public class EmailService {
         EmailDTO emailDTO = new EmailDTO(
                 userId,
                 email,
-                "Bem-vindo à Clínica IFBA",
+                "Bem-vindo à Clínica Kos",
                 "Olá,\n\n" +
-                "Seja bem-vindo(a) à Clínica IFBA!\n\n" +
+                "Seja bem-vindo(a) à Clínica Kos!\n\n" +
                 "Seu cadastro foi realizado com sucesso. Agora você pode acessar nossos serviços.\n\n" +
                 "Atenciosamente,\n" +
-                "Equipe Clínica IFBA"
+                "Equipe Clínica Kos"
         );
         emailProducer.publishEmailMessage(emailDTO);
     }
@@ -34,27 +34,28 @@ public class EmailService {
         EmailDTO emailDTO = new EmailDTO(
                 userId,
                 email,
-                "Confirmação de Alteração de Senha - Clínica IFBA",
+                "Confirmação de Alteração de Senha - Clínica Kos",
                 "Olá,\n\n" +
                 "Sua senha foi alterada com sucesso.\n\n" +
                 "Se você não realizou esta alteração, entre em contato conosco imediatamente.\n\n" +
                 "Atenciosamente,\n" +
-                "Equipe Clínica IFBA"
+                "Equipe Clínica Kos"
         );
         emailProducer.publishEmailMessage(emailDTO);
     }
 
-    public void sendUserAutoRegistrationEmail(Long userId, String email) {
+    public void sendUserAutoRegistrationEmail(Long userId, String email, String username) {
         EmailDTO emailDTO = new EmailDTO(
                 userId,
                 email,
-                "Cadastro Automático Realizado - Clínica IFBA",
+                "Cadastro Automático Realizado - Clínica Kos",
                 "Olá,\n\n" +
-                "Um cadastro de usuário foi criado automaticamente para você na Clínica IFBA.\n\n" +
+                "Um cadastro de usuário foi criado automaticamente para você na Clínica Kos.\n\n" +
+                "Seu nome de usuário é: " + username + "\n" +
                 "Sua senha temporária é: temp123\n" +
                 "Por favor, altere sua senha no primeiro acesso.\n\n" +
                 "Atenciosamente,\n" +
-                "Equipe Clínica IFBA"
+                "Equipe Clínica Kos"
         );
         emailProducer.publishEmailMessage(emailDTO);
     }
@@ -64,7 +65,7 @@ public class EmailService {
         EmailDTO emailDTO = new EmailDTO(
                 userId,
                 email,
-                "Consulta Agendada - Clínica IFBA",
+                "Consulta Agendada - Clínica Kos",
                 String.format(
                         "Olá %s,\n\n" +
                         "Sua consulta foi agendada com sucesso!\n\n" +
@@ -74,7 +75,7 @@ public class EmailService {
                         "Horário: %s\n\n" +
                         "Por favor, chegue com 15 minutos de antecedência.\n\n" +
                         "Atenciosamente,\n" +
-                        "Equipe Clínica IFBA",
+                        "Equipe Clínica Kos",
                         patientName,
                         doctorName,
                         appointmentDate.toLocalDate().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")),
@@ -89,7 +90,7 @@ public class EmailService {
         EmailDTO emailDTO = new EmailDTO(
                 userId,
                 email,
-                "Nova Consulta Agendada - Clínica IFBA",
+                "Nova Consulta Agendada - Clínica Kos",
                 String.format(
                         "Olá Dr(a). %s,\n\n" +
                         "Uma nova consulta foi agendada em sua agenda.\n\n" +
@@ -98,7 +99,7 @@ public class EmailService {
                         "Data: %s\n" +
                         "Horário: %s\n\n" +
                         "Atenciosamente,\n" +
-                        "Equipe Clínica IFBA",
+                        "Equipe Clínica Kos",
                         doctorName,
                         patientName,
                         appointmentDate.toLocalDate().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")),
@@ -114,7 +115,7 @@ public class EmailService {
         EmailDTO emailDTO = new EmailDTO(
                 userId,
                 email,
-                "Consulta Cancelada - Clínica IFBA",
+                "Consulta Cancelada - Clínica Kos",
                 String.format(
                         "Olá %s,\n\n" +
                         "Sua consulta foi cancelada.\n\n" +
@@ -125,7 +126,7 @@ public class EmailService {
                         "Motivo: %s\n\n" +
                         "Para reagendar, entre em contato conosco.\n\n" +
                         "Atenciosamente,\n" +
-                        "Equipe Clínica IFBA",
+                        "Equipe Clínica Kos",
                         patientName,
                         doctorName,
                         appointmentDate.toLocalDate().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")),
@@ -142,7 +143,7 @@ public class EmailService {
         EmailDTO emailDTO = new EmailDTO(
                 userId,
                 email,
-                "Consulta Cancelada - Clínica IFBA",
+                "Consulta Cancelada - Clínica Kos",
                 String.format(
                         "Olá Dr(a). %s,\n\n" +
                         "Uma consulta em sua agenda foi cancelada.\n\n" +
@@ -152,7 +153,7 @@ public class EmailService {
                         "Horário: %s\n" +
                         "Motivo: %s\n\n" +
                         "Atenciosamente,\n" +
-                        "Equipe Clínica IFBA",
+                        "Equipe Clínica Kos",
                         doctorName,
                         patientName,
                         appointmentDate.toLocalDate().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")),
@@ -162,4 +163,53 @@ public class EmailService {
         );
         emailProducer.publishEmailMessage(emailDTO);
     }
+
+    public void sendAppointmentCompletionToPatient(Long userId, String email, String patientName,
+                String doctorName, LocalDateTime appointmentDate) {
+        EmailDTO emailDTO = new EmailDTO(
+                userId,
+                email,
+                "Consulta Realizada - Clínica Kos",
+                String.format(
+                "Olá %s,\n\n" +
+                "Sua consulta foi concluída com sucesso!\n\n" +
+                "Detalhes da consulta:\n" +
+                "Médico(a): Dr(a). %s\n" +
+                "Data: %s\n" +
+                "Horário: %s\n\n" +
+                "Obrigado por confiar em nossos serviços.\n\n" +
+                "Atenciosamente,\n" +
+                "Equipe Clínica Kos",
+                patientName,
+                doctorName,
+                appointmentDate.toLocalDate().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")),
+                appointmentDate.toLocalTime().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm"))
+                )
+        );
+        emailProducer.publishEmailMessage(emailDTO);
+     }
+
+     public void sendAppointmentCompletionToDoctor(Long userId, String email, String doctorName,
+                String patientName, LocalDateTime appointmentDate) {
+        EmailDTO emailDTO = new EmailDTO(
+                userId,
+                email,
+                "Consulta Realizada - Clínica Kos",
+                String.format(
+                "Olá Dr(a). %s,\n\n" +
+                "A consulta foi registrada como realizada.\n\n" +
+                "Detalhes:\n" +
+                "Paciente: %s\n" +
+                "Data: %s\n" +
+                "Horário: %s\n\n" +
+                "Atenciosamente,\n" +
+                "Sistema Clínica Kos",
+                doctorName,
+                patientName,
+                appointmentDate.toLocalDate().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")),
+                appointmentDate.toLocalTime().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm"))
+                )
+        );
+        emailProducer.publishEmailMessage(emailDTO);
+     }
 }

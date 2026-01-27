@@ -33,7 +33,7 @@ public class DoctorService {
 
     public void register(DoctorRegDTO doctorDTO){
         validateUniqueCRM(doctorDTO.crm());
-        validateUniqueEmail(doctorDTO.email());
+        validateEmailRequirement(doctorDTO.username(), doctorDTO.email());
         UserFromEntityDTO userDTO = new UserFromEntityDTO(
             doctorDTO.username(),
             doctorDTO.name(),
@@ -45,12 +45,12 @@ public class DoctorService {
             address = addressService.register(doctorDTO.address());
         }
         Doctor doctor = new Doctor(
-            address,doctorDTO.crm(),
-            doctorDTO.email(),
-            doctorDTO.name(),
-            doctorDTO.phoneNumber(),
-            doctorDTO.speciality(),
-            user
+                address,
+                doctorDTO.crm(),
+                doctorDTO.name(),
+                doctorDTO.phoneNumber(),
+                doctorDTO.speciality(),
+                user
         );
         doctorRepository.save(doctor);
     }
@@ -97,7 +97,7 @@ public class DoctorService {
         return doctors.map(doctor -> new DoctorResponseDTO(
                 doctor.getId(),
                 doctor.getName(),
-                doctor.getEmail(),
+                doctor.getUser().getEmail(),
                 doctor.getCrm(),
                 doctor.getSpeciality(),
                 doctor.getIsActive()
@@ -113,7 +113,7 @@ public class DoctorService {
         return new DoctorResponseDTO(
                 doctor.getId(),
                 doctor.getName(),
-                doctor.getEmail(),
+                doctor.getUser().getEmail(),
                 doctor.getCrm(),
                 doctor.getSpeciality(),
                 doctor.getIsActive()
@@ -121,16 +121,18 @@ public class DoctorService {
     }
 
     // Helper methods
+    private void validateEmailRequirement(String username, String email) {
+        if ((username == null || username.isBlank()) && (email == null || email.isBlank())) {
+            throw new BusinessRuleException("É necessário informar o email ou username do médico");
+        }
+    }
+
     private void validateUniqueCRM(String crm) {
         if (doctorRepository.existsByCrm(crm)) {
             throw new BusinessRuleException("CRM " + crm + " já cadastrado");
         }
     }
-    private void validateUniqueEmail(String email) {
-        if(doctorRepository.existsByEmail(email)) {
-            throw new BusinessRuleException("Email " + email + " já cadastrado");
-        }
-    }
+
     private String formatCRM(String crm) {
         String cleanCrm = crm.replaceAll("[.\\-\\/\\s]", "");
         if (cleanCrm.length() == 10 && cleanCrm.matches("\\d{8}[A-Z]{2}")) {

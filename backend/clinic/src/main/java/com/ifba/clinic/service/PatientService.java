@@ -32,7 +32,7 @@ public class PatientService {
 
     public void register(PatientRegDTO patientDTO){
         validateUniqueCPF(patientDTO.cpf());
-        validateUniqueEmail(patientDTO.email());
+        validateEmailRequirement(patientDTO.username(), patientDTO.email());
         UserFromEntityDTO userDTO = new UserFromEntityDTO(
             patientDTO.username(),
             patientDTO.name(),
@@ -44,12 +44,11 @@ public class PatientService {
             address = addressService.register(patientDTO.address());
         }
         Patient patient = new Patient(
-            patientDTO.name(),
-            patientDTO.email(),
-            patientDTO.phoneNumber(),
-            patientDTO.cpf(),
-            address,
-            user
+                patientDTO.name(),
+                patientDTO.phoneNumber(),
+                patientDTO.cpf(),
+                address,
+                user
         );
         patientRepository.save(patient);
     }
@@ -96,7 +95,7 @@ public class PatientService {
         return patients.map(patient -> new PatientResponseDTO(
             patient.getId(),
             patient.getName(),
-            patient.getEmail(),
+            patient.getUser().getEmail(),
             patient.getCpf(),
             patient.getIsActive()
         ));
@@ -111,23 +110,25 @@ public class PatientService {
         return new PatientResponseDTO(
             patient.getId(),
             patient.getName(),
-            patient.getEmail(),
+            patient.getUser().getEmail(),
             patient.getCpf(),
             patient.getIsActive()
         );
     }
 
     // Helper methods
+    private void validateEmailRequirement(String username, String email) {
+        if ((username == null || username.isBlank()) && (email == null || email.isBlank())) {
+            throw new BusinessRuleException("É necessário informar o email ou username do paciente");
+        }
+    }
+
     private void validateUniqueCPF(String cpf) {
         if (patientRepository.existsByCpf(cpf)) {
             throw new BusinessRuleException("CPF " + cpf + " já cadastrado");
         }
     }
-    private void validateUniqueEmail(String email) {
-        if(patientRepository.existsByCpf(email)) {
-            throw new BusinessRuleException("Email " + email + " já cadastrado");
-        }
-    }
+
     private String formatCPF(String cpf) {
         String cleanCpf = cpf.replaceAll("[.\\-\\s]", "");
         if (cleanCpf.length() == 11 && cleanCpf.matches("\\d{11}")) {
