@@ -28,6 +28,11 @@ public class EmailService {
 
     @Transactional
     public Email sendEmail(Email email) {
+        if (email.getEmailTo().equals(email.getEmailFrom())) {
+            System.out.println("Tentativa de enviar email para o mesmo endereço: " + email.getEmailTo());
+            email.setStatus(EmailStatus.FALHA);
+            return emailRepository.save(email);
+        }
         try{
             email.setSentDate(LocalDateTime.now());
             email.setEmailFrom(fromAddress);
