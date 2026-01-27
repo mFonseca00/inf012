@@ -30,6 +30,8 @@ public class SecurityConfig {
             .authorizeHttpRequests(authorize -> authorize
                     // recursos públicos / docs
                     .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                    // endpoints de monitoramento públicos
+                    .requestMatchers("/monitoring/**").permitAll()
                     // endpoints de autenticação públicos
                     .requestMatchers(HttpMethod.POST, "/auth/login", "/auth/register").permitAll()
                     // qualquer usuário autenticado pode alterar sua própria senha
