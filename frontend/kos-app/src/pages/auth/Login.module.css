@@ -8,7 +8,7 @@ label {
   display: block;
 }
 
-input[type="text"],
+.textBox,
 select {
   width: 100%;
   padding: 12px;
@@ -19,7 +19,7 @@ select {
   box-sizing: border-box;
 }
 
-button {
+.send_button {
   width: 100%;
   background-color: #4caf50;
   color: white;
@@ -30,6 +30,6 @@ button {
   cursor: pointer;
 }
 
-input[type="button"]:hover {
+.send_button:hover {
   background-color: #45a049;
 }
