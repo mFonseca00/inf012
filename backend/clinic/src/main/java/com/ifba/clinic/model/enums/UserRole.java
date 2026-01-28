@@ -3,7 +3,11 @@ package com.ifba.clinic.model.enums;
 public enum UserRole {
     MASTER("Master Administrator"),
     ADMIN("Administrator"),
-    USER("User");
+    USER("User"),
+    PATIENT("Paciente"),
+    DOCTOR("Médico"),
+    RECEPTIONIST("Recepcionista")
+    ;
 
     private final String displayName;
 
