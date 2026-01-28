@@ -13,19 +13,24 @@ import com.ifba.clinic.exception.BusinessRuleException;
 import com.ifba.clinic.exception.EntityNotFoundException;
 import com.ifba.clinic.model.entity.Address;
 import com.ifba.clinic.model.entity.Patient;
+import com.ifba.clinic.model.entity.Role;
 import com.ifba.clinic.model.entity.User;
+import com.ifba.clinic.model.enums.UserRole;
 import com.ifba.clinic.repository.PatientRepository;
+import com.ifba.clinic.repository.RoleRepository;
 
 @Service
 public class PatientService {
 
     private final PatientRepository patientRepository;
+    private final RoleRepository roleRepository;
     private final UserService userService;
     private final AddressService addressService;
 
     @SuppressWarnings("unused")
-    PatientService(PatientRepository patientRepository, AddressService addressService, UserService userService){
+    PatientService(PatientRepository patientRepository, AddressService addressService, UserService userService, RoleRepository roleRepository){
         this.patientRepository = patientRepository;
+        this.roleRepository = roleRepository;
         this.userService = userService;
         this.addressService = addressService;
     }
@@ -39,6 +44,12 @@ public class PatientService {
             patientDTO.email()
         );
         User user = userService.findOrCreateUser(userDTO);
+        if (userService.hasPatient(user)) {
+            throw new BusinessRuleException("Este usuário já possui um paciente vinculado");
+        }
+        Role patientRole = roleRepository.findByRole(UserRole.PATIENT.name())
+                    .orElseThrow(() -> new EntityNotFoundException("Role PATIENT não encontrada"));
+        user.addRole(patientRole);
         Address address =addressService.findAddress(patientDTO.address());
         if (address == null){
             address = addressService.register(patientDTO.address());

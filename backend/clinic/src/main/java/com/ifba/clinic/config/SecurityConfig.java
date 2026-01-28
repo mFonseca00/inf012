@@ -30,14 +30,30 @@ public class SecurityConfig {
             .authorizeHttpRequests(authorize -> authorize
                     // recursos públicos / docs
                     .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-                    // endpoints de monitoramento públicos
-                    .requestMatchers("/monitoring/**").permitAll()
+                    
                     // endpoints de autenticação públicos
                     .requestMatchers(HttpMethod.POST, "/auth/login", "/auth/register").permitAll()
+                    
                     // qualquer usuário autenticado pode alterar sua própria senha
                     .requestMatchers(HttpMethod.PATCH, "/user/change-password").authenticated()
-                    // restante dos endpoints de /user exigem ADMIN ou MASTER
+                    
+                    // PERMISSÕES GERAIS
+                    .requestMatchers(HttpMethod.GET, "/appointment/all").hasAnyAuthority("PATIENT", "DOCTOR", "ADMIN", "MASTER")
+                    .requestMatchers(HttpMethod.GET, "/appointment/{id}").hasAnyAuthority("PATIENT", "DOCTOR", "ADMIN", "MASTER")
+                    .requestMatchers(HttpMethod.POST, "/appointment/schedule").hasAnyAuthority("PATIENT", "DOCTOR", "ADMIN", "MASTER")
+                    .requestMatchers(HttpMethod.PATCH, "/appointment/cancel").hasAnyAuthority("PATIENT", "DOCTOR", "ADMIN", "MASTER")
+                    .requestMatchers(HttpMethod.GET, "/doctor/all").hasAnyAuthority("PATIENT", "DOCTOR", "ADMIN", "MASTER")
+
+                    // PERMISSÕES ADICIONAIS PARA MÉDICOS E ADMINs
+                    .requestMatchers(HttpMethod.PATCH, "/appointment/conclude").hasAnyAuthority("DOCTOR", "ADMIN", "MASTER")
+                    .requestMatchers(HttpMethod.GET, "/patient/all").hasAnyAuthority( "DOCTOR", "ADMIN", "MASTER")
+
+                    // PERMISSÕES PARA ADMIN/MASTER
                     .requestMatchers("/user/**").hasAnyAuthority("ADMIN", "MASTER")
+                    .requestMatchers("/patient/**").hasAnyAuthority("ADMIN", "MASTER")
+                    .requestMatchers("/doctor/**").hasAnyAuthority("ADMIN", "MASTER")
+                    .requestMatchers("/monitoring/**").hasAnyAuthority("ADMIN", "MASTER")
+
                     // qualquer outro request exige autenticação
                     .anyRequest().authenticated()
             )

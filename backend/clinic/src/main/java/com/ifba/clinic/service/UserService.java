@@ -1,6 +1,8 @@
 package com.ifba.clinic.service;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,6 +25,8 @@ import com.ifba.clinic.exception.InvalidOperationException;
 import com.ifba.clinic.model.entity.Role;
 import com.ifba.clinic.model.entity.User;
 import com.ifba.clinic.model.enums.UserRole;
+import com.ifba.clinic.repository.DoctorRepository;
+import com.ifba.clinic.repository.PatientRepository;
 import com.ifba.clinic.repository.RoleRepository;
 import com.ifba.clinic.repository.UserRepository;
 
@@ -30,14 +34,18 @@ import com.ifba.clinic.repository.UserRepository;
 public class UserService {
 
     private final AuthenticationManager authenticationManager;
+    private final PatientRepository patientRepository;
+    private final DoctorRepository doctorRepository;
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final TokenService tokenService;
     private final EmailService emailService;
 
     public UserService(AuthenticationManager authenticationManager, UserRepository userRepository,
-                       RoleRepository roleRepository, TokenService tokenService, EmailService emailService) {
+                       RoleRepository roleRepository, TokenService tokenService, EmailService emailService, PatientRepository patientRepository, DoctorRepository doctorRepository) {
         this.authenticationManager = authenticationManager;
+        this.patientRepository = patientRepository;
+        this.doctorRepository = doctorRepository;
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.tokenService = tokenService;
@@ -186,6 +194,13 @@ public class UserService {
         return user;
     }
 
+    public List<String> getUserRoles(String username) {
+        User user = findUserByUsername(username);
+        return user.getRoles().stream()
+            .map(Role::getRole)
+            .collect(Collectors.toList());
+    }
+
     // Helper methods
     private String generateUsernameFromName(String name) {
         String baseName = (name == null || name.isBlank()) ? "user" : name;
@@ -230,6 +245,14 @@ public class UserService {
         if (userRepository.existsByEmail(email)) {
             throw new BusinessRuleException("Email " + email + " já está cadastrado");
         }
+    }
+
+    public boolean hasPatient(User user) {
+        return patientRepository.existsByUser(user);
+    }
+
+    public boolean hasDoctor(User user) {
+        return doctorRepository.existsByUser(user);
     }
 
 }
