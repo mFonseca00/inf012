@@ -1,6 +1,5 @@
 import React, { useState, useContext } from "react";
 import { AuthContext } from "../../contexts/AuthContext";
-// 1. Adicione 'Link' na importação
 import { useNavigate, Link } from "react-router-dom";
 import styles from "./Login.module.css";
 import logoKos from "../../assets/kos-logo.png";
@@ -28,7 +27,6 @@ function Login() {
       setCarregando(true);
       await login(username, password);
       navigate("/dashboard");
-      // Removi o alert para deixar a transição mais fluida
     } catch (err) {
       setErro("Usuário ou senha incorretos.");
       console.error(err);
@@ -53,6 +51,7 @@ function Login() {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               disabled={carregando}
+              placeholder="Digite seu usuário"
             />
           </div>
 
@@ -66,8 +65,8 @@ function Login() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               disabled={carregando}
+              placeholder="Digite sua senha"
             />
-            {/* LINK 1: Esqueceu a Senha */}
             <div className={styles.forgotPassword}>
               <Link to="/forgot-password" className={styles.linkText}>
                 Esqueceu a senha?
@@ -85,7 +84,6 @@ function Login() {
             {carregando ? "Entrando..." : "Entrar"}
           </button>
 
-          {/* LINK 2: Criar Conta */}
           <div className={styles.registerLink}>
             Não tem uma conta?{" "}
             <Link to="/register" className={styles.linkBold}>

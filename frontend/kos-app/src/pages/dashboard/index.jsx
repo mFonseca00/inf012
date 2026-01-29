@@ -4,13 +4,10 @@ import { AuthContext } from "../../contexts/AuthContext";
 import styles from "./index.module.css";
 
 function Dashboard() {
-  // 1. Buscamos a função logout e os dados do usuário no contexto
   const { logout, user } = useContext(AuthContext);
 
   const handleLogout = () => {
     logout();
-    // Não precisa de navigate("/");
-    // O PrivateRoute vai detectar que o user virou null e redirecionar sozinho.
   };
 
   return (
@@ -21,8 +18,6 @@ function Dashboard() {
           <span>
             Olá, <strong>{user?.username}</strong>
           </span>
-
-          {/* 2. O botão que chama a função */}
           <button onClick={handleLogout} className={styles.logoutButton}>
             Sair
           </button>

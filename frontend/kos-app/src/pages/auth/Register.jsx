@@ -16,7 +16,6 @@ function Register() {
   const navigate = useNavigate();
 
   async function handleSubmit(event) {
-    // ... (mesmo código de antes) ...
     event.preventDefault();
     setErro(null);
 
@@ -47,7 +46,6 @@ function Register() {
   return (
     <div className={styles.registerContainer}>
       <div className={styles.formWrapper}>
-        {/* --- NOVO BOTÃO DE VOLTAR --- */}
         <button
           onClick={() => navigate("/login")}
           className={styles.backButton}
@@ -65,8 +63,6 @@ function Register() {
         </h2>
 
         <form onSubmit={handleSubmit}>
-          {/* ... (resto do formulário igual) ... */}
-
           <div className={styles.inputGroup}>
             <label htmlFor="username">Usuário:</label>
             <input
