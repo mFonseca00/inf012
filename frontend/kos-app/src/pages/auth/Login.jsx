@@ -1,6 +1,7 @@
-import React, { useState } from "react";
-// Assumindo que você tem o react-router-dom para redirecionar após o login
-import { useNavigate } from "react-router-dom";
+import React, { useState, useContext } from "react";
+import { AuthContext } from "../../contexts/AuthContext";
+// 1. Adicione 'Link' na importação
+import { useNavigate, Link } from "react-router-dom";
 import styles from "./Login.module.css";
 import logoKos from "../../assets/kos-logo.png";
 
@@ -8,17 +9,16 @@ function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
-  // Novos estados para UX e Segurança
   const [erro, setErro] = useState(null);
   const [carregando, setCarregando] = useState(false);
 
-  const navigate = useNavigate(); // Hook para redirecionar
+  const { login } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   async function handleSubmit(event) {
-    event.preventDefault(); // Impede que a página recarregue
+    event.preventDefault();
     setErro(null);
 
-    // 1. Validação básica no Front
     if (username.length === 0 || password.length === 0) {
       setErro("Preencha todos os campos.");
       return;
@@ -26,31 +26,11 @@ function Login() {
 
     try {
       setCarregando(true);
-
-      // 2. Simulação de chamada para API (Substitua pela sua URL real)
-      const response = await fetch("http://localhost:8080/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ username, password }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Credenciais inválidas");
-      }
-
-      const data = await response.json();
-
-      // O ideal é usar Cookies HttpOnly definidos pelo back-end
-      // Evitar localStorage
-      window.localStorage.setItem("token", data.token);
-
-      // Redirecionar usuário
-      navigate("/dashboard/");
-      alert("Login realizado com sucesso!");
+      await login(username, password);
+      navigate("/dashboard");
+      // Removi o alert para deixar a transição mais fluida
     } catch (err) {
-      setErro("Usuário ou password incorretos.");
+      setErro("Usuário ou senha incorretos.");
       console.error(err);
     } finally {
       setCarregando(false);
@@ -62,7 +42,6 @@ function Login() {
       <div className={styles.formWrapper}>
         <img src={logoKos} alt="Logo Kos" className={styles.logo} />
 
-        {/* O onSubmit vai no form, não no botão */}
         <form onSubmit={handleSubmit}>
           <div className={styles.inputGroup}>
             <label htmlFor="username">Usuário:</label>
@@ -73,12 +52,12 @@ function Login() {
               name="username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              disabled={carregando} // Desabilita enquanto carrega
+              disabled={carregando}
             />
           </div>
 
           <div className={styles.inputGroup}>
-            <label htmlFor="password">password:</label>
+            <label htmlFor="password">Senha:</label>
             <input
               id="password"
               type="password"
@@ -88,9 +67,14 @@ function Login() {
               onChange={(e) => setPassword(e.target.value)}
               disabled={carregando}
             />
+            {/* LINK 1: Esqueceu a Senha */}
+            <div className={styles.forgotPassword}>
+              <Link to="/forgot-password" className={styles.linkText}>
+                Esqueceu a senha?
+              </Link>
+            </div>
           </div>
 
-          {/* Exibe mensagem de erro se houver */}
           {erro && <p style={{ color: "red", fontSize: "0.9rem" }}>{erro}</p>}
 
           <button
@@ -98,8 +82,16 @@ function Login() {
             className={styles.send_button}
             disabled={carregando}
           >
-            {carregando ? "Entrando..." : "Enviar"}
+            {carregando ? "Entrando..." : "Entrar"}
           </button>
+
+          {/* LINK 2: Criar Conta */}
+          <div className={styles.registerLink}>
+            Não tem uma conta?{" "}
+            <Link to="/register" className={styles.linkBold}>
+              Registre-se
+            </Link>
+          </div>
         </form>
       </div>
     </div>

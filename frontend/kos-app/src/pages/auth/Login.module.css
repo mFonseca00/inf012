@@ -63,3 +63,40 @@ select {
 .send_button:hover {
   background-color: #45a049;
 }
+
+/* ... seu css anterior ... */
+
+/* Link "Esqueceu a senha" alinhado à direita */
+.forgotPassword {
+  text-align: right;
+  margin-top: -5px; /* Puxa um pouco para perto do input */
+  margin-bottom: 15px;
+  font-size: 0.85rem;
+}
+
+/* Container do "Criar conta" centralizado */
+.registerLink {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+/* Estilo base dos links */
+.linkText,
+.linkBold {
+  color: #4caf50; /* A mesma cor verde do seu botão */
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.linkBold {
+  font-weight: bold;
+}
+
+/* Efeito Hover (passar o mouse) */
+.linkText:hover,
+.linkBold:hover {
+  color: #45a049; /* Verde um pouco mais escuro */
+  text-decoration: underline;
+}

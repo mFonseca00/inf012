@@ -1,4 +1,5 @@
 import React, { createContext, useState, useContext } from "react"; // Adicione useContext
+import { jwtDecode } from "jwt-decode";
 import authService from "../services/authService";
 
 // 1. Crie o Contexto mas NÃO o exporte
@@ -17,7 +18,27 @@ export const AuthProvider = ({ children }) => {
     // Cuidado aqui: retornar um objeto diferente pode causar bugs se
     // sua UI espera user.username e recebe apenas user.token
     if (storedToken) {
-      return { token: storedToken };
+      try {
+        // Tenta decodificar o token salvo ao abrir o site
+        const decoded = jwtDecode(storedToken);
+
+        // Verifica se o token não expirou (opcional, mas recomendado)
+        const isExpired = decoded.exp * 1000 < Date.now();
+        if (isExpired) {
+          localStorage.removeItem("token");
+          return null;
+        }
+
+        // O Spring Boot geralmente coloca o usuário no campo 'sub'
+        return {
+          username: decoded.sub,
+          token: storedToken,
+        };
+      } catch (error) {
+        // Se o token estiver inválido/corrompido
+        localStorage.removeItem("token");
+        return null;
+      }
     }
     return null;
   });
@@ -26,8 +47,10 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (username, password) => {
     const data = await authService.login(username, password);
+    const decoded = jwtDecode(data.token);
+
     const userData = {
-      username,
+      username: decoded.sub, // 'sub' é o padrão JWT para o "Subject" (Dono do token)
       token: data.token,
     };
     localStorage.setItem("token", data.token);
