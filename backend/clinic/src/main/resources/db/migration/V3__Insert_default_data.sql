@@ -1,4 +1,4 @@
-INSERT INTO roles (role) VALUES ('MASTER'), ('ADMIN'), ('USER') ON CONFLICT (role) DO NOTHING;
+INSERT INTO roles (role) VALUES ('MASTER'), ('ADMIN'), ('USER'), ('PATIENT'), ('DOCTOR'), ('RECEPTIONIST') ON CONFLICT (role) DO NOTHING;
 
 -- Insert default admin
 -- password: admin123 (with BCrypt)
