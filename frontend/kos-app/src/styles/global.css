@@ -1,0 +1,30 @@
+/* src/styles/global.css */
+:root {
+  /* cores do site todo */
+  --primary-color: #0056b3;
+  --secondary-color: #6c757d;
+  --background-color: #f4f4f9;
+  --text-color: #333;
+  --danger-color: #dc3545;
+}
+
+body {
+  font-family: "Roboto", sans-serif;
+  color: var(--text-color);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+.title-serif {
+  font-family: "Merriweather", serif;
+  font-weight: 700;
+  color: #222;
+}
+
+h1 {
+  font-size: 3rem;
+  font-weight: 900;
+  margin-bottom: 1rem;
+}
