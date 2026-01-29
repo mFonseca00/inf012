@@ -55,3 +55,108 @@
   max-width: 1200px;
   margin: 0 auto;
 }
+
+.container {
+  min-height: 100vh;
+  background-color: #f4f4f9;
+  /* Use variáveis se tiver definido no global, senão use a cor direta */
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background-color: #ffffff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.logoArea h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem; /* Espaço entre o texto e o botão */
+}
+
+/* Nova classe para alinhar o nome e o cargo */
+.userDetails {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end; /* Alinha o texto à direita */
+  line-height: 1.2;
+}
+
+.welcomeText {
+  color: #333;
+  font-size: 1rem;
+}
+
+/* Nova classe para o cargo (Role) */
+.userRole {
+  font-size: 0.8rem;
+  color: #888;
+  margin-top: 2px;
+}
+
+.logoutButton {
+  background-color: #ff4d4f;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.logoutButton:hover {
+  background-color: #d9363e;
+}
+
+.content {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.card h2 {
+  margin-top: 0;
+  color: #0056b3; /* Cor primária */
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.card p {
+  color: #666;
+  margin: 0;
+}
+
+.logo {
+  display: block;
+  margin: 0 auto 0rem auto;
+  max-width: 150px;
+  height: auto;
+}
