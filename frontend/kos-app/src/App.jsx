@@ -6,7 +6,7 @@ import { PrivateRoute } from "./components/PrivateRoute";
 import { PublicRoute } from "./components/PublicRoute";
 
 import Login from "./pages/auth/Login";
-import Dashboard from "./pages/dashboard";
+import Dashboard from "./pages/dashboard/Dashboard.jsx";
 function App() {
   return (
     <Routes>

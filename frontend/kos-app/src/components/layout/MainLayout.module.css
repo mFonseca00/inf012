@@ -1,0 +1,18 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.mainContainer {
+  display: flex;
+  flex: 1;
+  background-color: #f4f4f9;
+  overflow: hidden; /* Evita scroll duplo */
+}
+
+.contentArea {
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto; /* Scroll apenas no conteúdo */
+}
