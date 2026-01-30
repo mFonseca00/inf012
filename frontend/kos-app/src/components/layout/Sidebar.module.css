@@ -1,0 +1,49 @@
+.sidebar {
+  width: 250px;
+  background-color: #fff;
+  border-right: 1px solid #e0e0e0;
+  min-height: calc(100vh - 70px); /* Altura total menos a Navbar */
+  padding: 1.5rem 1rem;
+}
+
+.nav ul {
+  list-style: none;
+  padding: 0;
+}
+
+.nav li {
+  margin-bottom: 0.5rem;
+}
+
+.nav a {
+  display: block;
+  padding: 0.75rem 1rem;
+  color: #555;
+  text-decoration: none;
+  border-radius: 6px;
+  transition: all 0.2s;
+  font-weight: 500;
+}
+
+.nav a:hover {
+  background-color: #f0f2f5;
+  color: #0056b3;
+}
+
+/* Link ativo */
+.active {
+  background-color: #e6f0ff !important;
+  color: #0056b3 !important;
+  font-weight: 600;
+}
+
+.sectionTitle {
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+  padding-left: 1rem;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: #999;
+  letter-spacing: 0.5px;
+  font-weight: bold;
+}
