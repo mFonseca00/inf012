@@ -2,6 +2,7 @@ package com.ifba.clinic.controller;
 
 import java.util.List;
 
+import com.ifba.clinic.dto.user.TokenDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,10 +32,9 @@ public class AuthController {
 
     @PostMapping("/login")
     @Operation(summary = "Login de usuário", description = "Autentica um usuário e retorna o token de acesso e suas permissões.")
-    public ResponseEntity<AuthResponseDTO> login(@RequestBody @Valid LoginDTO login) {
+    public ResponseEntity<TokenDTO> login(@RequestBody @Valid LoginDTO login) {
         String token = userService.login(login);
-        List<String> roles = userService.getUserRoles(login.username());
-        return ResponseEntity.ok(new AuthResponseDTO(token, roles));
+        return ResponseEntity.ok(new TokenDTO(token));
     }
 
     @PostMapping("/register")

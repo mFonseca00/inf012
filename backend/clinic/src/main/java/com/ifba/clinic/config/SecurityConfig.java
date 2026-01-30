@@ -40,9 +40,10 @@ public class SecurityConfig {
                     
                     // endpoints de autenticação públicos
                     .requestMatchers(HttpMethod.POST, "/auth/login", "/auth/register").permitAll()
-                    
-                    // qualquer usuário autenticado pode alterar sua própria senha
+
+                    // qualquer usuário autenticado pode alterar sua própria senha e obter seu perfil
                     .requestMatchers(HttpMethod.PATCH, "/user/change-password").authenticated()
+                    .requestMatchers(HttpMethod.GET, "/user/me").authenticated()
                     
                     // PERMISSÕES GERAIS
                     .requestMatchers(HttpMethod.GET, "/appointment/all").hasAnyAuthority("PATIENT", "DOCTOR", "ADMIN", "MASTER")

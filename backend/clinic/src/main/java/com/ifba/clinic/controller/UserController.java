@@ -1,5 +1,6 @@
 package com.ifba.clinic.controller;
 
+import com.ifba.clinic.dto.user.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -12,11 +13,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ifba.clinic.dto.user.ChangePasswordDTO;
-import com.ifba.clinic.dto.user.ChangeRoleDTO;
-import com.ifba.clinic.dto.user.UserBasicInfoDTO;
-import com.ifba.clinic.dto.user.UserDataUpdateDTO;
-import com.ifba.clinic.dto.user.UserResponseDTO;
 import com.ifba.clinic.service.UserService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -32,6 +28,14 @@ public class UserController {
 
     public UserController(UserService userService) {
         this.userService = userService;
+    }
+
+    @GetMapping("/me")
+    @Operation(summary = "Obter perfil do usuário autenticado", description = "Retorna os dados do usuário autenticado.")
+    public ResponseEntity<UserProfileDTO> getProfile(Authentication authentication) {
+        String username = authentication.getName();
+        UserProfileDTO profile = userService.getProfile(username);
+        return ResponseEntity.ok(profile);
     }
 
     @PatchMapping("/add-role")

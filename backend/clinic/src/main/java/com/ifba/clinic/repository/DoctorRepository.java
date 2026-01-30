@@ -1,5 +1,6 @@
 package com.ifba.clinic.repository;
 
+import com.ifba.clinic.service.UserService;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -13,4 +14,5 @@ public interface DoctorRepository extends JpaRepository<Doctor, Long> {
     boolean existsByAddress(Address address);
     boolean existsByUser(User user);
     Doctor findByCrm(String crm);
+    Doctor findByUserUsername(String username);
 }
