@@ -52,6 +52,12 @@ public class AppointmentService {
         Patient patient = validatePatient(dto.patientId(), dto.appointmentDate());
         Doctor doctor = getOrSelectDoctor(dto.doctorId(), dto.appointmentDate());
         
+        if (patient.getUser().getId().equals(doctor.getUser().getId())) {
+            throw new BusinessRuleException(
+                "Um médico não pode marcar uma consulta com ele mesmo"
+            );
+        }
+
         Appointment appointment = new Appointment(
             patient,
             doctor,
