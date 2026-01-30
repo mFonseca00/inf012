@@ -30,6 +30,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
+    @Operation(summary = "Login de usuário", description = "Autentica um usuário e retorna o token de acesso e suas permissões.")
     public ResponseEntity<AuthResponseDTO> login(@RequestBody @Valid LoginDTO login) {
         String token = userService.login(login);
         List<String> roles = userService.getUserRoles(login.username());
