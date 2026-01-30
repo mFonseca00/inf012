@@ -1,8 +1,5 @@
 package com.ifba.clinic.controller;
 
-import java.util.List;
-
-import com.ifba.clinic.dto.user.TokenDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -10,8 +7,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ifba.clinic.dto.user.AuthResponseDTO;
 import com.ifba.clinic.dto.user.LoginDTO;
+import com.ifba.clinic.dto.user.TokenDTO;
 import com.ifba.clinic.dto.user.UserRegDTO;
 import com.ifba.clinic.service.UserService;
 
