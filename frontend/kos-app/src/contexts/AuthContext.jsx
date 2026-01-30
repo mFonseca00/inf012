@@ -1,87 +1,103 @@
-import React, { createContext, useState, useContext } from "react"; // Adicione useContext
-import { jwtDecode } from "jwt-decode";
+import React, { createContext, useState, useEffect } from "react";
+import { jwtDecode } from "jwt-decode"; // Importe a biblioteca
 import authService from "../services/authService";
 
-// 1. Crie o Contexto mas NÃO o exporte
 export const AuthContext = createContext();
 
-export const AuthProvider = ({ children }) => {
-  // ... (todo o seu código do AuthProvider continua igual aqui) ...
-  // Apenas uma observação sobre o loading (veja abaixo nas melhorias)
-  const [user, setUser] = useState(() => {
-    const storedToken = localStorage.getItem("token");
-    const storedUser = localStorage.getItem("user");
+export function AuthProvider({ children }) {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-    if (storedToken && storedUser) {
-      return JSON.parse(storedUser);
-    }
-    // Cuidado aqui: retornar um objeto diferente pode causar bugs se
-    // sua UI espera user.username e recebe apenas user.token
-    if (storedToken) {
-      try {
-        // Tenta decodificar o token salvo ao abrir o site
-        const decoded = jwtDecode(storedToken);
+  const getBestRole = (roles) => {
+    if (!roles || roles.length === 0) return "USER";
 
-        // Verifica se o token não expirou (opcional, mas recomendado)
-        const isExpired = decoded.exp * 1000 < Date.now();
-        if (isExpired) {
-          localStorage.removeItem("token");
-          return null;
+    // Verifica na ordem de importância
+    if (roles.includes("MASTER")) return "MASTER";
+    if (roles.includes("ADMIN")) return "ADMIN";
+    if (roles.includes("DOCTOR")) return "DOCTOR";
+    if (roles.includes("RECEPTIONIST")) return "RECEPTIONIST";
+    if (roles.includes("PATIENT")) return "PATIENT";
+
+    // Se não achar nenhuma especial, retorna a primeira ou USER
+    return roles[0];
+  };
+
+  // Função auxiliar para decodificar o token e formatar o usuário
+  const processToken = (token, rolesExternas) => {
+    try {
+      const decoded = jwtDecode(token);
+      let finalRoles = rolesExternas;
+
+      if (!finalRoles) {
+        const storedRoles = localStorage.getItem("user_roles");
+        if (storedRoles) {
+          finalRoles = JSON.parse(storedRoles);
+        } else {
+          finalRoles = decoded.roles || [];
         }
+      }
+      // O Spring Boot geralmente coloca o usuário no campo 'sub'
+      // e as roles em 'roles', 'authorities' ou 'scope' dependendo da config
+      return {
+        username: decoded.sub,
+        // Adapte abaixo conforme seu token (pode ser decoded.roles[0] se for array)
+        roles: finalRoles,
+        mainRole: getBestRole(finalRoles),
+        exp: decoded.exp,
+      };
+    } catch (error) {
+      console.error("Token inválido", error);
+      return null;
+    }
+  };
 
-        // O Spring Boot geralmente coloca o usuário no campo 'sub'
-        return {
-          username: decoded.sub,
-          token: storedToken,
-        };
-      } catch (error) {
-        // Se o token estiver inválido/corrompido
+  useEffect(() => {
+    const recoveredToken = localStorage.getItem("token");
+
+    if (recoveredToken) {
+      const userData = processToken(recoveredToken);
+      // Verifica se o token não expirou (opcional, mas recomendado)
+      if (userData && userData.exp * 1000 > Date.now()) {
+        setUser(userData);
+      } else {
         localStorage.removeItem("token");
-        return null;
+        localStorage.removeItem("user_roles");
+        setUser(null);
       }
     }
-    return null;
-  });
-
-  const loading = false; // Veja a nota sobre isso abaixo
+    setLoading(false);
+  }, []);
 
   const login = async (username, password) => {
-    const data = await authService.login(username, password);
-    const decoded = jwtDecode(data.token);
+    // 1. Chama a API
+    const response = await authService.login(username, password);
 
-    const userData = {
-      username: decoded.sub, // 'sub' é o padrão JWT para o "Subject" (Dono do token)
-      token: data.token,
-    };
-    localStorage.setItem("token", data.token);
-    localStorage.setItem("user", JSON.stringify(userData));
+    // 2. Pega o token da resposta (ajuste se vier como response.token ou apenas response)
+    const token = response.token;
+    const backendRoles = response.roles;
+
+    // 3. Salva no LocalStorage
+    localStorage.setItem("token", token);
+    localStorage.setItem("user_roles", JSON.stringify(backendRoles));
+
+    // 4. Decodifica e atualiza o estado IMEDIATAMENTE
+    const userData = processToken(token, backendRoles);
     setUser(userData);
+
+    // Não precisa de navigate aqui, o Login.jsx já faz isso após o await login()
   };
 
   const logout = () => {
     localStorage.removeItem("token");
-    localStorage.removeItem("user");
+    localStorage.removeItem("user_roles");
     setUser(null);
-  };
-
-  const register = async (formData) => {
-    await authService.register(formData);
   };
 
   return (
     <AuthContext.Provider
-      value={{ user, signed: !!user, login, logout, register, loading }}
+      value={{ isAuthenticated: !!user, user, login, logout, loading }}
     >
-      {children}
+      {!loading && children}
     </AuthContext.Provider>
   );
-};
-
-// 2. Exporte um hook personalizado para usar o contexto
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth deve ser usado dentro de um AuthProvider");
-  }
-  return context;
-};
+}
