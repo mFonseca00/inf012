@@ -39,7 +39,6 @@ export function AuthProvider({ children }) {
     try {
       // 1. Faz login e recebe o token
       const response = await authService.login(username, password);
-      console.log("Login response:", response);
       const token = response.token;
 
       // 2. Salva o token no localStorage
