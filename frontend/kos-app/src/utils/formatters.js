@@ -28,3 +28,7 @@ export function formatCEP(value) {
   const v = onlyDigits(value).slice(0, 8);
   return v.replace(/^(\d{5})(\d)/, "$1-$2");
 }
+
+export function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}

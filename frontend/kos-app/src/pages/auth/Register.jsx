@@ -2,6 +2,7 @@ import React, { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { AuthContext } from "../../contexts/AuthContext";
+import { isValidEmail } from "../../utils/formatters";
 import RegisterForm from "../../components/auth/register_form/RegisterForm";
 import patientService from "../../services/patientService";
 import styles from "./Register.module.css";
@@ -13,6 +14,11 @@ function Register() {
   const navigate = useNavigate();
 
   async function handleSubmit(form) {
+
+    if (!isValidEmail(form.email)) {
+      toast.error("Por favor, informe um e-mail válido.");
+      return;
+    }
 
     if (form.password !== form.confirmPassword) {
       toast.error("As senhas não coincidem.");
