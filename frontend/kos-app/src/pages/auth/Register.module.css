@@ -1,7 +1,8 @@
+/* Reutilizando a mesma base bonita do Login */
 .registerContainer {
   min-height: 100vh;
   width: 100vw;
-  background-image: url("../../assets/background-login.jpg");
+  background-image: url("../../assets/background-login.jpg"); /* Confirme se o caminho está certo */
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -12,30 +13,66 @@
 
 .formWrapper {
   background-color: rgba(255, 255, 255, 0.95);
-  padding: 1rem;
+  padding: 2.5rem;
   border-radius: 8px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
   width: 100%;
-  max-width: 700px;
-  min-width: 300px;
-  margin: 0 auto;
-  display: flex;              
-  flex-direction: column;     
-  align-items: center;        
+  max-width: 400px;
 }
 
 .logo {
   display: block;
   margin: 0 auto 1.5rem auto;
-  max-width: 200px;
+  max-width: 200px; /* Ajuste conforme seu logo */
   height: auto;
 }
 
-.pageTitle {
-  text-align: center;
-  margin-bottom: 20px;
+.inputGroup {
+  margin-bottom: 1rem;
+}
+
+.inputGroup label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 500;
   color: #333;
-  font-size: 1.5rem;
+}
+
+.textBox {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  font-size: 1rem;
+}
+
+.textBox:focus {
+  border-color: #4caf50;
+  outline: none;
+}
+
+.send_button {
+  width: 100%;
+  background-color: #4caf50;
+  color: white;
+  padding: 14px;
+  margin-top: 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: bold;
+  transition: background-color 0.3s;
+}
+
+.send_button:hover:not(:disabled) {
+  background-color: #45a049;
+}
+
+.send_button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
 }
 
 .loginLink {
@@ -50,39 +87,28 @@
   text-decoration: none;
   font-weight: bold;
   margin-left: 5px;
-  transition: color 0.2s;
 }
 
 .linkBold:hover {
-  color: #45a049;
   text-decoration: underline;
 }
 
 .backButton {
-  background: none;
+  background: none; /* Sem fundo */
   border: none;
-  color: #888;
+  color: #888; /* Cinza discreto */
   cursor: pointer;
   font-size: 0.9rem;
   font-weight: 500;
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 5px; /* Espaço entre a seta e o texto */
   padding: 0;
-  margin-bottom: 1rem;
+  margin-bottom: 1rem; /* Empurra o logo um pouco para baixo */
   transition: color 0.2s;
-  width: 100%;
-  justify-content: flex-start;
 }
 
 .backButton:hover {
-  color: #333;
+  color: #333; /* Fica mais escuro ao passar o mouse */
   text-decoration: underline;
-}
-
-@media (max-width: 900px) {
-  .formWrapper {
-    max-width: 98vw;
-    padding: 1.2rem;
-  }
 }

@@ -1,7 +1,6 @@
 import React, { createContext, useState, useEffect } from "react";
-import { jwtDecode } from "jwt-decode";
+import { jwtDecode } from "jwt-decode"; // Importe a biblioteca
 import authService from "../services/authService";
-import userService from "../services/userService";
 
 export const AuthContext = createContext();
 
@@ -12,85 +11,85 @@ export function AuthProvider({ children }) {
   const getBestRole = (roles) => {
     if (!roles || roles.length === 0) return "USER";
 
+    // Verifica na ordem de importância
     if (roles.includes("MASTER")) return "MASTER";
     if (roles.includes("ADMIN")) return "ADMIN";
     if (roles.includes("DOCTOR")) return "DOCTOR";
     if (roles.includes("RECEPTIONIST")) return "RECEPTIONIST";
     if (roles.includes("PATIENT")) return "PATIENT";
 
+    // Se não achar nenhuma especial, retorna a primeira ou USER
     return roles[0];
   };
 
-  // Função para formatar o usuário com dados do backend
-  const formatUser = (profileData) => {
-    return {
-      userId: profileData.userId,
-      username: profileData.username,
-      email: profileData.email,
-      roles: profileData.roles || [],
-      mainRole: getBestRole(profileData.roles),
-      patientId: profileData.patientId,
-      doctorId: profileData.doctorId,
-    };
-  };
-
-  // Ao fazer login: salva token e busca dados do usuário
-  const login = async (username, password) => {
+  // Função auxiliar para decodificar o token e formatar o usuário
+  const processToken = (token, rolesExternas) => {
     try {
-      // 1. Faz login e recebe o token
-      const response = await authService.login(username, password);
-      const token = response.token;
+      const decoded = jwtDecode(token);
+      let finalRoles = rolesExternas;
 
-      // 2. Salva o token no localStorage
-      localStorage.setItem("token", token);
-
-      // 3. Busca os dados completos do usuário via /user/me
-      const profileData = await userService.getProfile();
-
-      // 4. Formata e salva o usuário no estado
-      const userData = formatUser(profileData);
-      setUser(userData);
-
-      return userData;
+      if (!finalRoles) {
+        const storedRoles = localStorage.getItem("user_roles");
+        if (storedRoles) {
+          finalRoles = JSON.parse(storedRoles);
+        } else {
+          finalRoles = decoded.roles || [];
+        }
+      }
+      // O Spring Boot geralmente coloca o usuário no campo 'sub'
+      // e as roles em 'roles', 'authorities' ou 'scope' dependendo da config
+      return {
+        username: decoded.sub,
+        // Adapte abaixo conforme seu token (pode ser decoded.roles[0] se for array)
+        roles: finalRoles,
+        mainRole: getBestRole(finalRoles),
+        exp: decoded.exp,
+      };
     } catch (error) {
-      console.error("Erro no login:", error);
-      throw error;
+      console.error("Token inválido", error);
+      return null;
     }
   };
 
-  // Ao inicializar: recupera token e busca dados do usuário
   useEffect(() => {
     const recoveredToken = localStorage.getItem("token");
 
     if (recoveredToken) {
-      const initializeUser = async () => {
-        try {
-          // Valida se o token ainda é válido
-          const decoded = jwtDecode(recoveredToken);
-          if (decoded.exp * 1000 > Date.now()) {
-            // Busca os dados completos do usuário
-            const profileData = await userService.getProfile();
-            const userData = formatUser(profileData);
-            setUser(userData);
-          } else {
-            // Token expirado
-            localStorage.removeItem("token");
-            setUser(null);
-          }
-        } catch (error) {
-          console.error("Erro ao recuperar usuário:", error);
-          localStorage.removeItem("token");
-          setUser(null);
-        }
-      };
-
-      initializeUser();
+      const userData = processToken(recoveredToken);
+      // Verifica se o token não expirou (opcional, mas recomendado)
+      if (userData && userData.exp * 1000 > Date.now()) {
+        setUser(userData);
+      } else {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user_roles");
+        setUser(null);
+      }
     }
     setLoading(false);
   }, []);
 
+  const login = async (username, password) => {
+    // 1. Chama a API
+    const response = await authService.login(username, password);
+
+    // 2. Pega o token da resposta (ajuste se vier como response.token ou apenas response)
+    const token = response.token;
+    const backendRoles = response.roles;
+
+    // 3. Salva no LocalStorage
+    localStorage.setItem("token", token);
+    localStorage.setItem("user_roles", JSON.stringify(backendRoles));
+
+    // 4. Decodifica e atualiza o estado IMEDIATAMENTE
+    const userData = processToken(token, backendRoles);
+    setUser(userData);
+
+    // Não precisa de navigate aqui, o Login.jsx já faz isso após o await login()
+  };
+
   const logout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("user_roles");
     setUser(null);
   };
 

@@ -4,9 +4,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.ifba.clinic.dto.user.*;
-import com.ifba.clinic.model.entity.Doctor;
-import com.ifba.clinic.model.entity.Patient;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -14,6 +11,14 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.ifba.clinic.dto.user.ChangePasswordDTO;
+import com.ifba.clinic.dto.user.ChangeRoleDTO;
+import com.ifba.clinic.dto.user.LoginDTO;
+import com.ifba.clinic.dto.user.UserBasicInfoDTO;
+import com.ifba.clinic.dto.user.UserDataUpdateDTO;
+import com.ifba.clinic.dto.user.UserFromEntityDTO;
+import com.ifba.clinic.dto.user.UserRegDTO;
+import com.ifba.clinic.dto.user.UserResponseDTO;
 import com.ifba.clinic.exception.BusinessRuleException;
 import com.ifba.clinic.exception.EntityNotFoundException;
 import com.ifba.clinic.exception.InvalidOperationException;
@@ -51,25 +56,6 @@ public class UserService {
         var usernamePassToken = new UsernamePasswordAuthenticationToken(login.username(), login.password());
         var auth = authenticationManager.authenticate(usernamePassToken);
         return tokenService.generateToken((User) auth.getPrincipal());
-    }
-
-    public UserProfileDTO getProfile(String username) {
-        User user = findUserByUsername(username);
-
-        Patient patient = patientRepository.findByUserUsername(username);
-        Long patientId = (patient != null) ? patient.getId() : null;
-
-        Doctor doctor = doctorRepository.findByUserUsername(username);
-        Long doctorId = (doctor != null) ? doctor.getId() : null;
-
-        return new UserProfileDTO(
-                user.getId(),
-                patientId,
-                doctorId,
-                user.getUsername(),
-                user.getEmail(),
-                user.getRoles().stream().map(r -> r.getAuthority()).toList()
-        );
     }
 
     public void register(UserRegDTO newUser) {

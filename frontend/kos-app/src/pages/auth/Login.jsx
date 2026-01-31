@@ -1,15 +1,14 @@
 import React, { useState, useContext } from "react";
 import { AuthContext } from "../../contexts/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
-import { toast } from "react-toastify";
-import TextField from "../../components/ui/text_field/TextField";
-import Button from "../../components/ui/button/Button";
 import styles from "./Login.module.css";
 import logoKos from "../../assets/kos-logo.png";
 
 function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+
+  const [erro, setErro] = useState(null);
   const [carregando, setCarregando] = useState(false);
 
   const { login } = useContext(AuthContext);
@@ -17,9 +16,10 @@ function Login() {
 
   async function handleSubmit(event) {
     event.preventDefault();
+    setErro(null);
 
-    if (username.trim() === "" || password.trim() === "") {
-      toast.error("Preencha todos os campos.");
+    if (username.length === 0 || password.length === 0) {
+      setErro("Preencha todos os campos.");
       return;
     }
 
@@ -28,7 +28,7 @@ function Login() {
       await login(username, password);
       navigate("/dashboard");
     } catch (err) {
-      toast.error("Usuário ou senha incorretos.");
+      setErro("Usuário ou senha incorretos.");
       console.error(err);
     } finally {
       setCarregando(false);
@@ -39,42 +39,51 @@ function Login() {
     <div className={styles.loginContainer}>
       <div className={styles.formWrapper}>
         <img src={logoKos} alt="Logo Kos" className={styles.logo} />
+
         <form onSubmit={handleSubmit}>
-          <TextField
-            id="username"
-            name="username"
-            label="Usuário:"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            disabled={carregando}
-            placeholder="Digite seu usuário"
-            required={true}
-            autoComplete="username"
-          />
-          <TextField
-            id="password"
-            name="password"
-            label="Senha:"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            disabled={carregando}
-            placeholder="Digite sua senha"
-            required={true}
-            autoComplete="current-password"
-          />
-          <div className={styles.forgotPassword}>
-            <Link to="/forgot-password" className={styles.linkText}>
-              Esqueceu a senha?
-            </Link>
+          <div className={styles.inputGroup}>
+            <label htmlFor="username">Usuário:</label>
+            <input
+              id="username"
+              type="text"
+              className={styles.textBox}
+              name="username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              disabled={carregando}
+              placeholder="Digite seu usuário"
+            />
           </div>
-          <Button
+
+          <div className={styles.inputGroup}>
+            <label htmlFor="password">Senha:</label>
+            <input
+              id="password"
+              type="password"
+              className={styles.textBox}
+              name="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              disabled={carregando}
+              placeholder="Digite sua senha"
+            />
+            <div className={styles.forgotPassword}>
+              <Link to="/forgot-password" className={styles.linkText}>
+                Esqueceu a senha?
+              </Link>
+            </div>
+          </div>
+
+          {erro && <p style={{ color: "red", fontSize: "0.9rem" }}>{erro}</p>}
+
+          <button
             type="submit"
-            variant="primary"
+            className={styles.send_button}
             disabled={carregando}
           >
             {carregando ? "Entrando..." : "Entrar"}
-          </Button>
+          </button>
+
           <div className={styles.registerLink}>
             Não tem uma conta?{" "}
             <Link to="/register" className={styles.linkBold}>

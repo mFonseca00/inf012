@@ -1,5 +1,7 @@
 package com.ifba.clinic.controller;
 
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -7,8 +9,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ifba.clinic.dto.user.AuthResponseDTO;
 import com.ifba.clinic.dto.user.LoginDTO;
-import com.ifba.clinic.dto.user.TokenDTO;
 import com.ifba.clinic.dto.user.UserRegDTO;
 import com.ifba.clinic.service.UserService;
 
@@ -28,10 +30,10 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    @Operation(summary = "Login de usuário", description = "Autentica um usuário e retorna o token de acesso e suas permissões.")
-    public ResponseEntity<TokenDTO> login(@RequestBody @Valid LoginDTO login) {
+    public ResponseEntity<AuthResponseDTO> login(@RequestBody @Valid LoginDTO login) {
         String token = userService.login(login);
-        return ResponseEntity.ok(new TokenDTO(token));
+        List<String> roles = userService.getUserRoles(login.username());
+        return ResponseEntity.ok(new AuthResponseDTO(token, roles));
     }
 
     @PostMapping("/register")
