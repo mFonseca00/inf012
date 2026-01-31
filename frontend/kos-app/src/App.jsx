@@ -1,6 +1,7 @@
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import Register from "./pages/auth/Register";
+import AppointmentList from "./pages/appointment/AppointmentList";
 
 import { PrivateRoute } from "./components/PrivateRoute";
 import { PublicRoute } from "./components/PublicRoute";
@@ -43,6 +44,15 @@ function App() {
           <PublicRoute>
             <Register />
           </PublicRoute>
+        }
+      />
+
+      <Route
+        path="/minhas-consultas"
+        element={
+          <PrivateRoute>
+            <AppointmentList />
+          </PrivateRoute>
         }
       />
 
