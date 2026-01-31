@@ -19,6 +19,7 @@ import com.ifba.clinic.model.entity.User;
 import com.ifba.clinic.model.enums.UserRole;
 import com.ifba.clinic.repository.DoctorRepository;
 import com.ifba.clinic.repository.RoleRepository;
+import com.ifba.clinic.repository.UserRepository;
 import com.ifba.clinic.util.Formatters;
 
 @Service
@@ -26,13 +27,15 @@ public class DoctorService {
 
     private final DoctorRepository doctorRepository;
     private final RoleRepository roleRepository;
+    private final UserRepository userRepository;
     private final UserService userService;
     private final AddressService addressService;
 
     @SuppressWarnings("unused")
-    DoctorService(DoctorRepository doctorRepository, AddressService addressService, UserService userService, RoleRepository roleRepository){
+    DoctorService(DoctorRepository doctorRepository, AddressService addressService, UserRepository userRepository, UserService userService, RoleRepository roleRepository){
         this.doctorRepository = doctorRepository;
         this.roleRepository = roleRepository;
+        this.userRepository = userRepository;
         this.userService = userService;
         this.addressService = addressService;
     }
@@ -135,6 +138,18 @@ public class DoctorService {
                 doctor.getSpeciality(),
                 doctor.getIsActive()
         );
+    }
+
+    public Doctor getDoctorByUsername(String username) {
+        User user = (User) userRepository.findByUsername(username);
+        if(user==null){
+            throw new EntityNotFoundException("Usuário não encontrado");
+        }
+        Doctor doctor = doctorRepository.findByUserId(user.getId());
+        if (doctor == null) {
+            return null; // Retorna null se não for médico
+        }
+        return doctor;
     }
 
     // Helper methods

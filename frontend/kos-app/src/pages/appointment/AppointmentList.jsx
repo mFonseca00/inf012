@@ -3,32 +3,51 @@ import { toast } from "react-toastify";
 import { AuthContext } from "../../contexts/AuthContext";
 import styles from "./AppointmentList.module.css";
 import AppointmentCard from "../../components/appointment/AppointmentCard";
+import AppointmentTabs from "../../components/appointment/AppointmentTabs";
 import Button from "../../components/ui/button/Button";
 import Pagination from "../../components/ui/Pagination";
 import StatusFilter from "../../components/ui/selectors/StatusFilter";
-import { useNavigate } from "react-router-dom";
 import appointmentService from "../../services/appointmentService";
 import AppointmentListSkeleton from "../../components/appointment/AppointmentListSkeleton";
 
-
 const AppointmentList = () => {
   const { user } = useContext(AuthContext);
-  const navigate = useNavigate();
   const [consultas, setConsultas] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showSkeleton, setShowSkeleton] = useState(false);
 
   // Paginação
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const [totalPages, setTotalPages] = useState(1);
 
-  // Filtro
+  // Filtros
   const [statusFilter, setStatusFilter] = useState("");
+
+  // Abas para médico que também é paciente
+  const [activeTab, setActiveTab] = useState("PATIENT");
+  const isDoctorAndPatient = user?.roles?.includes("DOCTOR") && user?.roles?.includes("PATIENT");
 
   useEffect(() => {
     setLoading(true);
+    setShowSkeleton(false);
+
+    // Define qual role usar baseado na aba ativa ou no perfil do usuário
+    let roleParam = null;
+    if (isDoctorAndPatient) {
+      roleParam = activeTab;
+    } else if (user?.roles?.includes("DOCTOR")) {
+      roleParam = "DOCTOR";
+    } else if (user?.roles?.includes("PATIENT")) {
+      roleParam = "PATIENT";
+    }
+
+    const skeletonTimer = setTimeout(() => {
+      setShowSkeleton(true);
+    }, 500);
+
     appointmentService
-      .getAll(currentPage - 1, itemsPerPage, statusFilter)
+      .getMyAppointments(currentPage - 1, itemsPerPage, statusFilter, roleParam)
       .then((data) => {
         setConsultas(data.content || []);
         setTotalPages(data.totalPages || 1);
@@ -38,17 +57,26 @@ const AppointmentList = () => {
         setConsultas([]);
         setTotalPages(1);
       })
-      .finally(() => setLoading(false));
-  }, [currentPage, itemsPerPage, statusFilter]);
+      .finally(() => {
+        clearTimeout(skeletonTimer);
+        setLoading(false);
+        setShowSkeleton(false);
+      });
+  }, [currentPage, statusFilter, activeTab, isDoctorAndPatient, user?.roles]);
 
   let pageTitle = "Meus Agendamentos";
-  if (user?.roles?.includes("DOCTOR")) {
+  if (user?.roles?.includes("DOCTOR") && !user?.roles?.includes("PATIENT")) {
     pageTitle = "Minha Agenda";
   } else if (user?.roles?.includes("ADMIN") || user?.roles?.includes("MASTER")) {
     pageTitle = "Agendamentos da Clínica";
   }
 
-  if (loading) {
+  const handleTabChange = (newTab) => {
+    setActiveTab(newTab);
+    setCurrentPage(1);
+  };
+
+  if (loading && showSkeleton) {
     return <AppointmentListSkeleton title={pageTitle} />;
   }
 
@@ -64,6 +92,12 @@ const AppointmentList = () => {
         </Button>
       </div>
 
+      <AppointmentTabs
+        activeTab={activeTab}
+        onTabChange={handleTabChange}
+        isDoctorAndPatient={isDoctorAndPatient}
+      />
+
       <StatusFilter value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} />
 
       {consultas.length === 0 ? (
@@ -77,6 +111,7 @@ const AppointmentList = () => {
               <AppointmentCard
                 key={consulta.id}
                 consulta={consulta}
+                viewMode={activeTab}
               />
             ))}
           </div>

@@ -4,12 +4,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ifba.clinic.dto.appointment.AppointmentCancelationDTO;
@@ -58,6 +60,25 @@ public class AppointmentController {
     @Operation(summary = "Listar todas as consultas", description = "Retorna uma lista paginada de todas as consultas.")
     public ResponseEntity<Page<AppointmentResponseDTO>> getAllAppointments(Pageable pageable) {
         Page<AppointmentResponseDTO> appointments = appointmentService.getAllAppointments(pageable);
+        if (appointments.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(appointments);
+    }
+
+    @GetMapping("/my-appointments")
+    @Operation(summary = "Obter minhas consultas", 
+               description = "Retorna consultas do usuário autenticado (como paciente ou médico). Para médicos que também são pacientes, use o parâmetro 'role' para filtrar.")
+    public ResponseEntity<Page<AppointmentResponseDTO>> getMyAppointments(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String role,
+            @RequestParam(required = false) String status,
+            Authentication authentication) {
+        
+        String username = authentication.getName();
+        Page<AppointmentResponseDTO> appointments = appointmentService.getMyAppointments(username, role, status, page, size);
+        
         if (appointments.isEmpty()) {
             return ResponseEntity.noContent().build();
         }

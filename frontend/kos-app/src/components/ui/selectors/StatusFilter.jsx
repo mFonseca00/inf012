@@ -3,9 +3,10 @@ import styles from "./StatusFilter.module.css";
 
 const STATUS_OPTIONS = [
   { value: "", label: "Todos" },
-  { value: "CONFIRMED", label: "Confirmado" },
-  { value: "PENDING", label: "Pendente" },
-  { value: "CANCELED", label: "Cancelado" },
+  { value: "ATIVO", label: "Ativa" },
+  { value: "CANCELADO", label: "Cancelada pelo médico" },
+  { value: "DESISTENCIA", label: "Cancelada pelo paciente" },
+  { value: "REALIZADA", label: "Realizada" },
 ];
 
 export default function StatusFilter({ value, onChange }) {

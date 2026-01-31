@@ -13,6 +13,11 @@ const Sidebar = () => {
     return rolesPermitidas.some((r) => user.roles.includes(r));
   };
 
+  const hasPatientAndDoctor = () => {
+    if (!user?.roles) return false;
+    return user.roles.includes("DOCTOR") && user.roles.includes("PATIENT");
+  };
+
   // Helper para classe ativa
   const isActive = (path) => (location.pathname === path ? styles.active : "");
 
@@ -22,7 +27,7 @@ const Sidebar = () => {
         <ul>
 
           {/* Menu para Pacientes*/}
-          {hasRole(["PATIENT"]) && (
+          {hasRole(["PATIENT"]) && !hasPatientAndDoctor() && (
             <li>
               <Link to="/appointments" className={isActive("/appointments")}>
                 Meus Agendamentos
@@ -31,10 +36,19 @@ const Sidebar = () => {
           )}
 
           {/* Menu para Médicos */}
-          {hasRole(["DOCTOR"]) && (
+          {hasRole(["DOCTOR"]) && !hasPatientAndDoctor() && (
             <li>
               <Link to="/appointments" className={isActive("/appointments")}>
                 Minha Agenda
+              </Link>
+            </li>
+          )}
+
+          {/* Menu para Médicos que também são Pacientes */}
+          {hasPatientAndDoctor() && (
+            <li>
+              <Link to="/appointments" className={isActive("/appointments")}>
+                Meus Agendamentos
               </Link>
             </li>
           )}

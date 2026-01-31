@@ -21,7 +21,7 @@ const STATUS_MAP = {
   },
 };
 
-export default function AppointmentCard({ consulta }) {
+export default function AppointmentCard({ consulta, viewMode = "PATIENT" }) {
   const dateObj = consulta.appointmentDate ? new Date(consulta.appointmentDate) : null;
 
   const day = dateObj ? String(dateObj.getDate()).padStart(2, "0") : "--";
@@ -30,8 +30,16 @@ export default function AppointmentCard({ consulta }) {
   const hour = dateObj ? String(dateObj.getHours()).padStart(2, "0") : "--";
   const minute = dateObj ? String(dateObj.getMinutes()).padStart(2, "0") : "--";
 
-  const doctorName = consulta.doctorName || "Médico não informado";
-  const specialty = consulta.doctorSpeciality || "Especialidade não informada";
+  // Define qual nome exibir baseado no viewMode
+  // Se viewMode é DOCTOR, mostra o paciente. Se é PATIENT, mostra o médico.
+  const displayName = viewMode === "DOCTOR" 
+    ? (consulta.patientName || "Paciente não informado")
+    : (consulta.doctorName || "Médico não informado");
+
+  const specialty = viewMode === "DOCTOR"
+    ? (consulta.patientName ? "" : "") // Paciente não tem especialidade
+    : (consulta.doctorSpeciality || "Especialidade não informada");
+
   const status = consulta.appointmentStatus;
 
   // Busca label e classe do status
@@ -54,8 +62,8 @@ export default function AppointmentCard({ consulta }) {
         </div>
       </div>
       <div className={styles.cardBody}>
-        <h3 className={styles.doctorName}>{doctorName}</h3>
-        <p className={styles.specialty}>{specialty}</p>
+        <h3 className={styles.doctorName}>{displayName}</h3>
+        {specialty && <p className={styles.specialty}>{specialty}</p>}
       </div>
       <div className={styles.cardFooter}>
         <span className={`${styles.statusBadge} ${statusInfo.className}`}>

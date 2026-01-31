@@ -166,6 +166,18 @@ public class PatientService {
         );
     }
 
+    public Patient getPatientByUsername(String username) {
+        User user = (User) userRepository.findByUsername(username);
+        if(user==null){
+            throw new EntityNotFoundException("Usuário não encontrado");
+        }
+        Patient patient = patientRepository.findByUserId(user.getId());
+        if (patient == null) {
+            throw new EntityNotFoundException("Paciente não encontrado para este usuário");
+        }
+        return patient;
+    }
+
     // Helper methods
     private void validateEmailRequirement(String username, String email) {
         if ((username == null || username.isBlank()) && (email == null || email.isBlank())) {

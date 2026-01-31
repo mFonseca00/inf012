@@ -1,0 +1,33 @@
+.tabsContainer {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding-left: 1.5rem;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.tab {
+  background: none;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #999;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.tab:hover {
+  color: #0056b3;
+}
+
+.tabActive {
+  color: #0056b3;
+  border-bottom-color: #0056b3;
+}
+
+.tab:focus-visible {
+  outline: 2px solid #0056b3;
+  outline-offset: -2px;
+}
