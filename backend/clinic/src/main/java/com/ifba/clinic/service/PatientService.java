@@ -31,14 +31,16 @@ public class PatientService {
     private final UserRepository userRepository;
     private final UserService userService;
     private final AddressService addressService;
+    private final EmailService emailService;
 
     @SuppressWarnings("unused")
-    PatientService(PatientRepository patientRepository, AddressService addressService, UserService userService, RoleRepository roleRepository, UserRepository userRepository){
+    PatientService(PatientRepository patientRepository, AddressService addressService, UserService userService, RoleRepository roleRepository, UserRepository userRepository, com.ifba.clinic.service.EmailService emailService){
         this.patientRepository = patientRepository;
         this.roleRepository = roleRepository;
         this.userService = userService;
         this.addressService = addressService;
         this.userRepository = userRepository;
+        this.emailService = emailService;
     }
 
     public void register(PatientRegDTO patientDTO){
@@ -95,6 +97,7 @@ public class PatientService {
                 user
         );
         patientRepository.save(patient);
+        emailService.sendUserRegistrationEmail(user.getId(), user.getEmail());
     }
 
     public void update(PatientUpdateDTO patientDTO) {
