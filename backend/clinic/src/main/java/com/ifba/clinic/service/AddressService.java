@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import com.ifba.clinic.dto.address.AddressDTO;
 import com.ifba.clinic.model.entity.Address;
 import com.ifba.clinic.repository.AddressRepository;
+import com.ifba.clinic.util.Formatters;
 
 @Service
 public class AddressService {
@@ -17,10 +18,7 @@ public class AddressService {
     }
 
     public Address register(AddressDTO newAddress){
-
-        if (this.findAddress(newAddress) != null) {
-            throw new IllegalArgumentException("Endereço já cadastrado");
-        }
+        String formattedCEP = Formatters.formatCEP(newAddress.cep());
         Address address = new Address(
             newAddress.street(),
             newAddress.number(),
@@ -28,19 +26,20 @@ public class AddressService {
             newAddress.district(),
             newAddress.city(),
             newAddress.state(),
-            newAddress.cep()
+            formattedCEP
         );
         addressRepository.save(address);
         return address;
     }
 
     public Address findAddress(AddressDTO address){
+        String formattedCEP = Formatters.formatCEP(address.cep());
         return addressRepository.findByAddressFields(
                 address.street(),
                 address.district(),
                 address.city(),
                 address.state(),
-                address.cep(),
+                formattedCEP,
                 address.number(),
                 address.complement()
         );
