@@ -1,17 +1,16 @@
 package com.ifba.clinic.service;
 
-import com.ifba.clinic.dto.mix.UserPatientRegDTO;
-import com.ifba.clinic.dto.user.UserRegDTO;
-import com.ifba.clinic.repository.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.ifba.clinic.dto.mix.UserPatientRegDTO;
 import com.ifba.clinic.dto.patient.PatientInactivationDTO;
 import com.ifba.clinic.dto.patient.PatientRegDTO;
 import com.ifba.clinic.dto.patient.PatientResponseDTO;
 import com.ifba.clinic.dto.patient.PatientUpdateDTO;
 import com.ifba.clinic.dto.user.UserFromEntityDTO;
+import com.ifba.clinic.dto.user.UserRegDTO;
 import com.ifba.clinic.exception.BusinessRuleException;
 import com.ifba.clinic.exception.EntityNotFoundException;
 import com.ifba.clinic.model.entity.Address;
@@ -21,6 +20,8 @@ import com.ifba.clinic.model.entity.User;
 import com.ifba.clinic.model.enums.UserRole;
 import com.ifba.clinic.repository.PatientRepository;
 import com.ifba.clinic.repository.RoleRepository;
+import com.ifba.clinic.repository.UserRepository;
+import com.ifba.clinic.util.Formatters;
 
 @Service
 public class PatientService {
@@ -30,18 +31,22 @@ public class PatientService {
     private final UserRepository userRepository;
     private final UserService userService;
     private final AddressService addressService;
+    private final EmailService emailService;
 
     @SuppressWarnings("unused")
-    PatientService(PatientRepository patientRepository, AddressService addressService, UserService userService, RoleRepository roleRepository, UserRepository userRepository){
+    PatientService(PatientRepository patientRepository, AddressService addressService, UserService userService, RoleRepository roleRepository, UserRepository userRepository, com.ifba.clinic.service.EmailService emailService){
         this.patientRepository = patientRepository;
         this.roleRepository = roleRepository;
         this.userService = userService;
         this.addressService = addressService;
         this.userRepository = userRepository;
+        this.emailService = emailService;
     }
 
     public void register(PatientRegDTO patientDTO){
-        validateUniqueCPF(patientDTO.cpf());
+        String formattedCPF = Formatters.formatCPF(patientDTO.cpf());
+        String formattedPhone = Formatters.formatPhone(patientDTO.phoneNumber());
+        validateUniqueCPF(formattedCPF);
         validateEmailRequirement(patientDTO.username(), patientDTO.email());
         UserFromEntityDTO userDTO = new UserFromEntityDTO(
             patientDTO.username(),
@@ -61,8 +66,8 @@ public class PatientService {
         }
         Patient patient = new Patient(
                 patientDTO.name(),
-                patientDTO.phoneNumber(),
-                patientDTO.cpf(),
+                formattedPhone,
+                formattedCPF,
                 address,
                 user
         );
@@ -70,7 +75,9 @@ public class PatientService {
     }
 
     public void registerWithUserInfo(UserPatientRegDTO regDTO){
-        validateUniqueCPF(regDTO.cpf());
+        String formattedCPF = Formatters.formatCPF(regDTO.cpf());
+        String formattedPhone = Formatters.formatPhone(regDTO.phoneNumber());
+        validateUniqueCPF(formattedCPF);
         validateEmailRequirement(regDTO.username(), regDTO.email());
         UserRegDTO userRegDTO = new UserRegDTO(regDTO.username(), regDTO.password(), regDTO.email());
         userService.register(userRegDTO);
@@ -84,16 +91,19 @@ public class PatientService {
         }
         Patient patient = new Patient(
                 regDTO.fullName(),
-                regDTO.phoneNumber(),
-                regDTO.cpf(),
+                formattedPhone,
+                formattedCPF,
                 address,
                 user
         );
         patientRepository.save(patient);
+        emailService.sendUserRegistrationEmail(user.getId(), user.getEmail());
     }
 
     public void update(PatientUpdateDTO patientDTO) {
-        Patient patient = patientRepository.findByCpf(patientDTO.cpf());
+        String formattedCPF = Formatters.formatCPF(patientDTO.cpf());
+        String formattedPhone = Formatters.formatPhone(patientDTO.phoneNumber());
+        Patient patient = patientRepository.findByCpf(formattedCPF);
         if (patient == null) {
             throw new EntityNotFoundException("Paciente de CPF " + patientDTO.cpf() + " não encontrado");
         }
@@ -108,8 +118,8 @@ public class PatientService {
         if (!patient.getName().equals(patientDTO.name())) {
             patient.setName(patientDTO.name());
         }
-        if (!patient.getPhoneNumber().equals(patientDTO.phoneNumber())) {
-            patient.setPhoneNumber(patientDTO.phoneNumber());
+        if (!patient.getPhoneNumber().equals(formattedPhone)) {
+            patient.setPhoneNumber(formattedPhone);
         }
         patientRepository.save(patient);
         if(!patientRepository.existsByAddress(oldAddress)) {
@@ -118,7 +128,8 @@ public class PatientService {
     }
 
     public void inactivate(PatientInactivationDTO patientDTO) {
-        Patient patient = patientRepository.findByCpf(patientDTO.cpf());
+        String formattedCPF = Formatters.formatCPF(patientDTO.cpf());
+        Patient patient = patientRepository.findByCpf(formattedCPF);
         if (patient == null) {
             throw new EntityNotFoundException("Paciente de CPF " + patientDTO.cpf() + " não encontrado");
         }
@@ -141,7 +152,7 @@ public class PatientService {
     }
 
     public PatientResponseDTO getPatientByCPF(String cpf) {
-        String formattedCpf = formatCPF(cpf);
+        String formattedCpf = Formatters.formatCPF(cpf);
         Patient patient = patientRepository.findByCpf(formattedCpf);
         if (patient == null) {
             throw new EntityNotFoundException("Paciente de CPF " + cpf + " não encontrado");
@@ -168,14 +179,4 @@ public class PatientService {
         }
     }
 
-    private String formatCPF(String cpf) {
-        String cleanCpf = cpf.replaceAll("[.\\-\\s]", "");
-        if (cleanCpf.length() == 11 && cleanCpf.matches("\\d{11}")) {
-            return cleanCpf.substring(0, 3) + "." +
-                    cleanCpf.substring(3, 6) + "." +
-                    cleanCpf.substring(6, 9) + "-" +
-                    cleanCpf.substring(9, 11);
-        }
-        return cpf;
-    }
 }

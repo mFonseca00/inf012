@@ -19,6 +19,7 @@ import com.ifba.clinic.model.entity.User;
 import com.ifba.clinic.model.enums.UserRole;
 import com.ifba.clinic.repository.DoctorRepository;
 import com.ifba.clinic.repository.RoleRepository;
+import com.ifba.clinic.util.Formatters;
 
 @Service
 public class DoctorService {
@@ -37,7 +38,9 @@ public class DoctorService {
     }
 
     public void register(DoctorRegDTO doctorDTO){
-        validateUniqueCRM(doctorDTO.crm());
+        String formattedCRM = Formatters.formatCRM(doctorDTO.crm());
+        String formattedPhone = Formatters.formatPhone(doctorDTO.phoneNumber());
+        validateUniqueCRM(formattedCRM);
         validateEmailRequirement(doctorDTO.username(), doctorDTO.email());
         UserFromEntityDTO userDTO = new UserFromEntityDTO(
             doctorDTO.username(),
@@ -57,9 +60,9 @@ public class DoctorService {
         }
         Doctor doctor = new Doctor(
                 address,
-                doctorDTO.crm(),
+                formattedCRM,
                 doctorDTO.name(),
-                doctorDTO.phoneNumber(),
+                formattedPhone,
                 doctorDTO.speciality(),
                 user
         );
@@ -67,7 +70,9 @@ public class DoctorService {
     }
 
     public void update(DoctorUpdateDTO doctorDTO) {
-        Doctor doctor = doctorRepository.findByCrm(doctorDTO.crm());
+        String formattedCRM = Formatters.formatCRM(doctorDTO.crm());
+        String formattedPhone = Formatters.formatPhone(doctorDTO.phoneNumber());
+        Doctor doctor = doctorRepository.findByCrm(formattedCRM);
         if (doctor == null) {
             throw new EntityNotFoundException("Médico de CRM " + doctorDTO.crm() + " não encontrado");
         }
@@ -82,8 +87,8 @@ public class DoctorService {
         if (!doctor.getName().equals(doctorDTO.name())) {
             doctor.setName(doctorDTO.name());
         }
-        if (!doctor.getPhoneNumber().equals(doctorDTO.phoneNumber())) {
-            doctor.setPhoneNumber(doctorDTO.phoneNumber());
+        if (!doctor.getPhoneNumber().equals(formattedPhone)) {
+            doctor.setPhoneNumber(formattedPhone);
         }
         doctorRepository.save(doctor);
         if(!doctorRepository.existsByAddress(oldAddress)) {
@@ -92,7 +97,8 @@ public class DoctorService {
     }
 
     public void inactivate(DoctorInactivationDTO doctorDTO) {
-        Doctor doctor = doctorRepository.findByCrm(doctorDTO.crm());
+        String formattedCRM = Formatters.formatCRM(doctorDTO.crm());
+        Doctor doctor = doctorRepository.findByCrm(formattedCRM);
         if (doctor == null) {
             throw new EntityNotFoundException("Médico de CRM " + doctorDTO.crm() + " não encontrado");
         }
@@ -116,7 +122,7 @@ public class DoctorService {
     }
 
     public DoctorResponseDTO getDoctor(String crm) {
-        String formattedCrm = formatCRM(crm);
+        String formattedCrm = Formatters.formatCRM(crm);
         Doctor doctor = doctorRepository.findByCrm(formattedCrm);
         if (doctor == null) {
             throw new EntityNotFoundException("Médico de CRM " + crm + " não encontrado");
@@ -142,15 +148,5 @@ public class DoctorService {
         if (doctorRepository.existsByCrm(crm)) {
             throw new BusinessRuleException("CRM " + crm + " já cadastrado");
         }
-    }
-
-    private String formatCRM(String crm) {
-        String cleanCrm = crm.replaceAll("[.\\-\\/\\s]", "");
-        if (cleanCrm.length() == 10 && cleanCrm.matches("\\d{8}[A-Z]{2}")) {
-            return cleanCrm.substring(0, 6) + "-" +
-                    cleanCrm.substring(6, 8) + "/" +
-                    cleanCrm.substring(8, 10);
-        }
-        return crm;
     }
 }
