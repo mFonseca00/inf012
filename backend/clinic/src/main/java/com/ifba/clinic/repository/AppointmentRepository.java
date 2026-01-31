@@ -25,4 +25,22 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     Page<Appointment> findByPatientId(Long patientId, Pageable pageable);
     Page<Appointment> findByDoctorId(Long doctorId, Pageable pageable);
 
+    // Verifica se há conflito de horário para o paciente (se o paciente já tem outra consulta no mesmo horário)
+    @Query("SELECT a FROM Appointment a WHERE a.patient.id = :patientId " +
+           "AND a.appointmentDate = :appointmentDate " +
+           "AND a.appointmentStatus NOT IN ('CANCELADO', 'DESISTENCIA')")
+    List<Appointment> findConflictingAppointmentForPatient(
+        @Param("patientId") Long patientId,
+        @Param("appointmentDate") LocalDateTime appointmentDate
+    );
+
+    // Verifica se há conflito de horário para o médico (se o médico já tem outra consulta no mesmo horário)
+    @Query("SELECT a FROM Appointment a WHERE a.doctor.id = :doctorId " +
+           "AND a.appointmentDate = :appointmentDate " +
+           "AND a.appointmentStatus NOT IN ('CANCELADO', 'DESISTENCIA')")
+    List<Appointment> findConflictingAppointmentForDoctor(
+        @Param("doctorId") Long doctorId,
+        @Param("appointmentDate") LocalDateTime appointmentDate
+    );
+
 }

@@ -15,6 +15,7 @@ import com.ifba.clinic.dto.appointment.AppointmentCancelationDTO;
 import com.ifba.clinic.dto.appointment.AppointmentConclusionDTO;
 import com.ifba.clinic.dto.appointment.AppointmentRegDTO;
 import com.ifba.clinic.dto.appointment.AppointmentResponseDTO;
+import com.ifba.clinic.exception.AppointmentConflictException;
 import com.ifba.clinic.exception.BusinessRuleException;
 import com.ifba.clinic.exception.EntityNotFoundException;
 import com.ifba.clinic.model.entity.Appointment;
@@ -60,7 +61,10 @@ public class AppointmentService {
         
         Patient patient = validatePatient(dto.patientId(), dto.appointmentDate());
         Doctor doctor = getOrSelectDoctor(dto.doctorId(), dto.appointmentDate());
-        
+
+        validatePatientConflict(patient.getId(), dto.appointmentDate());
+        validateDoctorConflict(doctor.getId(), dto.appointmentDate());
+
         if (patient.getUser().getId().equals(doctor.getUser().getId())) {
             throw new BusinessRuleException(
                 "Um médico não pode marcar uma consulta com ele mesmo"
@@ -342,6 +346,28 @@ public class AppointmentService {
             return new PageImpl<>(filtered, appointments.getPageable(), filtered.size());
         } catch (IllegalArgumentException e) {
             return appointments;
+        }
+    }
+
+    private void validatePatientConflict(Long patientId, LocalDateTime appointmentDate) {
+        List<Appointment> conflicts = appointmentRepository
+            .findConflictingAppointmentForPatient(patientId, appointmentDate);
+        
+        if (!conflicts.isEmpty()) {
+            throw new AppointmentConflictException(
+                "Paciente já possui uma consulta agendada para este horário"
+            );
+        }
+    }
+
+    private void validateDoctorConflict(Long doctorId, LocalDateTime appointmentDate) {
+        List<Appointment> conflicts = appointmentRepository
+            .findConflictingAppointmentForDoctor(doctorId, appointmentDate);
+        
+        if (!conflicts.isEmpty()) {
+            throw new AppointmentConflictException(
+                "Médico já possui uma consulta agendada para este horário"
+            );
         }
     }
 }

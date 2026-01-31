@@ -56,4 +56,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleInvalidTokenException(InvalidTokenException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }
+
+    @ExceptionHandler(AppointmentConflictException.class)
+    public ResponseEntity<String> handleAppointmentConflict(AppointmentConflictException e) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+    }
 }
