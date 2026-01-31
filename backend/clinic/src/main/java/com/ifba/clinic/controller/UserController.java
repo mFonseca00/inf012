@@ -1,22 +1,12 @@
 package com.ifba.clinic.controller;
 
+import com.ifba.clinic.dto.user.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import com.ifba.clinic.dto.user.ChangePasswordDTO;
-import com.ifba.clinic.dto.user.ChangeRoleDTO;
-import com.ifba.clinic.dto.user.UserBasicInfoDTO;
-import com.ifba.clinic.dto.user.UserDataUpdateDTO;
-import com.ifba.clinic.dto.user.UserProfileDTO;
-import com.ifba.clinic.dto.user.UserResponseDTO;
 import com.ifba.clinic.service.UserService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -99,5 +89,19 @@ public class UserController {
     public ResponseEntity<String> changePassword(@RequestBody @Valid ChangePasswordDTO passwordDTO, Authentication auth){ // Authenticação injetada pelo Spring Security
         userService.changePassword(auth.getName(), passwordDTO);
         return ResponseEntity.ok("Senha alterada com sucesso");
+    }
+
+    @PostMapping("/forgot-password")
+    @Operation(summary = "Solicitar recuperação de senha", description = "Envia um email com link para redefinir a senha.")
+    public ResponseEntity<String> forgotPassword(@RequestBody @Valid ForgotPasswordDTO dto) {
+        userService.requestPasswordReset(dto);
+        return ResponseEntity.ok("Email de recuperação enviado com sucesso");
+    }
+
+    @PostMapping("/reset-password")
+    @Operation(summary = "Redefinir senha", description = "Redefine a senha do usuário usando o token recebido por email.")
+    public ResponseEntity<String> resetPassword(@RequestBody @Valid ResetPasswordDTO dto) {
+        userService.resetPassword(dto);
+        return ResponseEntity.ok("Senha redefinida com sucesso");
     }
 }
