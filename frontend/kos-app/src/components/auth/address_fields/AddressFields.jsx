@@ -2,6 +2,7 @@ import React from "react";
 import TextField from "../../ui/text_field/TextField";
 import { formatCEP, onlyDigits } from "../../../utils/formatters";
 import styles from "./AddressFields.module.css";
+import StateSelect from "../../ui/selectors/StateSelect";
 
 export default function AddressFields({ address, handleChange, loading }) {
   return (
@@ -53,16 +54,13 @@ export default function AddressFields({ address, handleChange, loading }) {
           autoComplete="address-level2"
           required={true}
         />
-        <TextField
+        <StateSelect
           id="address.state"
           name="address.state"
           label="Estado:"
           value={address.state}
           onChange={handleChange}
-          placeholder="Sigla do estado"
-          maxLength={2}
           disabled={loading}
-          autoComplete="address-level1"
           required={true}
         />
         <TextField
