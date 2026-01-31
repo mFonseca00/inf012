@@ -28,3 +28,11 @@
   background: #fafbfc;
   transition: border-color 0.2s;
 }
+
+.errorText {
+  color: red;
+  font-size: 0.85rem;
+  margin-top: 1px;
+  margin-bottom: 5px;
+  display: block;
+}

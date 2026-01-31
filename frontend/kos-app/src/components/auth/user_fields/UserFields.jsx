@@ -1,9 +1,45 @@
 import React from "react";
 import TextField from "../../ui/text_field/TextField";
-import { formatCPF, formatPhone } from "../../../utils/formatters";
+import { formatCPF, formatPhone, isValidEmail, isValidPassword } from "../../../utils/formatters";
 import styles from "./UserFields.module.css";
 
 export default function UserFields({ form, handleChange, loading }) {
+  const [passwordError, setPasswordError] = React.useState("");
+  const [emailError, setEmailError] = React.useState("");
+  const [confirmPasswordError, setConfirmPasswordError] = React.useState("");
+
+  function handlePasswordChange(e) {
+    handleChange(e);
+    const result = isValidPassword(e.target.value);
+    setPasswordError(result.valid ? "" : result.message);
+    
+    if (form.confirmPassword && e.target.value !== form.confirmPassword) {
+      setConfirmPasswordError("As senhas não coincidem");
+    } else {
+      setConfirmPasswordError("");
+    }
+  }
+
+  function handleEmailChange(e) {
+    handleChange(e);
+    const value = e.target.value;
+    if (value && !isValidEmail(value)) {
+      setEmailError("E-mail inválido");
+    } else {
+      setEmailError("");
+    }
+  }
+
+  function handleConfirmPasswordChange(e) {
+    handleChange(e);
+    const value = e.target.value;
+    if (value && value !== form.password) {
+      setConfirmPasswordError("As senhas não coincidem");
+    } else {
+      setConfirmPasswordError("");
+    }
+  }
+
   return (
     <>
       <div className={styles.fullWidthField}>
@@ -60,42 +96,57 @@ export default function UserFields({ form, handleChange, loading }) {
           autoComplete="username"
           required={true}
         />
-        <TextField
-          id="email"
-          name="email"
-          label="E-mail:"
-          type="email"
-          value={form.email}
-          onChange={handleChange}
-          placeholder="seu@email.com"
-          disabled={loading}
-          autoComplete="email"
-          required={true}
-        />
-        <TextField
-          id="password"
-          name="password"
-          label="Senha:"
-          type="password"
-          value={form.password}
-          onChange={handleChange}
-          placeholder="Senha forte"
-          disabled={loading}
-          autoComplete="new-password"
-          required={true}
-        />
-        <TextField
-          id="confirmPassword"
-          name="confirmPassword"
-          label="Confirmar Senha:"
-          type="password"
-          value={form.confirmPassword}
-          onChange={handleChange}
-          placeholder="Repita a senha"
-          disabled={loading}
-          autoComplete="new-password"
-          required={true}
-        />
+        <div>
+          <TextField
+            id="email"
+            name="email"
+            label="E-mail:"
+            type="email"
+            value={form.email}
+            onChange={handleEmailChange}
+            placeholder="seu@email.com"
+            disabled={loading}
+            autoComplete="email"
+            required={true}
+          />
+          {emailError && (
+            <span className={styles.errorText}>{emailError}</span>
+          )}
+        </div>
+        <div>
+          <TextField
+            id="password"
+            name="password"
+            label="Senha:"
+            type="password"
+            value={form.password}
+            onChange={handlePasswordChange}
+            placeholder="Senha forte"
+            disabled={loading}
+            autoComplete="new-password"
+            required={true}
+          />
+          {passwordError && (
+            <span className={styles.errorText}>{passwordError}</span>
+          )}
+        </div>
+        <div>
+          <TextField
+            id="confirmPassword"
+            name="confirmPassword"
+            label="Confirmar Senha:"
+            type="password"
+            value={form.confirmPassword}
+            onChange={handleConfirmPasswordChange}
+            placeholder="Repita a senha"
+            disabled={loading}
+            autoComplete="new-password"
+            required={true}
+          />
+          {confirmPasswordError && (
+            <span className={styles.errorText}>{confirmPasswordError}</span>
+          )}
+        </div>
       </div>
     </>
   );

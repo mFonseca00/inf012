@@ -2,7 +2,7 @@ import React, { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { AuthContext } from "../../contexts/AuthContext";
-import { isValidEmail } from "../../utils/formatters";
+import { isValidEmail, isValidPassword } from "../../utils/formatters";
 import RegisterForm from "../../components/auth/register_form/RegisterForm";
 import patientService from "../../services/patientService";
 import styles from "./Register.module.css";
@@ -14,9 +14,15 @@ function Register() {
   const navigate = useNavigate();
 
   async function handleSubmit(form) {
-
+    // Validações finais antes de enviar (segurança extra)
     if (!isValidEmail(form.email)) {
       toast.error("Por favor, informe um e-mail válido.");
+      return;
+    }
+
+    const passwordValidation = isValidPassword(form.password);
+    if (!passwordValidation.valid) {
+      toast.error(passwordValidation.message);
       return;
     }
 
@@ -27,23 +33,13 @@ function Register() {
 
     setLoading(true);
     try {
-      // Remove confirmPassword antes de enviar (não faz parte do DTO)
       const { confirmPassword, ...dataToSend } = form;
-
-      // Chamada da API para registrar paciente com usuário
       await patientService.registerWithUser(dataToSend);
-
       toast.success("Conta criada com sucesso!");
-
-      // Após sucesso, faz login automático
       await login(form.username, form.password);
-
-      // Redireciona para dashboard
       navigate("/dashboard");
     } catch (err) {
-      // Trata diferentes tipos de erro
       let errorMessage = "Erro ao registrar usuário. Tente novamente.";
-
       if (err.response?.data?.message) {
         errorMessage = err.response.data.message;
       } else if (err.response?.data) {
@@ -51,7 +47,6 @@ function Register() {
       } else if (err.message) {
         errorMessage = err.message;
       }
-
       toast.error(errorMessage);
       console.error("Erro no registro:", err);
     } finally {
