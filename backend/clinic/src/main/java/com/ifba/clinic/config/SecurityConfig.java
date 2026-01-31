@@ -39,7 +39,7 @@ public class SecurityConfig {
                     .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                     
                     // endpoints de autenticação públicos
-                    .requestMatchers(HttpMethod.POST, "/auth/login", "/auth/register").permitAll()
+                    .requestMatchers(HttpMethod.POST, "/auth/login", "/auth/register", "/patient/register-with-user").permitAll()
 
                     // qualquer usuário autenticado pode alterar sua própria senha e obter seu perfil
                     .requestMatchers(HttpMethod.PATCH, "/user/change-password").authenticated()

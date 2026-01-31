@@ -1,5 +1,6 @@
 package com.ifba.clinic.controller;
 
+import com.ifba.clinic.dto.mix.UserPatientRegDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -39,6 +40,13 @@ public class PatientController {
     public ResponseEntity<String> register(@RequestBody @Valid PatientRegDTO patientDTO) {
         patientService.register(patientDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body("Paciente registrado com sucesso");
+    }
+
+    @PostMapping("/register-with-user")
+    @Operation(summary = "Registrar novo paciente com usuário", description = "Registra um novo paciente e cria um usuário associado no sistema.")
+    public ResponseEntity<String> registerWithUser(@RequestBody @Valid UserPatientRegDTO regDTO){
+        patientService.registerWithUserInfo(regDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body("Usuário/Paciente registrado com sucesso");
     }
 
     @PatchMapping("/update")
