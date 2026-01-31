@@ -1,7 +1,6 @@
-// src/pages/dashboard/index.jsx
 import React, { useContext } from "react";
 import { AuthContext } from "../../contexts/AuthContext";
-import MainLayout from "../../components/layout/MainLayout"; // Importe o Layout
+import MainLayout from "../../components/layout/MainLayout";
 import styles from "./Dashboard.module.css";
 
 function Dashboard() {

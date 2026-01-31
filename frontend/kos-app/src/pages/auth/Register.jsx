@@ -14,23 +14,6 @@ function Register() {
 
   async function handleSubmit(form) {
 
-    // // Validação se os campos obrigatórios foram preenchidos
-    // const requiredUserFields = ["username", "password", "confirmPassword", "email", "cpf", "fullName", "phoneNumber"];
-    // for (const key of requiredUserFields) {
-    //   if (!form[key]) {
-    //     toast.error("Por favor, preencha todos os campos obrigatórios.");
-    //     return;
-    //   }
-    // }
-
-    // const requiredAddressFields = ["street", "district", "city", "state", "cep"];
-    // for (const key of requiredAddressFields) {
-    //   if (!form.address[key] || String(form.address[key]).trim() === "") {
-    //     toast.error("Por favor, preencha todos os campos de endereço obrigatórios.");
-    //     return;
-    //   }
-    // }
-
     if (form.password !== form.confirmPassword) {
       toast.error("As senhas não coincidem.");
       return;
