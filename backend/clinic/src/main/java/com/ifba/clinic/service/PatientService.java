@@ -1,5 +1,8 @@
 package com.ifba.clinic.service;
 
+import com.ifba.clinic.dto.mix.UserPatientRegDTO;
+import com.ifba.clinic.dto.user.UserRegDTO;
+import com.ifba.clinic.repository.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -24,15 +27,17 @@ public class PatientService {
 
     private final PatientRepository patientRepository;
     private final RoleRepository roleRepository;
+    private final UserRepository userRepository;
     private final UserService userService;
     private final AddressService addressService;
 
     @SuppressWarnings("unused")
-    PatientService(PatientRepository patientRepository, AddressService addressService, UserService userService, RoleRepository roleRepository){
+    PatientService(PatientRepository patientRepository, AddressService addressService, UserService userService, RoleRepository roleRepository, UserRepository userRepository){
         this.patientRepository = patientRepository;
         this.roleRepository = roleRepository;
         this.userService = userService;
         this.addressService = addressService;
+        this.userRepository = userRepository;
     }
 
     public void register(PatientRegDTO patientDTO){
@@ -58,6 +63,29 @@ public class PatientService {
                 patientDTO.name(),
                 patientDTO.phoneNumber(),
                 patientDTO.cpf(),
+                address,
+                user
+        );
+        patientRepository.save(patient);
+    }
+
+    public void registerWithUserInfo(UserPatientRegDTO regDTO){
+        validateUniqueCPF(regDTO.cpf());
+        validateEmailRequirement(regDTO.username(), regDTO.email());
+        UserRegDTO userRegDTO = new UserRegDTO(regDTO.username(), regDTO.password(), regDTO.email());
+        userService.register(userRegDTO);
+        User user = (User) userRepository.findByUsername(regDTO.username());
+        Role patientRole = roleRepository.findByRole(UserRole.PATIENT.name())
+                    .orElseThrow(() -> new EntityNotFoundException("Role PATIENT não encontrada"));
+        user.addRole(patientRole);
+        Address address =addressService.findAddress(regDTO.address());
+        if (address == null){
+            address = addressService.register(regDTO.address());
+        }
+        Patient patient = new Patient(
+                regDTO.fullName(),
+                regDTO.phoneNumber(),
+                regDTO.cpf(),
                 address,
                 user
         );
