@@ -63,9 +63,9 @@ function Login() {
             required={true}
             autoComplete="current-password"
           />
-          <div className={styles.forgotPassword}>
-            <Link to="/forgot-password" className={styles.linkText}>
-              Esqueceu a senha?
+          <div className={styles.forgotPasswordLink}>
+            <Link to="/forgot-password" className={styles.linkBold}>
+              Esqueci minha senha
             </Link>
           </div>
           <Button

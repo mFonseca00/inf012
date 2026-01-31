@@ -248,6 +248,9 @@ public class UserService {
     @Transactional
     public void resetPassword(ResetPasswordDTO dto) {
         User user = passwordResetTokenService.validateToken(dto.token());
+        if (passwordEncoder.matches(dto.newPassword(), user.getPassword())) {
+            throw new BusinessRuleException("A nova senha não pode ser igual à senha atual");
+        }
         user.setPassword(passwordEncoder.encode(dto.newPassword()));
         userRepository.save(user);
         passwordResetTokenService.markTokenAsUsed(dto.token());
