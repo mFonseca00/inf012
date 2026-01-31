@@ -4,19 +4,30 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.ifba.clinic.dto.user.*;
-import com.ifba.clinic.model.entity.Doctor;
-import com.ifba.clinic.model.entity.Patient;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.ifba.clinic.dto.user.ChangePasswordDTO;
+import com.ifba.clinic.dto.user.ChangeRoleDTO;
+import com.ifba.clinic.dto.user.ForgotPasswordDTO;
+import com.ifba.clinic.dto.user.LoginDTO;
+import com.ifba.clinic.dto.user.ResetPasswordDTO;
+import com.ifba.clinic.dto.user.UserBasicInfoDTO;
+import com.ifba.clinic.dto.user.UserDataUpdateDTO;
+import com.ifba.clinic.dto.user.UserFromEntityDTO;
+import com.ifba.clinic.dto.user.UserProfileDTO;
+import com.ifba.clinic.dto.user.UserRegDTO;
+import com.ifba.clinic.dto.user.UserResponseDTO;
 import com.ifba.clinic.exception.BusinessRuleException;
 import com.ifba.clinic.exception.EntityNotFoundException;
 import com.ifba.clinic.exception.InvalidOperationException;
+import com.ifba.clinic.model.entity.Doctor;
+import com.ifba.clinic.model.entity.Patient;
 import com.ifba.clinic.model.entity.Role;
 import com.ifba.clinic.model.entity.User;
 import com.ifba.clinic.model.enums.UserRole;
@@ -35,9 +46,13 @@ public class UserService {
     private final RoleRepository roleRepository;
     private final TokenService tokenService;
     private final EmailService emailService;
+    private final PasswordResetTokenService passwordResetTokenService;
+    private final BCryptPasswordEncoder passwordEncoder;
 
     public UserService(AuthenticationManager authenticationManager, UserRepository userRepository,
-                       RoleRepository roleRepository, TokenService tokenService, EmailService emailService, PatientRepository patientRepository, DoctorRepository doctorRepository) {
+                       RoleRepository roleRepository, TokenService tokenService, EmailService emailService,
+                       PatientRepository patientRepository, DoctorRepository doctorRepository,
+                       PasswordResetTokenService passwordResetTokenService) {
         this.authenticationManager = authenticationManager;
         this.patientRepository = patientRepository;
         this.doctorRepository = doctorRepository;
@@ -45,6 +60,8 @@ public class UserService {
         this.roleRepository = roleRepository;
         this.tokenService = tokenService;
         this.emailService = emailService;
+        this.passwordResetTokenService = passwordResetTokenService;
+        this.passwordEncoder = new BCryptPasswordEncoder();
     }
 
     public String login(LoginDTO login) {
@@ -213,6 +230,30 @@ public class UserService {
         return user.getRoles().stream()
             .map(Role::getRole)
             .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void requestPasswordReset(ForgotPasswordDTO dto) {
+        User user = userRepository.findByEmail(dto.email())
+            .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado com este email"));
+
+        if (!user.getUsername().equals(dto.username())) {
+            throw new BusinessRuleException("Username não corresponde ao email informado");
+        }
+
+    String token = passwordResetTokenService.createToken(user);
+    emailService.sendPasswordResetEmail(user.getId(), user.getEmail(), user.getUsername(), token);
+}
+
+    @Transactional
+    public void resetPassword(ResetPasswordDTO dto) {
+        User user = passwordResetTokenService.validateToken(dto.token());
+        if (passwordEncoder.matches(dto.newPassword(), user.getPassword())) {
+            throw new BusinessRuleException("A nova senha não pode ser igual à senha atual");
+        }
+        user.setPassword(passwordEncoder.encode(dto.newPassword()));
+        userRepository.save(user);
+        passwordResetTokenService.markTokenAsUsed(dto.token());
     }
 
     // Helper methods

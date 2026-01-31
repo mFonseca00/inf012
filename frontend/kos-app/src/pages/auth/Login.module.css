@@ -64,11 +64,10 @@ select {
   background-color: #45a049;
 }
 
-.forgotPassword {
-  text-align: right;
-  margin-top: -5px;
-  margin-bottom: 15px;
-  font-size: 0.85rem;
+.forgotPasswordLink {
+  text-align: center;
+  margin-top: 12px;
+  font-size: 14px;
 }
 
 .registerLink {
