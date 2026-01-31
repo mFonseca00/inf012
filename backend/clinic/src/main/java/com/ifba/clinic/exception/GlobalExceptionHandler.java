@@ -1,6 +1,5 @@
 package com.ifba.clinic.exception;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,17 +13,23 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> handleValidationErrors(MethodArgumentNotValidException ex) {
-        Map<String, Object> errors = new HashMap<>();
-        errors.put("timestamp", LocalDateTime.now());
-        errors.put("status", HttpStatus.BAD_REQUEST.value());
-        
         Map<String, String> fieldErrors = new HashMap<>();
-        ex.getBindingResult().getFieldErrors().forEach(error -> 
+        ex.getBindingResult().getFieldErrors().forEach(error ->
             fieldErrors.put(error.getField(), error.getDefaultMessage())
         );
-        errors.put("errors", fieldErrors);
-        
-        return ResponseEntity.badRequest().body(errors);
+
+        StringBuilder message = new StringBuilder("Por favor, corrija os seguintes campos: ");
+        message.append(
+            fieldErrors.entrySet().stream()
+                .map(entry -> entry.getKey() + " (" + entry.getValue() + ")")
+                .reduce((a, b) -> a + ", " + b)
+                .orElse("campos inválidos")
+        );
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", message.toString());
+
+        return ResponseEntity.badRequest().body(response);
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
