@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { AuthContext } from "../../contexts/AuthContext";
 import MainLayout from "../../components/layout/MainLayout"; 
 import styles from "./AppointmentList.module.css";
+import AppointmentCard from "../../components/appointment/AppointmentCard";
 
 const AppointmentList = () => {
   const { user } = useContext(AuthContext);
@@ -84,31 +85,12 @@ const AppointmentList = () => {
               </div>
             ) : (
               consultas.map((consulta) => (
-                <div key={consulta.id} className={styles.card}>
-                  <div className={styles.cardHeader}>
-                    <div className={styles.dateBadge}>
-                      <span className={styles.day}>{consulta.data.split("/")[0]}</span>
-                      <span className={styles.monthYear}>
-                        {consulta.data.split("/")[1]}/{consulta.data.split("/")[2]}
-                      </span>
-                    </div>
-                    <div className={styles.timeInfo}>
-                      <i className="pi pi-clock"></i> 🕒 {consulta.hora}
-                    </div>
-                  </div>
-
-                  <div className={styles.cardBody}>
-                    <h3 className={styles.doctorName}>{consulta.medico}</h3>
-                    <p className={styles.specialty}>{consulta.especialidade}</p>
-                  </div>
-
-                  <div className={styles.cardFooter}>
-                    <span className={`${styles.statusBadge} ${getStatusStyle(consulta.status)}`}>
-                      {getStatusLabel(consulta.status)}
-                    </span>
-                    <button className={styles.btnDetails}>Detalhes</button>
-                  </div>
-                </div>
+                <AppointmentCard
+                  key={consulta.id}
+                  consulta={consulta}
+                  getStatusStyle={getStatusStyle}
+                  getStatusLabel={getStatusLabel}
+                />
               ))
             )}
           </div>

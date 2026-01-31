@@ -51,7 +51,7 @@ select {
 
 .send_button {
   width: 100%;
-  background-color: #4caf50;
+  background-color: #4c6faf;
   color: white;
   padding: 14px;
   margin: 8px 0;
@@ -61,7 +61,7 @@ select {
 }
 
 .send_button:hover {
-  background-color: #45a049;
+  background-color: #4565a0;
 }
 
 .forgotPasswordLink {
@@ -79,7 +79,7 @@ select {
 
 .linkText,
 .linkBold {
-  color: #4caf50;
+  color: #4c6faf;
   text-decoration: none;
   transition: color 0.2s;
 }
@@ -90,6 +90,6 @@ select {
 
 .linkText:hover,
 .linkBold:hover {
-  color: #45a049;
+  color: #4565a0;
   text-decoration: underline;
 }

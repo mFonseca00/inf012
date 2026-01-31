@@ -12,11 +12,11 @@
 
 /* Variante padrão (verde) */
 .primary {
-  background-color: #4caf50;
+  background-color: #4c6faf;
   color: white;
 }
 .primary:hover:not(:disabled) {
-  background-color: #45a049;
+  background-color: #4565a0;
 }
 
 /* Variante secundária (cinza) */

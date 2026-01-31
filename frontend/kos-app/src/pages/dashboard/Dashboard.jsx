@@ -4,9 +4,12 @@ import MainLayout from "../../components/layout/MainLayout";
 import Button from "../../components/ui/button/Button";
 import { toast } from "react-toastify";
 import styles from "./Dashboard.module.css";
+import AppointmentList from "../appointment/AppointmentList";
+import { useNavigate } from "react-router-dom";
 
 function Dashboard() {
   const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   const hasRole = (targetRole) => {
     if (!user?.roles) return false;
@@ -30,8 +33,8 @@ function Dashboard() {
           <div className={styles.card}>
             <h2>Área do Médico</h2>
             <p>Ver meus próximos pacientes...</p>
-            <Button onClick={() => toast.info("Funcionalidade em breve!")}>
-              Ver agenda
+            <Button onClick={() => navigate("/minhas-consultas")}>
+              Agendar consulta
             </Button>
           </div>
         )}
@@ -40,7 +43,7 @@ function Dashboard() {
           <div className={styles.card}>
             <h2>Minhas Consultas</h2>
             <p>Agendar nova consulta...</p>
-            <Button onClick={() => toast.info("Funcionalidade em breve!")}>
+            <Button onClick={() => navigate("/minhas-consultas")}>
               Agendar consulta
             </Button>
           </div>

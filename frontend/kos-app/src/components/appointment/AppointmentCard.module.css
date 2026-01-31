@@ -1,0 +1,125 @@
+.card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: transform 0.2s, box-shadow 0.2s;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #f0f0f0;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.10);
+}
+
+.cardHeader {
+  background-color: #f8f9fa;
+  padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #eee;
+}
+
+.dateBadge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1;
+  background: #fff;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.day {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #333;
+}
+
+.monthYear {
+  font-size: 0.75rem;
+  color: #666;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+.timeInfo {
+  font-size: 0.95rem;
+  color: #555;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.cardBody {
+  padding: 1.5rem 1rem;
+  flex-grow: 1;
+}
+
+.doctorName {
+  margin: 0;
+  color: #0056b3;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.specialty {
+  margin: 6px 0 0 0;
+  color: #777;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.cardFooter {
+  padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid #f0f0f0;
+  background-color: #fff;
+}
+
+.statusBadge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.statusConfirmed {
+  background-color: #def7ec;
+  color: #03543f;
+}
+
+.statusPending {
+  background-color: #fff8f1;
+  color: #9c4221;
+}
+
+.statusCanceled {
+  background-color: #fde8e8;
+  color: #9b1c1c;
+}
+
+.btnDetails {
+  background: none;
+  border: 1px solid transparent;
+  color: #0056b3;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.85rem;
+  padding: 6px 12px;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.btnDetails:hover {
+  background-color: #eef7ff;
+}

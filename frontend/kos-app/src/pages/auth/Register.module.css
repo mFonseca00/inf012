@@ -46,7 +46,7 @@
 }
 
 .linkBold {
-  color: #4caf50;
+  color: #4c6faf;
   text-decoration: none;
   font-weight: bold;
   margin-left: 5px;
@@ -54,7 +54,7 @@
 }
 
 .linkBold:hover {
-  color: #45a049;
+  color: #4565a0;
   text-decoration: underline;
 }
 
