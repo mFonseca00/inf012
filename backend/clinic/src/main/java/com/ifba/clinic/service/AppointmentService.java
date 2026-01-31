@@ -168,6 +168,7 @@ public class AppointmentService {
                 appointment.getPatient().getName(),
                 appointment.getDoctor().getId(),
                 appointment.getDoctor().getName(),
+                appointment.getDoctor().getSpeciality().name(),
                 appointment.getAppointmentDate(),
                 appointment.getAppointmentStatus()
         ));
@@ -184,6 +185,7 @@ public class AppointmentService {
                 appointment.getPatient().getName(),
                 appointment.getDoctor().getId(),
                 appointment.getDoctor().getName(),
+                appointment.getDoctor().getSpeciality().name(),
                 appointment.getAppointmentDate(),
                 appointment.getAppointmentStatus()
         );

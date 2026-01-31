@@ -10,9 +10,6 @@ const Sidebar = () => {
   // Função auxiliar para verificar permissão
   const hasRole = (rolesPermitidas) => {
     if (!user?.roles) return false;
-    // Se for MASTER, sempre retorna true
-    if (user.roles.includes("MASTER")) return true;
-    // Verifica se tem alguma das roles permitidas
     return rolesPermitidas.some((r) => user.roles.includes(r));
   };
 
@@ -23,14 +20,9 @@ const Sidebar = () => {
     <aside className={styles.sidebar}>
       <nav className={styles.nav}>
         <ul>
-          <li>
-            <Link to="/dashboard" className={isActive("/dashboard")}>
-              Dashboard
-            </Link>
-          </li>
 
-          {/* Menu para Pacientes e Atendentes */}
-          {hasRole(["PATIENT", "RECEPTIONIST"]) && (
+          {/* Menu para Pacientes*/}
+          {hasRole(["PATIENT"]) && (
             <li>
               <Link to="/appointments" className={isActive("/appointments")}>
                 Meus Agendamentos
@@ -41,18 +33,20 @@ const Sidebar = () => {
           {/* Menu para Médicos */}
           {hasRole(["DOCTOR"]) && (
             <li>
-              <Link
-                to="/doctor/schedule"
-                className={isActive("/doctor/schedule")}
-              >
+              <Link to="/appointments" className={isActive("/appointments")}>
                 Minha Agenda
               </Link>
             </li>
           )}
 
-          {/* Menu Administrativo (Admin, Master, Recepção) */}
-          {hasRole(["ADMIN", "RECEPTIONIST"]) && (
+          {/* Menu Administrativo (Admin, Master) */}
+          {hasRole(["ADMIN", "MASTER"]) && (
             <>
+              <li>
+                <Link to="/dashboard" className={isActive("/dashboard")}>
+                  Dashboard
+                </Link>
+              </li>
               <li className={styles.sectionTitle}>Gerenciamento</li>
               <li>
                 <Link to="/patients" className={isActive("/patients")}>
@@ -62,6 +56,11 @@ const Sidebar = () => {
               <li>
                 <Link to="/doctors" className={isActive("/doctors")}>
                   Médicos
+                </Link>
+              </li>
+              <li>
+                <Link to="/appointments" className={isActive("/appointments")}>
+                  Consultas
                 </Link>
               </li>
             </>

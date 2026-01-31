@@ -1,27 +1,65 @@
 import React from "react";
 import styles from "./AppointmentCard.module.css";
 
-export default function AppointmentCard({ consulta, getStatusStyle, getStatusLabel }) {
+// Mapeamento dos status reais do backend para cor e label
+const STATUS_MAP = {
+  ATIVO: {
+    label: "Ativa",
+    className: styles.statusConfirmed,
+  },
+  CANCELADO: {
+    label: "Cancelada pelo médico",
+    className: styles.statusCanceled,
+  },
+  DESISTENCIA: {
+    label: "Cancelada pelo paciente",
+    className: styles.statusCanceled,
+  },
+  REALIZADA: {
+    label: "Realizada",
+    className: styles.statusConfirmed,
+  },
+};
+
+export default function AppointmentCard({ consulta }) {
+  const dateObj = consulta.appointmentDate ? new Date(consulta.appointmentDate) : null;
+
+  const day = dateObj ? String(dateObj.getDate()).padStart(2, "0") : "--";
+  const month = dateObj ? String(dateObj.getMonth() + 1).padStart(2, "0") : "--";
+  const year = dateObj ? dateObj.getFullYear() : "--";
+  const hour = dateObj ? String(dateObj.getHours()).padStart(2, "0") : "--";
+  const minute = dateObj ? String(dateObj.getMinutes()).padStart(2, "0") : "--";
+
+  const doctorName = consulta.doctorName || "Médico não informado";
+  const specialty = consulta.doctorSpeciality || "Especialidade não informada";
+  const status = consulta.appointmentStatus;
+
+  // Busca label e classe do status
+  const statusInfo = STATUS_MAP[status] || {
+    label: status,
+    className: "",
+  };
+
   return (
     <div className={styles.card}>
       <div className={styles.cardHeader}>
         <div className={styles.dateBadge}>
-          <span className={styles.day}>{consulta.data.split("/")[0]}</span>
+          <span className={styles.day}>{day}</span>
           <span className={styles.monthYear}>
-            {consulta.data.split("/")[1]}/{consulta.data.split("/")[2]}
+            {month}/{year}
           </span>
         </div>
         <div className={styles.timeInfo}>
-          <i className="pi pi-clock"></i> 🕒 {consulta.hora}
+          <i className="pi pi-clock"></i> 🕒 {hour}:{minute}
         </div>
       </div>
       <div className={styles.cardBody}>
-        <h3 className={styles.doctorName}>{consulta.medico}</h3>
-        <p className={styles.specialty}>{consulta.especialidade}</p>
+        <h3 className={styles.doctorName}>{doctorName}</h3>
+        <p className={styles.specialty}>{specialty}</p>
       </div>
       <div className={styles.cardFooter}>
-        <span className={`${styles.statusBadge} ${getStatusStyle(consulta.status)}`}>
-          {getStatusLabel(consulta.status)}
+        <span className={`${styles.statusBadge} ${statusInfo.className}`}>
+          {statusInfo.label}
         </span>
         <button className={styles.btnDetails}>Detalhes</button>
       </div>

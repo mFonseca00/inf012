@@ -1,102 +1,93 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Link } from "react-router-dom";
+import { toast } from "react-toastify";
 import { AuthContext } from "../../contexts/AuthContext";
-import MainLayout from "../../components/layout/MainLayout"; 
 import styles from "./AppointmentList.module.css";
 import AppointmentCard from "../../components/appointment/AppointmentCard";
+import Button from "../../components/ui/button/Button";
+import Pagination from "../../components/ui/Pagination";
+import StatusFilter from "../../components/ui/selectors/StatusFilter";
+import { useNavigate } from "react-router-dom";
+import appointmentService from "../../services/appointmentService";
+import AppointmentListSkeleton from "../../components/appointment/AppointmentListSkeleton";
+
 
 const AppointmentList = () => {
   const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
   const [consultas, setConsultas] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Simulando busca de dados na API
+  // Paginação
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+  const [totalPages, setTotalPages] = useState(1);
+
+  // Filtro
+  const [statusFilter, setStatusFilter] = useState("");
+
   useEffect(() => {
-    // Aqui futuramente entrará sua chamada: api.get('/appointments')
-    setTimeout(() => {
-      setConsultas([
-        {
-          id: 1,
-          medico: "Dr. André Martins",
-          especialidade: "Cardiologia",
-          data: "30/01/2026",
-          hora: "14:00",
-          status: "CONFIRMED",
-        },
-        {
-          id: 2,
-          medico: "Dra. Juliana Costa",
-          especialidade: "Dermatologia",
-          data: "05/02/2026",
-          hora: "09:30",
-          status: "PENDING",
-        },
-        {
-          id: 3,
-          medico: "Dr. Roberto Campos",
-          especialidade: "Ortopedia",
-          data: "10/02/2026",
-          hora: "16:00",
-          status: "CANCELED",
-        },
-      ]);
-      setLoading(false);
-    }, 800);
-  }, []);
+    setLoading(true);
+    appointmentService
+      .getAll(currentPage - 1, itemsPerPage, statusFilter)
+      .then((data) => {
+        setConsultas(data.content || []);
+        setTotalPages(data.totalPages || 1);
+      })
+      .catch(() => {
+        toast.error("Erro ao buscar agendamentos.");
+        setConsultas([]);
+        setTotalPages(1);
+      })
+      .finally(() => setLoading(false));
+  }, [currentPage, itemsPerPage, statusFilter]);
 
-  const getStatusStyle = (status) => {
-    switch (status) {
-      case "CONFIRMED": return styles.statusConfirmed;
-      case "PENDING": return styles.statusPending;
-      case "CANCELED": return styles.statusCanceled;
-      default: return "";
-    }
-  };
+  let pageTitle = "Meus Agendamentos";
+  if (user?.roles?.includes("DOCTOR")) {
+    pageTitle = "Minha Agenda";
+  } else if (user?.roles?.includes("ADMIN") || user?.roles?.includes("MASTER")) {
+    pageTitle = "Agendamentos da Clínica";
+  }
 
-  const getStatusLabel = (status) => {
-    switch (status) {
-      case "CONFIRMED": return "Confirmado";
-      case "PENDING": return "Pendente";
-      case "CANCELED": return "Cancelado";
-      default: return status;
-    }
-  };
+  if (loading) {
+    return <AppointmentListSkeleton title={pageTitle} />;
+  }
 
   return (
-    <MainLayout>
-      <div className={styles.container}>
-        <div className={styles.pageHeader}>
-          <div>
-            <h2>Meus Agendamentos</h2>
-            <p className={styles.subtitle}>Gerencie suas consultas médicas</p>
-          </div>
-          <Link to="/nova-consulta" className={styles.btnNew}>
-            + Novo Agendamento
-          </Link>
-        </div>
-
-        {loading ? (
-          <div className={styles.loadingState}>Carregando agendamentos...</div>
-        ) : (
-          <div className={styles.gridContainer}>
-            {consultas.length === 0 ? (
-              <div className={styles.emptyState}>
-                <p>Você não possui agendamentos futuros.</p>
-              </div>
-            ) : (
-              consultas.map((consulta) => (
-                <AppointmentCard
-                  key={consulta.id}
-                  consulta={consulta}
-                  getStatusStyle={getStatusStyle}
-                  getStatusLabel={getStatusLabel}
-                />
-              ))
-            )}
-          </div>
-        )}
+    <div className={styles.appointmentListContainer}>
+      <div className={styles.pageHeader}>
+        <h1 className={styles.pageTitle}>{pageTitle}</h1>
+        <Button
+          className={styles.btnNew}
+          onClick={() => toast.info("Funcionalidade de agendamento será implementada em breve!")}
+        >
+          Agendar nova consulta
+        </Button>
       </div>
-    </MainLayout>
+
+      <StatusFilter value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} />
+
+      {consultas.length === 0 ? (
+        <div className={styles.emptyState}>
+          <p>Nenhum agendamento encontrado.</p>
+        </div>
+      ) : (
+        <>
+          <div className={styles.gridContainer}>
+            {consultas.map((consulta) => (
+              <AppointmentCard
+                key={consulta.id}
+                consulta={consulta}
+              />
+            ))}
+          </div>
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+          />
+        </>
+      )}
+    </div>
   );
 };
 
