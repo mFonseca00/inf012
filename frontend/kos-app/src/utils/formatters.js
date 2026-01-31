@@ -32,3 +32,25 @@ export function formatCEP(value) {
 export function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
+
+export function isValidPassword(password) {
+  if (!password || password.length < 8 || password.length > 20) {
+    return { valid: false, message: "Senha deve ter entre 8 e 20 caracteres" };
+  }
+  if (!/\d/.test(password)) {
+    return { valid: false, message: "Senha deve conter pelo menos um número" };
+  }
+  if (!/[a-z]/.test(password)) {
+    return { valid: false, message: "Senha deve conter pelo menos uma letra minúscula" };
+  }
+  if (!/[A-Z]/.test(password)) {
+    return { valid: false, message: "Senha deve conter pelo menos uma letra maiúscula" };
+  }
+  if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+    return { valid: false, message: "Senha deve conter pelo menos um caractere especial" };
+  }
+  if (/^\d+$/.test(password)) {
+    return { valid: false, message: "Senha não pode ser apenas números ou uma sequência numérica" };
+  }
+  return { valid: true };
+}
