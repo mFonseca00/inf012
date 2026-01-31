@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import UserFields from "../user_fields/UserFields";
 import AddressFields from "../address_fields/AddressFields";
-import styles from "./RegisterForm.module.css";
 import Button from "../../ui/button/Button";
+import styles from "./RegisterForm.module.css";
 
-export default function RegisterForm({ onSubmit, loading, error }) {
+export default function RegisterForm({ onSubmit, loading }) {
   const [form, setForm] = useState({
     username: "",
     password: "",
@@ -17,10 +17,10 @@ export default function RegisterForm({ onSubmit, loading, error }) {
       street: "",
       number: "",
       complement: "",
-      neighborhood: "",
+      district: "",
       city: "",
       state: "",
-      zipCode: ""
+      cep: ""
     }
   });
 
@@ -39,7 +39,27 @@ export default function RegisterForm({ onSubmit, loading, error }) {
 
   function handleSubmit(e) {
     e.preventDefault();
-    onSubmit(form);
+
+    const userData = {
+      username: form.username,
+      password: form.password,
+      confirmPassword: form.confirmPassword,
+      email: form.email,
+      cpf: form.cpf,
+      fullName: form.fullName,
+      phoneNumber: form.phoneNumber,
+      address: {
+        street: form.address.street,
+        number: form.address.number,
+        complement: form.address.complement,
+        district: form.address.district,
+        city: form.address.city,
+        state: form.address.state,
+        cep: form.address.cep
+      }
+    };
+
+    onSubmit(userData);
   }
 
   return (
@@ -54,9 +74,7 @@ export default function RegisterForm({ onSubmit, loading, error }) {
         loading={loading}
       />
 
-      {error && <p className={styles.errorMessage}>{error}</p>}
-
-      <Button type="submit" disabled={loading}>
+      <Button type="submit" variant="primary" disabled={loading}>
         {loading ? "Criando conta..." : "Registrar"}
       </Button>
     </form>

@@ -32,10 +32,10 @@ export default function AddressFields({ address, handleChange, loading }) {
           autoComplete="address-line2"
         />
         <TextField
-          id="address.neighborhood"
-          name="address.neighborhood"
+          id="address.district"
+          name="address.district"
           label="Bairro:"
-          value={address.neighborhood}
+          value={address.district}
           onChange={handleChange}
           placeholder="Bairro"
           disabled={loading}
@@ -59,17 +59,17 @@ export default function AddressFields({ address, handleChange, loading }) {
           label="Estado:"
           value={address.state}
           onChange={handleChange}
-          placeholder="Estado"
+          placeholder="Sigla do estado"
           maxLength={2}
           disabled={loading}
           autoComplete="address-level1"
           required={true}
         />
         <TextField
-          id="address.zipCode"
-          name="address.zipCode"
+          id="address.cep"
+          name="address.cep"
           label="CEP:"
-          value={address.zipCode}
+          value={address.cep}
           onChange={handleChange}
           placeholder="00000-000"
           inputMode="numeric"
