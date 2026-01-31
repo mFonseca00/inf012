@@ -44,6 +44,33 @@ public class EmailService {
         emailProducer.publishEmailMessage(emailDTO);
     }
 
+    public void sendPasswordResetEmail(Long userId, String email, String username, String token) {
+        String resetLink = "http://localhost:5173/reset-password?token=" + token;
+
+        EmailDTO emailDTO = new EmailDTO(
+                userId,
+                email,
+                "Recuperação de Senha - Clínica Kos",
+                String.format("""
+                Olá, %s!
+                
+                Você solicitou a recuperação de senha da sua conta no sistema Kos.
+                
+                Clique no link abaixo para redefinir sua senha:
+                %s
+                
+                Este link expira em 30 minutos.
+                
+                Se você não solicitou esta recuperação, ignore este email.
+                
+                Atenciosamente,
+                Equipe Clínica Kos
+                """, username, resetLink)
+        );
+
+        emailProducer.publishEmailMessage(emailDTO);
+    }
+
     public void sendUserAutoRegistrationEmail(Long userId, String email, String username) {
         EmailDTO emailDTO = new EmailDTO(
                 userId,
