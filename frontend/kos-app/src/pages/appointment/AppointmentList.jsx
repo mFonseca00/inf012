@@ -9,16 +9,18 @@ import Pagination from "../../components/ui/Pagination";
 import StatusFilter from "../../components/ui/selectors/StatusFilter";
 import appointmentService from "../../services/appointmentService";
 import AppointmentListSkeleton from "../../components/appointment/AppointmentListSkeleton";
+import ScheduleModal from "../../components/appointment/ScheduleModal";
 
 const AppointmentList = () => {
   const { user } = useContext(AuthContext);
   const [consultas, setConsultas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showSkeleton, setShowSkeleton] = useState(false);
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
 
   // Paginação
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 8;
+  const itemsPerPage = 12;
   const [totalPages, setTotalPages] = useState(1);
 
   // Filtros
@@ -36,7 +38,7 @@ const AppointmentList = () => {
   
   const [activeTab, setActiveTab] = useState(getInitialTab);
 
-  useEffect(() => {
+  const fetchAppointments = () => {
     setLoading(true);
     setShowSkeleton(false);
 
@@ -70,6 +72,10 @@ const AppointmentList = () => {
         setLoading(false);
         setShowSkeleton(false);
       });
+  };
+
+  useEffect(() => {
+    fetchAppointments();
   }, [currentPage, statusFilter, activeTab, isDoctorAndPatient, user?.roles]);
 
   let pageTitle = "Meus Agendamentos";
@@ -91,6 +97,10 @@ const AppointmentList = () => {
     return "PATIENT";
   };
 
+  const handleScheduleSuccess = () => {
+    fetchAppointments();
+  };
+
   if (loading && showSkeleton) {
     return <AppointmentListSkeleton title={pageTitle} />;
   }
@@ -101,7 +111,7 @@ const AppointmentList = () => {
         <h1 className={styles.pageTitle}>{pageTitle}</h1>
         <Button
           className={styles.btnNew}
-          onClick={() => toast.info("Funcionalidade de agendamento será implementada em breve!")}
+          onClick={() => setShowScheduleModal(true)}
         >
           Agendar nova consulta
         </Button>
@@ -122,15 +132,14 @@ const AppointmentList = () => {
       ) : (
         <>
           <div className={styles.gridContainer}>
-            {[...consultas]
-              .sort((a, b) => new Date(a.appointmentDate) - new Date(b.appointmentDate))
-              .map((consulta) => (
-                <AppointmentCard
-                  key={consulta.id}
-                  consulta={consulta}
-                  viewMode={getViewMode()}
-                />
-              ))}
+            {consultas.map((consulta) => (
+              <AppointmentCard
+                key={consulta.id}
+                consulta={consulta}
+                viewMode={getViewMode()}
+                onActionSuccess={fetchAppointments}
+              />
+            ))}
           </div>
           <Pagination
             currentPage={currentPage}
@@ -138,6 +147,13 @@ const AppointmentList = () => {
             onPageChange={setCurrentPage}
           />
         </>
+      )}
+
+      {showScheduleModal && (
+        <ScheduleModal
+          onClose={() => setShowScheduleModal(false)}
+          onSuccess={handleScheduleSuccess}
+        />
       )}
     </div>
   );

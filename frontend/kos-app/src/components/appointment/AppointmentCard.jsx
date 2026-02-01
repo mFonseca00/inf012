@@ -2,7 +2,7 @@ import React, { useState, useContext } from "react";
 import { toast } from "react-toastify";
 import { AuthContext } from "../../contexts/AuthContext";
 import styles from "./AppointmentCard.module.css";
-import CancelModal from "./CancelModal";
+import CancelModal from "./AppointmentCancelModal";
 import appointmentService from "../../services/appointmentService";
 
 const STATUS_MAP = {
