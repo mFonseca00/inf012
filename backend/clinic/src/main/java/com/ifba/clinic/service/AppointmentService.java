@@ -99,7 +99,7 @@ public class AppointmentService {
             .orElseThrow(() -> new EntityNotFoundException(
                 "Consulta não encontrada com ID: " + dto.appointmentId()
             ));
-        if (appointment.getAppointmentStatus() != AppointmentStatus.ATIVO) {
+        if (appointment.getAppointmentStatus() != AppointmentStatus.ATIVA) {
             throw new BusinessRuleException(
                 "Esta consulta já foi cancelada anteriormente"
             );
@@ -145,7 +145,7 @@ public class AppointmentService {
                 "Consulta não encontrada com ID: " + dto.appointmentId()
             ));
         
-        if (appointment.getAppointmentStatus() != AppointmentStatus.ATIVO) {
+        if (appointment.getAppointmentStatus() != AppointmentStatus.ATIVA) {
             throw new BusinessRuleException(
                 "Apenas consultas ativas podem ser concluídas"
             );
@@ -257,11 +257,11 @@ public class AppointmentService {
     }
 
     private void validateCancelationStatus(AppointmentStatus newStatus) {
-        if (newStatus != AppointmentStatus.CANCELADO && 
+        if (newStatus != AppointmentStatus.CANCELADA && 
             newStatus != AppointmentStatus.DESISTENCIA) {
             throw new BusinessRuleException(
                 "Status de cancelamento inválido. " +
-                "Motivo de cancelamento deve ser: CANCELADO (médico cancelou), " +
+                "Motivo de cancelamento deve ser: CANCELADA (médico cancelou), " +
                 "DESISTENCIA (paciente desistiu) ou OUTRO (outros motivos)"
             );
         }

@@ -25,8 +25,16 @@ const AppointmentList = () => {
   const [statusFilter, setStatusFilter] = useState("");
 
   // Abas para médico que também é paciente
-  const [activeTab, setActiveTab] = useState("PATIENT");
   const isDoctorAndPatient = user?.roles?.includes("DOCTOR") && user?.roles?.includes("PATIENT");
+  
+  // Define o activeTab inicial baseado na role do usuário
+  const getInitialTab = () => {
+    if (isDoctorAndPatient) return "PATIENT";
+    if (user?.roles?.includes("DOCTOR")) return "DOCTOR";
+    return "PATIENT";
+  };
+  
+  const [activeTab, setActiveTab] = useState(getInitialTab);
 
   useEffect(() => {
     setLoading(true);
@@ -76,6 +84,13 @@ const AppointmentList = () => {
     setCurrentPage(1);
   };
 
+  // Determina o viewMode correto para passar ao AppointmentCard
+  const getViewMode = () => {
+    if (isDoctorAndPatient) return activeTab;
+    if (user?.roles?.includes("DOCTOR")) return "DOCTOR";
+    return "PATIENT";
+  };
+
   if (loading && showSkeleton) {
     return <AppointmentListSkeleton title={pageTitle} />;
   }
@@ -111,7 +126,7 @@ const AppointmentList = () => {
               <AppointmentCard
                 key={consulta.id}
                 consulta={consulta}
-                viewMode={activeTab}
+                viewMode={getViewMode()}
               />
             ))}
           </div>

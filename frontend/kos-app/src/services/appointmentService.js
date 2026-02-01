@@ -15,6 +15,22 @@ const appointmentService = {
     const response = await api.get(url);
     return response.data;
   },
+
+  cancelAppointment: async (appointmentId, reason, newStatus) => {
+    const response = await api.patch("/appointment/cancel", {
+      appointmentId,
+      reason,
+      newStatus,
+    });
+    return response.data;
+  },
+
+  concludeAppointment: async (appointmentId) => {
+    const response = await api.patch("/appointment/conclude", {
+      appointmentId,
+    });
+    return response.data;
+  },
 };
 
 export default appointmentService;
