@@ -81,12 +81,15 @@ export function AuthProvider({ children }) {
           console.error("Erro ao recuperar usuário:", error);
           localStorage.removeItem("token");
           setUser(null);
+        } finally {
+          setLoading(false);
         }
       };
 
       initializeUser();
+    } else {
+      setLoading(false);
     }
-    setLoading(false);
   }, []);
 
   const logout = () => {
