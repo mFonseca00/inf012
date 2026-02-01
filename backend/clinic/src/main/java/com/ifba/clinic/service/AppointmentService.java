@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.ifba.clinic.dto.appointment.AppointmentCancelationDTO;
@@ -99,7 +100,7 @@ public class AppointmentService {
             .orElseThrow(() -> new EntityNotFoundException(
                 "Consulta não encontrada com ID: " + dto.appointmentId()
             ));
-        if (appointment.getAppointmentStatus() != AppointmentStatus.ATIVO) {
+        if (appointment.getAppointmentStatus() != AppointmentStatus.ATIVA) {
             throw new BusinessRuleException(
                 "Esta consulta já foi cancelada anteriormente"
             );
@@ -145,7 +146,7 @@ public class AppointmentService {
                 "Consulta não encontrada com ID: " + dto.appointmentId()
             ));
         
-        if (appointment.getAppointmentStatus() != AppointmentStatus.ATIVO) {
+        if (appointment.getAppointmentStatus() != AppointmentStatus.ATIVA) {
             throw new BusinessRuleException(
                 "Apenas consultas ativas podem ser concluídas"
             );
@@ -187,16 +188,12 @@ public class AppointmentService {
     }
 
     public Page<AppointmentResponseDTO> getMyAppointments(String username, String role, String status, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "appointmentDate"));
         User user = userService.findUserByUsername(username);
-        
-        // Se é ADMIN ou MASTER, retorna todas as consultas
         if (user.getRoles().stream().anyMatch(r -> "ADMIN".equals(r.getRole()) || "MASTER".equals(r.getRole()))) {
             Page<Appointment> appointments = appointmentRepository.findAll(pageable);
             return filterByStatus(appointments, status).map(this::convertToDTO);
         }
-        
-        // Se role é especificado (para médicos que também são pacientes)
         if ("DOCTOR".equals(role)) {
             Doctor doctor = doctorService.getDoctorByUsername(username);
             if (doctor == null) {
@@ -205,14 +202,33 @@ public class AppointmentService {
             Page<Appointment> appointments = appointmentRepository.findByDoctorId(doctor.getId(), pageable);
             return filterByStatus(appointments, status).map(this::convertToDTO);
         }
-        
-        // Padrão: retorna como PACIENTE
-        Patient patient = patientService.getPatientByUsername(username);
-        if (patient == null) {
-            return Page.empty(pageable);
+        if ("PATIENT".equals(role)) {
+            Patient patient = patientService.getPatientByUsername(username);
+            if (patient == null) {
+                return Page.empty(pageable);
+            }
+            Page<Appointment> appointments = appointmentRepository.findByPatientId(patient.getId(), pageable);
+            return filterByStatus(appointments, status).map(this::convertToDTO);
         }
-        Page<Appointment> appointments = appointmentRepository.findByPatientId(patient.getId(), pageable);
-        return filterByStatus(appointments, status).map(this::convertToDTO);
+        boolean isDoctor = user.getRoles().stream().anyMatch(r -> "DOCTOR".equals(r.getRole()));
+        boolean isPatient = user.getRoles().stream().anyMatch(r -> "PATIENT".equals(r.getRole()));
+        if (isDoctor && !isPatient) {
+            Doctor doctor = doctorService.getDoctorByUsername(username);
+            if (doctor == null) {
+                return Page.empty(pageable);
+            }
+            Page<Appointment> appointments = appointmentRepository.findByDoctorId(doctor.getId(), pageable);
+            return filterByStatus(appointments, status).map(this::convertToDTO);
+        }
+        if (isPatient) {
+            Patient patient = patientService.getPatientByUsername(username);
+            if (patient == null) {
+                return Page.empty(pageable);
+            }
+            Page<Appointment> appointments = appointmentRepository.findByPatientId(patient.getId(), pageable);
+            return filterByStatus(appointments, status).map(this::convertToDTO);
+        }
+        return Page.empty(pageable);
     }
 
 
@@ -257,12 +273,12 @@ public class AppointmentService {
     }
 
     private void validateCancelationStatus(AppointmentStatus newStatus) {
-        if (newStatus != AppointmentStatus.CANCELADO && 
+        if (newStatus != AppointmentStatus.CANCELADA && 
             newStatus != AppointmentStatus.DESISTENCIA) {
             throw new BusinessRuleException(
                 "Status de cancelamento inválido. " +
-                "Motivo de cancelamento deve ser: CANCELADO (médico cancelou), " +
-                "DESISTENCIA (paciente desistiu) ou OUTRO (outros motivos)"
+                "Motivo de cancelamento deve ser: CANCELADA (médico cancelou) " +
+                "ou DESISTENCIA (paciente desistiu)"
             );
         }
     }

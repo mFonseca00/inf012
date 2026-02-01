@@ -1,10 +1,10 @@
 package com.ifba.clinic.controller;
 
-import com.ifba.clinic.dto.mix.UserPatientRegDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ifba.clinic.dto.mix.UserPatientRegDTO;
 import com.ifba.clinic.dto.patient.PatientInactivationDTO;
 import com.ifba.clinic.dto.patient.PatientRegDTO;
 import com.ifba.clinic.dto.patient.PatientResponseDTO;
@@ -61,6 +62,14 @@ public class PatientController {
     public ResponseEntity<String> inactivate(@RequestBody @Valid PatientInactivationDTO patientDTO) {
         patientService.inactivate(patientDTO);
         return ResponseEntity.ok("Paciente inativado com sucesso");
+    }
+
+    @GetMapping("/me")
+    @Operation(summary = "Obter meus dados de paciente", description = "Retorna os dados do paciente vinculado ao usuário autenticado.")
+    public ResponseEntity<PatientResponseDTO> getMyPatient(Authentication authentication) {
+        String username = authentication.getName();
+        PatientResponseDTO patient = patientService.getMyPatient(username);
+        return ResponseEntity.ok(patient);
     }
 
     @GetMapping("/all")

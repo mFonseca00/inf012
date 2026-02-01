@@ -3,8 +3,8 @@ import styles from "./StatusFilter.module.css";
 
 const STATUS_OPTIONS = [
   { value: "", label: "Todos" },
-  { value: "ATIVO", label: "Ativa" },
-  { value: "CANCELADO", label: "Cancelada pelo médico" },
+  { value: "ATIVA", label: "Ativa" },
+  { value: "CANCELADA", label: "Cancelada pelo médico" },
   { value: "DESISTENCIA", label: "Cancelada pelo paciente" },
   { value: "REALIZADA", label: "Realizada" },
 ];
