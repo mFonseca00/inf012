@@ -35,6 +35,16 @@ const INITIAL_FORM_STATE = {
   },
 };
 
+const INITIAL_ADDRESS_STATE = {
+  street: "",
+  number: "",
+  complement: "",
+  district: "",
+  city: "",
+  state: "",
+  cep: "",
+};
+
 export default function DoctorForm({ onClose, onSuccess, initialData }) {
   const [formData, setFormData] = useState(INITIAL_FORM_STATE);
   const [loading, setLoading] = useState(false);
@@ -43,6 +53,7 @@ export default function DoctorForm({ onClose, onSuccess, initialData }) {
   const [loadingPatient, setLoadingPatient] = useState(false);
   const [usernameTimeout, setUsernameTimeout] = useState(null);
   const [originalName, setOriginalName] = useState("");
+  const [originalAddress, setOriginalAddress] = useState(INITIAL_ADDRESS_STATE);
 
   useEffect(() => {
     if (initialData) {
@@ -67,6 +78,7 @@ export default function DoctorForm({ onClose, onSuccess, initialData }) {
       
       setFormData(completeData);
       setOriginalName(initialData.name || "");
+      setOriginalAddress(completeData.address);
       setIsEditing(true);
       
       if (initialData.username) {
@@ -74,6 +86,7 @@ export default function DoctorForm({ onClose, onSuccess, initialData }) {
       }
     } else {
       setFormData(INITIAL_FORM_STATE);
+      setOriginalAddress(INITIAL_ADDRESS_STATE);
       setIsEditing(false);
     }
   }, [initialData]);
@@ -103,16 +116,7 @@ export default function DoctorForm({ onClose, onSuccess, initialData }) {
     console.log("Preenchendo dados do paciente:", patient); // DEBUG
     
     if (patient) {
-      // Garantir que o endereço existe
-      const address = patient.address || {
-        street: "",
-        number: "",
-        complement: "",
-        district: "",
-        city: "",
-        state: "",
-        cep: "",
-      };
+      const address = patient.address || INITIAL_ADDRESS_STATE;
       
       console.log("Endereço do paciente:", address); // DEBUG
       
@@ -135,6 +139,8 @@ export default function DoctorForm({ onClose, onSuccess, initialData }) {
         console.log("FormData atualizado:", newFormData); // DEBUG
         return newFormData;
       });
+
+      setOriginalAddress(address);
     }
   };
 
@@ -199,6 +205,10 @@ export default function DoctorForm({ onClose, onSuccess, initialData }) {
     }
   };
 
+  const addressChanged = () => {
+    return JSON.stringify(formData.address) !== JSON.stringify(originalAddress);
+  };
+
   const validateForm = () => {
     if (!formData.name?.trim()) {
       toast.warning("Nome é obrigatório");
@@ -245,7 +255,14 @@ export default function DoctorForm({ onClose, onSuccess, initialData }) {
 
         await doctorService.update(updateData);
         
-        if (linkedPatient && formData.name !== originalName) {
+        // ✅ CORRIGIDO: Verificar se nome OU endereço foram alterados
+        const nameChanged = formData.name !== originalName;
+        const addrChanged = addressChanged();
+        
+        console.log("Nome alterado:", nameChanged); // DEBUG
+        console.log("Endereço alterado:", addrChanged); // DEBUG
+        
+        if (linkedPatient && (nameChanged || addrChanged)) {
           try {
             await patientService.update({
               cpf: linkedPatient.cpf,
