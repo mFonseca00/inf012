@@ -34,6 +34,11 @@ const patientService = {
   getByUsername: (username) => {
     return api.get(`/patient/${username}`).then(res => res.data);
   },
+
+  update: async (patientData) => {
+    const response = await api.patch("/patient/update", patientData);
+    return response.data;
+  },
 };
 
 export default patientService;

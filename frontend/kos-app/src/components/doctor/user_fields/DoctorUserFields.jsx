@@ -11,8 +11,10 @@ export default function DoctorUserFields({
   onChange, 
   loading,
   usernameDisabled,
+  emailDisabled,
   nameDisabled,
-  loadingPatient
+  loadingPatient,
+  isEditing
 }) {
   const [emailError, setEmailError] = React.useState("");
   const [usernameError, setUsernameError] = React.useState("");
@@ -27,8 +29,8 @@ export default function DoctorUserFields({
       setEmailError("");
     }
     
-    // Se preencheu email, limpa username
-    if (value && username) {
+    // Se preencheu email, limpa username (apenas na criação)
+    if (!isEditing && value && username) {
       onChange({ target: { name: "username", value: "" } });
     }
   }
@@ -43,8 +45,8 @@ export default function DoctorUserFields({
       setUsernameError("");
     }
     
-    // Se preencheu username, limpa email
-    if (value && email) {
+    // Se preencheu username, limpa email (apenas na criação)
+    if (!isEditing && value && email) {
       onChange({ target: { name: "email", value: "" } });
     }
   }
@@ -92,9 +94,9 @@ export default function DoctorUserFields({
           value={username}
           onChange={handleUsernameChange}
           placeholder="Escolha seu usuário"
-          disabled={loading || usernameDisabled || !!email}
+          disabled={loading || usernameDisabled || (!isEditing && !!email)}
           autoComplete="username"
-          required={!email}
+          required={!isEditing && !email}
         />
       </div>
 
@@ -107,15 +109,20 @@ export default function DoctorUserFields({
           value={email}
           onChange={handleEmailChange}
           placeholder="seu@email.com"
-          disabled={loading || !!username}
+          disabled={loading || emailDisabled || (!isEditing && !!username)}
           autoComplete="email"
-          required={!username}
+          required={!isEditing && !username}
         />
         {emailError && (
           <span className={styles.errorText}>{emailError}</span>
         )}
         {usernameError && (
           <span className={styles.errorText}>{usernameError}</span>
+        )}
+        {emailDisabled && (
+          <span className={styles.helperText}>
+            Campo não pode ser alterado na edição
+          </span>
         )}
       </div>
     </>

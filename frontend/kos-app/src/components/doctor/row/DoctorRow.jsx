@@ -37,11 +37,15 @@ export default function DoctorRow({ doctor, onActionSuccess, onEdit }) {
     }
   };
 
-  const handleEdit = () => {
-    if (onEdit) {
-      onEdit(doctor);
-    } else {
-      console.log("Editar médico:", doctor.id);
+  const handleEdit = async () => {
+    try {
+      const completeDoctorData = await doctorService.getDoctorInfo(doctor.crm);
+      if (onEdit) {
+        onEdit(completeDoctorData);
+      }
+    } catch (error) {
+      toast.error("Erro ao carregar dados do médico para edição");
+      console.error("Erro:", error);
     }
   };
 

@@ -4,6 +4,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.ifba.clinic.dto.address.AddressDTO;
+import com.ifba.clinic.dto.doctor.DoctorDetailDTO;
 import com.ifba.clinic.dto.doctor.DoctorInactivationDTO;
 import com.ifba.clinic.dto.doctor.DoctorRegDTO;
 import com.ifba.clinic.dto.doctor.DoctorResponseDTO;
@@ -175,6 +177,36 @@ public class DoctorService {
             return null; // Retorna null se não for médico
         }
         return doctor;
+    }
+
+    public DoctorDetailDTO getDoctorInfo(String crm) {
+        String formattedCrm = Formatters.formatCRM(crm);
+        Doctor doctor = doctorRepository.findByCrm(formattedCrm);
+        if (doctor == null) {
+            throw new EntityNotFoundException("Médico de CRM " + crm + " não encontrado");
+        }
+        
+        AddressDTO addressDTO = new AddressDTO(
+            doctor.getAddress().getStreet(),
+            doctor.getAddress().getNumber(),
+            doctor.getAddress().getComplement(),
+            doctor.getAddress().getDistrict(),
+            doctor.getAddress().getCity(),
+            doctor.getAddress().getState(),
+            doctor.getAddress().getCep()
+        );
+        
+        return new DoctorDetailDTO(
+            doctor.getId(),
+            doctor.getCrm(),
+            doctor.getName(),
+            doctor.getUser().getEmail(),
+            doctor.getUser().getUsername(),
+            doctor.getPhoneNumber(),
+            doctor.getSpeciality(),
+            addressDTO,
+            doctor.getIsActive()
+        );
     }
 
     // Helper methods

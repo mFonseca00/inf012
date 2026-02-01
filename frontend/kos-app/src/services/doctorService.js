@@ -31,11 +31,16 @@ const doctorService = {
     return response.data;
   },
 
+  getDoctorInfo: async (crm) => {
+    const response = await api.get("/doctor/info", { params: { crm } });
+    return response.data;
+  },
+
   getByCrm: async (crm) => {
     const response = await api.get("/doctor", { params: { crm } });
     return response.data;
   },
-  
+
 };
 
 export default doctorService;

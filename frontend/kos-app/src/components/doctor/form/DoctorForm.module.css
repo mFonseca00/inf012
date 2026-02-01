@@ -105,6 +105,14 @@
   background: #f8f9fa;
 }
 
+.helperText {
+  display: block;
+  color: #1976d2;
+  font-size: 0.8rem;
+  margin-top: 0.35rem;
+  font-style: italic;
+}
+
 @media (max-width: 600px) {
   .modal {
     max-width: 98vw;

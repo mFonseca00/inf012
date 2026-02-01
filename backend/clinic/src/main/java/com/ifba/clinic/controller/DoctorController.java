@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ifba.clinic.dto.doctor.DoctorDetailDTO;
 import com.ifba.clinic.dto.doctor.DoctorInactivationDTO;
 import com.ifba.clinic.dto.doctor.DoctorRegDTO;
 import com.ifba.clinic.dto.doctor.DoctorResponseDTO;
@@ -91,6 +92,16 @@ public class DoctorController {
         @Pattern(regexp = "^(\\d{6}-\\d{2}\\/[A-Z]{2}|\\d{8}[A-Z]{2})$", message = "CRM inválido")
         String crm) {
         DoctorResponseDTO doctor = doctorService.getDoctor(crm);
+        return ResponseEntity.ok(doctor);
+    }
+
+    @GetMapping("/info")
+    @Operation(summary = "Obter informações completas do médico", description = "Retorna todos os dados do médico incluindo endereço e telefone para edição.")
+    public ResponseEntity<DoctorDetailDTO> getDoctorInfo(
+        @RequestParam
+        @Pattern(regexp = "^(\\d{6}-\\d{2}\\/[A-Z]{2}|\\d{8}[A-Z]{2})$", message = "CRM inválido")
+        String crm) {
+        DoctorDetailDTO doctor = doctorService.getDoctorInfo(crm);
         return ResponseEntity.ok(doctor);
     }
 }
