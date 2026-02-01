@@ -18,7 +18,7 @@ const AppointmentList = () => {
 
   // Paginação
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const itemsPerPage = 8;
   const [totalPages, setTotalPages] = useState(1);
 
   // Filtros
@@ -122,13 +122,15 @@ const AppointmentList = () => {
       ) : (
         <>
           <div className={styles.gridContainer}>
-            {consultas.map((consulta) => (
-              <AppointmentCard
-                key={consulta.id}
-                consulta={consulta}
-                viewMode={getViewMode()}
-              />
-            ))}
+            {[...consultas]
+              .sort((a, b) => new Date(a.appointmentDate) - new Date(b.appointmentDate))
+              .map((consulta) => (
+                <AppointmentCard
+                  key={consulta.id}
+                  consulta={consulta}
+                  viewMode={getViewMode()}
+                />
+              ))}
           </div>
           <Pagination
             currentPage={currentPage}
