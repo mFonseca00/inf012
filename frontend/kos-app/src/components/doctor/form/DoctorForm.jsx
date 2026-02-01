@@ -46,7 +46,6 @@ export default function DoctorForm({ onClose, onSuccess, initialData }) {
 
   useEffect(() => {
     if (initialData) {
-      // Garantir que todos os campos existam com valores padrão
       const completeData = {
         id: initialData.id || null,
         name: initialData.name || "",
@@ -70,12 +69,10 @@ export default function DoctorForm({ onClose, onSuccess, initialData }) {
       setOriginalName(initialData.name || "");
       setIsEditing(true);
       
-      // Buscar dados do paciente vinculado se houver
       if (initialData.username) {
         fetchLinkedPatientForEdit(initialData.username);
       }
     } else {
-      // Modo criação - inicializar com estado padrão
       setFormData(INITIAL_FORM_STATE);
       setIsEditing(false);
     }
@@ -102,6 +99,45 @@ export default function DoctorForm({ onClose, onSuccess, initialData }) {
     }
   };
 
+  const preencherDadosPaciente = (patient) => {
+    console.log("Preenchendo dados do paciente:", patient); // DEBUG
+    
+    if (patient) {
+      // Garantir que o endereço existe
+      const address = patient.address || {
+        street: "",
+        number: "",
+        complement: "",
+        district: "",
+        city: "",
+        state: "",
+        cep: "",
+      };
+      
+      console.log("Endereço do paciente:", address); // DEBUG
+      
+      setFormData((prev) => {
+        const newFormData = {
+          ...prev,
+          name: patient.name || prev.name,
+          email: patient.email || prev.email,
+          phoneNumber: patient.phoneNumber || prev.phoneNumber,
+          address: {
+            street: address.street || "",
+            number: address.number || "",
+            complement: address.complement || "",
+            district: address.district || "",
+            city: address.city || "",
+            state: address.state || "",
+            cep: address.cep || "",
+          },
+        };
+        console.log("FormData atualizado:", newFormData); // DEBUG
+        return newFormData;
+      });
+    }
+  };
+
   useEffect(() => {
     if (usernameTimeout) {
       clearTimeout(usernameTimeout);
@@ -112,21 +148,24 @@ export default function DoctorForm({ onClose, onSuccess, initialData }) {
       setLoadingPatient(true);
 
       const timeout = setTimeout(() => {
+        console.log("Buscando paciente com username:", formData.username); // DEBUG
+        
         patientService
           .getByUsername(formData.username)
           .then((patient) => {
+            console.log("Paciente encontrado:", patient); // DEBUG
+            
             if (patient) {
               setLinkedPatient(patient);
-              // Pré-preencher nome com o nome do paciente
-              setFormData((prev) => ({
-                ...prev,
-                name: patient.name || "",
-              }));
+              // Pré-preencher todos os dados do paciente
+              preencherDadosPaciente(patient);
             } else {
+              console.log("Paciente não encontrado"); // DEBUG
               setLinkedPatient(null);
             }
           })
-          .catch(() => {
+          .catch((error) => {
+            console.error("Erro na busca do paciente:", error); // DEBUG
             setLinkedPatient(null);
           })
           .finally(() => {
@@ -278,6 +317,7 @@ export default function DoctorForm({ onClose, onSuccess, initialData }) {
             nameDisabled={!isEditing && !!linkedPatient}
             loadingPatient={loadingPatient}
             isEditing={isEditing}
+            hasLinkedPatient={!!linkedPatient}
           />
 
           {!isEditing && (
@@ -357,6 +397,8 @@ export default function DoctorForm({ onClose, onSuccess, initialData }) {
             address={formData.address}
             handleChange={handleChange}
             loading={loading}
+            disabledIfLinkedPatient={!isEditing && !!linkedPatient}
+            loadingPatient={loadingPatient}
           />
 
           <div className={styles.footer}>

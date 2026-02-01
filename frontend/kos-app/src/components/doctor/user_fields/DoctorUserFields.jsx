@@ -14,7 +14,8 @@ export default function DoctorUserFields({
   emailDisabled,
   nameDisabled,
   loadingPatient,
-  isEditing
+  isEditing,
+  hasLinkedPatient
 }) {
   const [emailError, setEmailError] = React.useState("");
   const [usernameError, setUsernameError] = React.useState("");
@@ -29,7 +30,6 @@ export default function DoctorUserFields({
       setEmailError("");
     }
     
-    // Se preencheu email, limpa username (apenas na criação)
     if (!isEditing && value && username) {
       onChange({ target: { name: "username", value: "" } });
     }
@@ -45,7 +45,6 @@ export default function DoctorUserFields({
       setUsernameError("");
     }
     
-    // Se preencheu username, limpa email (apenas na criação)
     if (!isEditing && value && email) {
       onChange({ target: { name: "email", value: "" } });
     }
@@ -67,7 +66,7 @@ export default function DoctorUserFields({
         />
         {nameDisabled && (
           <span className={styles.helperText}>
-            Nome preenchido automaticamente, o usuário já tem um paciente vinculado
+            Nome preenchido automaticamente do paciente vinculado
           </span>
         )}
       </div>
@@ -122,6 +121,11 @@ export default function DoctorUserFields({
         {emailDisabled && (
           <span className={styles.helperText}>
             Campo não pode ser alterado na edição
+          </span>
+        )}
+        {hasLinkedPatient && !isEditing && (
+          <span className={styles.helperText}>
+            Dados preenchidos automaticamente do paciente vinculado
           </span>
         )}
       </div>

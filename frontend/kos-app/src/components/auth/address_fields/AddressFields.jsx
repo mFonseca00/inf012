@@ -4,10 +4,30 @@ import { formatCEP, onlyDigits } from "../../../utils/formatters";
 import styles from "./AddressFields.module.css";
 import StateSelect from "../../ui/selectors/StateSelect";
 
-export default function AddressFields({ address, handleChange, loading }) {
+export default function AddressFields({ 
+  address, 
+  handleChange, 
+  loading,
+  disabledIfLinkedPatient = false,
+  loadingPatient = false
+}) {
   return (
     <>
       <h3 className={styles.sectionTitle}>Endereço</h3>
+
+      {disabledIfLinkedPatient && (
+        <div style={{ 
+          padding: "10px", 
+          backgroundColor: "#e3f2fd", 
+          borderLeft: "4px solid #1976d2",
+          marginBottom: "1rem",
+          borderRadius: "4px"
+        }}>
+          <p style={{ margin: 0, fontSize: "0.9rem", color: "#1565c0" }}>
+            ℹ️ Endereço preenchido automaticamente do paciente vinculado
+          </p>
+        </div>
+      )}
 
       <div className={styles.gridTwoCols}>
         <TextField
@@ -17,7 +37,7 @@ export default function AddressFields({ address, handleChange, loading }) {
           value={address.street}
           onChange={handleChange}
           placeholder="Rua"
-          disabled={loading}
+          disabled={loading || loadingPatient}
           autoComplete="street-address"
           required={true}
         />
@@ -29,7 +49,7 @@ export default function AddressFields({ address, handleChange, loading }) {
           onChange={handleChange}
           placeholder="Número (opcional)"
           maxLength={10}
-          disabled={loading}
+          disabled={loading || loadingPatient}
           autoComplete="address-line2"
         />
         <TextField
@@ -39,7 +59,7 @@ export default function AddressFields({ address, handleChange, loading }) {
           value={address.district}
           onChange={handleChange}
           placeholder="Bairro"
-          disabled={loading}
+          disabled={loading || loadingPatient}
           autoComplete="address-level3"
           required={true}
         />
@@ -50,7 +70,7 @@ export default function AddressFields({ address, handleChange, loading }) {
           value={address.city}
           onChange={handleChange}
           placeholder="Cidade"
-          disabled={loading}
+          disabled={loading || loadingPatient}
           autoComplete="address-level2"
           required={true}
         />
@@ -60,7 +80,7 @@ export default function AddressFields({ address, handleChange, loading }) {
           label="Estado:"
           value={address.state}
           onChange={handleChange}
-          disabled={loading}
+          disabled={loading || loadingPatient}
           required={true}
         />
         <TextField
@@ -72,7 +92,7 @@ export default function AddressFields({ address, handleChange, loading }) {
           placeholder="00000-000"
           inputMode="numeric"
           maxLength={9}
-          disabled={loading}
+          disabled={loading || loadingPatient}
           formatter={formatCEP}
           autoComplete="postal-code"
           required={true}
@@ -85,7 +105,7 @@ export default function AddressFields({ address, handleChange, loading }) {
           label="Complemento:"
           value={address.complement}
           onChange={handleChange}
-          disabled={loading}
+          disabled={loading || loadingPatient}
           placeholder="Complemento (opcional)"
           autoComplete="address-line3"
         />

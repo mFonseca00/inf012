@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ifba.clinic.dto.mix.UserPatientRegDTO;
+import com.ifba.clinic.dto.patient.PatientDetailDTO;
 import com.ifba.clinic.dto.patient.PatientInactivationDTO;
 import com.ifba.clinic.dto.patient.PatientRegDTO;
 import com.ifba.clinic.dto.patient.PatientResponseDTO;
@@ -97,6 +98,13 @@ public class PatientController {
     @Operation(summary = "Buscar paciente por username", description = "Retorna os dados do paciente vinculado a um username, se existir.")
     public ResponseEntity<PatientResponseDTO> getPatientByUsername(@PathVariable String username) {
         PatientResponseDTO patient = patientService.getPatient(username);
+        return ResponseEntity.ok(patient);
+    }
+
+    @GetMapping("/info/{username}")
+    @Operation(summary = "Obter informações completas do paciente por username", description = "Retorna todos os dados do paciente vinculado a um username, se existir.")
+    public ResponseEntity<PatientDetailDTO> getPatientInfo(@PathVariable String username) {
+        PatientDetailDTO patient = patientService.getPatientInfo(username);
         return ResponseEntity.ok(patient);
     }
 }

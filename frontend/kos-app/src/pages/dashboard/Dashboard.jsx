@@ -26,16 +26,6 @@ function Dashboard() {
 
   return (
     <div className={styles.dashboardGrid}>
-      {hasRole("ADMIN") && (
-        <div className={styles.card}>
-          <h2>Painel Administrativo</h2>
-          <p>Gerenciar usuários e consultas...</p>
-          <Button onClick={handleAdminAction}>
-            Gerenciar usuários
-          </Button>
-        </div>
-      )}
-
       <div className={styles.card}>
         <h2>Bem-vindo ao Sistema</h2>
         <p>Selecione uma opção no menu lateral para começar.</p>
