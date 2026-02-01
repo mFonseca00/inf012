@@ -1,14 +1,17 @@
 package com.ifba.clinic.repository;
 
-import com.ifba.clinic.model.entity.Appointment;
-import com.ifba.clinic.model.entity.Doctor;
+import java.time.LocalDateTime;
+import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
-import java.util.List;
+import com.ifba.clinic.model.entity.Appointment;
+import com.ifba.clinic.model.entity.Doctor;
 
 @Repository
 public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
@@ -19,4 +22,25 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             "WHERE a.appointmentDate BETWEEN :startTime AND :endTime " +
             "AND a.appointmentStatus = 'ATIVO')")
     List<Doctor> findAvailableDoctors(@Param("startTime") LocalDateTime startTime, @Param("endTime") LocalDateTime endTime);
+    Page<Appointment> findByPatientId(Long patientId, Pageable pageable);
+    Page<Appointment> findByDoctorId(Long doctorId, Pageable pageable);
+
+    // Verifica se há conflito de horário para o paciente (se o paciente já tem outra consulta no mesmo horário)
+    @Query("SELECT a FROM Appointment a WHERE a.patient.id = :patientId " +
+           "AND a.appointmentDate = :appointmentDate " +
+           "AND a.appointmentStatus NOT IN ('CANCELADO', 'DESISTENCIA')")
+    List<Appointment> findConflictingAppointmentForPatient(
+        @Param("patientId") Long patientId,
+        @Param("appointmentDate") LocalDateTime appointmentDate
+    );
+
+    // Verifica se há conflito de horário para o médico (se o médico já tem outra consulta no mesmo horário)
+    @Query("SELECT a FROM Appointment a WHERE a.doctor.id = :doctorId " +
+           "AND a.appointmentDate = :appointmentDate " +
+           "AND a.appointmentStatus NOT IN ('CANCELADO', 'DESISTENCIA')")
+    List<Appointment> findConflictingAppointmentForDoctor(
+        @Param("doctorId") Long doctorId,
+        @Param("appointmentDate") LocalDateTime appointmentDate
+    );
+
 }

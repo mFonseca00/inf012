@@ -1,12 +1,13 @@
 import React, { useContext } from "react";
 import { AuthContext } from "../../contexts/AuthContext";
-import MainLayout from "../../components/layout/MainLayout";
 import Button from "../../components/ui/button/Button";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import styles from "./Dashboard.module.css";
 
 function Dashboard() {
   const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   const hasRole = (targetRole) => {
     if (!user?.roles) return false;
@@ -24,44 +25,22 @@ function Dashboard() {
   }
 
   return (
-    <MainLayout>
-      <div className={styles.dashboardGrid}>
-        {hasRole("DOCTOR") && (
-          <div className={styles.card}>
-            <h2>Área do Médico</h2>
-            <p>Ver meus próximos pacientes...</p>
-            <Button onClick={() => toast.info("Funcionalidade em breve!")}>
-              Ver agenda
-            </Button>
-          </div>
-        )}
-
-        {hasRole("PATIENT") && (
-          <div className={styles.card}>
-            <h2>Minhas Consultas</h2>
-            <p>Agendar nova consulta...</p>
-            <Button onClick={() => toast.info("Funcionalidade em breve!")}>
-              Agendar consulta
-            </Button>
-          </div>
-        )}
-
-        {hasRole("ADMIN") && (
-          <div className={styles.card}>
-            <h2>Painel Administrativo</h2>
-            <p>Gerenciar usuários...</p>
-            <Button onClick={handleAdminAction}>
-              Gerenciar usuários
-            </Button>
-          </div>
-        )}
-
+    <div className={styles.dashboardGrid}>
+      {hasRole("ADMIN") && (
         <div className={styles.card}>
-          <h2>Bem-vindo ao Sistema</h2>
-          <p>Selecione uma opção no menu lateral.</p>
+          <h2>Painel Administrativo</h2>
+          <p>Gerenciar usuários e consultas...</p>
+          <Button onClick={handleAdminAction}>
+            Gerenciar usuários
+          </Button>
         </div>
+      )}
+
+      <div className={styles.card}>
+        <h2>Bem-vindo ao Sistema</h2>
+        <p>Selecione uma opção no menu lateral para começar.</p>
       </div>
-    </MainLayout>
+    </div>
   );
 }
 

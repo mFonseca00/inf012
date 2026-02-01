@@ -1,10 +1,11 @@
 import React from "react";
+import { Outlet } from "react-router-dom";
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 import Breadcrumbs from "./Breadcrumbs";
 import styles from "./MainLayout.module.css";
 
-const MainLayout = ({ children }) => {
+const MainLayout = () => {
   return (
     <div className={styles.wrapper}>
       <Navbar />
@@ -12,7 +13,7 @@ const MainLayout = ({ children }) => {
         <Sidebar />
         <div className={styles.contentArea}>
           <Breadcrumbs />
-          {children}
+          <Outlet /> {/* Aqui o conteúdo dinâmico será renderizado */}
         </div>
       </div>
     </div>

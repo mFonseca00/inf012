@@ -2,14 +2,7 @@
   margin-bottom: 1rem;
 }
 
-.inputGroup label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: 500;
-  color: #333;
-}
-
-.textBox {
+.selectBox {
   width: 100%;
   min-width: 0;
   padding: 16px 14px;
@@ -19,14 +12,16 @@
   font-size: 1.08rem;
   background: #fafbfc;
   transition: border-color 0.2s;
+  margin-top: 5.5px;
+  margin-bottom: 0; 
 }
 
-.textBox:focus {
+.selectBox:focus {
   border-color: #4c6faf;
   outline: none;
 }
 
-.textBox:disabled {
+.selectBox:disabled {
   background-color: #f5f5f5;
   cursor: not-allowed;
 }

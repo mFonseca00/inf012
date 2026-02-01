@@ -282,7 +282,7 @@ public class UserService {
         }
         return username;
     }
-    private User findUserByUsername(String username) {
+    User findUserByUsername(String username) {
         User user = (User) userRepository.findByUsername(username);
         if (user == null) {
             throw new EntityNotFoundException("Usuário " + username + " não encontrado");

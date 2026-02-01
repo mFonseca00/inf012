@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Random;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -13,12 +15,14 @@ import com.ifba.clinic.dto.appointment.AppointmentCancelationDTO;
 import com.ifba.clinic.dto.appointment.AppointmentConclusionDTO;
 import com.ifba.clinic.dto.appointment.AppointmentRegDTO;
 import com.ifba.clinic.dto.appointment.AppointmentResponseDTO;
+import com.ifba.clinic.exception.AppointmentConflictException;
 import com.ifba.clinic.exception.BusinessRuleException;
 import com.ifba.clinic.exception.EntityNotFoundException;
 import com.ifba.clinic.model.entity.Appointment;
 import com.ifba.clinic.model.entity.AppointmentCancelation;
 import com.ifba.clinic.model.entity.Doctor;
 import com.ifba.clinic.model.entity.Patient;
+import com.ifba.clinic.model.entity.User;
 import com.ifba.clinic.model.enums.AppointmentStatus;
 import com.ifba.clinic.repository.AppointmentCancelationRepository;
 import com.ifba.clinic.repository.AppointmentRepository;
@@ -33,16 +37,22 @@ public class AppointmentService {
     private final DoctorRepository doctorRepository;
     private final AppointmentCancelationRepository appointmentCancelationRepository;
     private final EmailService emailService;
+    private final UserService userService;
+    private final PatientService patientService;
+    private final DoctorService doctorService;
 
     @SuppressWarnings("unused")
     AppointmentService(AppointmentRepository appointmentRepository, PatientRepository patientRepository,
         DoctorRepository doctorRepository, AppointmentCancelationRepository appointmentCancelationRepository,
-        EmailService emailService) {
+        EmailService emailService, DoctorService doctorService, PatientService patientService, UserService userService) {
         this.appointmentRepository = appointmentRepository;
         this.patientRepository = patientRepository;
         this.doctorRepository = doctorRepository;
         this.appointmentCancelationRepository = appointmentCancelationRepository;
         this.emailService = emailService;
+        this.userService = userService;
+        this.patientService = patientService;
+        this.doctorService = doctorService;
     }
 
     public void scheduleAppointment(AppointmentRegDTO dto) {
@@ -51,7 +61,10 @@ public class AppointmentService {
         
         Patient patient = validatePatient(dto.patientId(), dto.appointmentDate());
         Doctor doctor = getOrSelectDoctor(dto.doctorId(), dto.appointmentDate());
-        
+
+        validatePatientConflict(patient.getId(), dto.appointmentDate());
+        validateDoctorConflict(doctor.getId(), dto.appointmentDate());
+
         if (patient.getUser().getId().equals(doctor.getUser().getId())) {
             throw new BusinessRuleException(
                 "Um médico não pode marcar uma consulta com ele mesmo"
@@ -162,15 +175,7 @@ public class AppointmentService {
 
     public Page<AppointmentResponseDTO> getAllAppointments(Pageable pageable) {
         Page<Appointment> appointments = appointmentRepository.findAll(pageable);
-        return appointments.map(appointment -> new AppointmentResponseDTO(
-                appointment.getId(),
-                appointment.getPatient().getId(),
-                appointment.getPatient().getName(),
-                appointment.getDoctor().getId(),
-                appointment.getDoctor().getName(),
-                appointment.getAppointmentDate(),
-                appointment.getAppointmentStatus()
-        ));
+        return appointments.map(this::convertToDTO);
     }
 
     public AppointmentResponseDTO getAppointment(Long id) {
@@ -178,16 +183,38 @@ public class AppointmentService {
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Consulta não encontrada com ID: " + id
                 ));
-        return new AppointmentResponseDTO(
-                appointment.getId(),
-                appointment.getPatient().getId(),
-                appointment.getPatient().getName(),
-                appointment.getDoctor().getId(),
-                appointment.getDoctor().getName(),
-                appointment.getAppointmentDate(),
-                appointment.getAppointmentStatus()
-        );
+        return convertToDTO(appointment);
     }
+
+    public Page<AppointmentResponseDTO> getMyAppointments(String username, String role, String status, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        User user = userService.findUserByUsername(username);
+        
+        // Se é ADMIN ou MASTER, retorna todas as consultas
+        if (user.getRoles().stream().anyMatch(r -> "ADMIN".equals(r.getRole()) || "MASTER".equals(r.getRole()))) {
+            Page<Appointment> appointments = appointmentRepository.findAll(pageable);
+            return filterByStatus(appointments, status).map(this::convertToDTO);
+        }
+        
+        // Se role é especificado (para médicos que também são pacientes)
+        if ("DOCTOR".equals(role)) {
+            Doctor doctor = doctorService.getDoctorByUsername(username);
+            if (doctor == null) {
+                return Page.empty(pageable);
+            }
+            Page<Appointment> appointments = appointmentRepository.findByDoctorId(doctor.getId(), pageable);
+            return filterByStatus(appointments, status).map(this::convertToDTO);
+        }
+        
+        // Padrão: retorna como PACIENTE
+        Patient patient = patientService.getPatientByUsername(username);
+        if (patient == null) {
+            return Page.empty(pageable);
+        }
+        Page<Appointment> appointments = appointmentRepository.findByPatientId(patient.getId(), pageable);
+        return filterByStatus(appointments, status).map(this::convertToDTO);
+    }
+
 
     // Helper Methods
     private void validateMinimumAdvanceTime(LocalDateTime appointmentDate) {
@@ -291,5 +318,56 @@ public class AppointmentService {
             );
         }
         return doctor;
+    }
+
+    private AppointmentResponseDTO convertToDTO(Appointment appointment) {
+        return new AppointmentResponseDTO(
+            appointment.getId(),
+            appointment.getPatient().getId(),
+            appointment.getPatient().getName(),
+            appointment.getDoctor().getId(),
+            appointment.getDoctor().getName(),
+            appointment.getDoctor().getSpeciality().name(),
+            appointment.getAppointmentDate(),
+            appointment.getAppointmentStatus()
+        );
+    }
+
+    private Page<Appointment> filterByStatus(Page<Appointment> appointments, String status) {
+        if (status == null || status.isEmpty()) {
+            return appointments;
+        }
+        
+        try {
+            AppointmentStatus appointmentStatus = AppointmentStatus.valueOf(status.toUpperCase());
+            List<Appointment> filtered = appointments.getContent().stream()
+                .filter(a -> a.getAppointmentStatus() == appointmentStatus)
+                .toList();
+            return new PageImpl<>(filtered, appointments.getPageable(), filtered.size());
+        } catch (IllegalArgumentException e) {
+            return appointments;
+        }
+    }
+
+    private void validatePatientConflict(Long patientId, LocalDateTime appointmentDate) {
+        List<Appointment> conflicts = appointmentRepository
+            .findConflictingAppointmentForPatient(patientId, appointmentDate);
+        
+        if (!conflicts.isEmpty()) {
+            throw new AppointmentConflictException(
+                "Paciente já possui uma consulta agendada para este horário"
+            );
+        }
+    }
+
+    private void validateDoctorConflict(Long doctorId, LocalDateTime appointmentDate) {
+        List<Appointment> conflicts = appointmentRepository
+            .findConflictingAppointmentForDoctor(doctorId, appointmentDate);
+        
+        if (!conflicts.isEmpty()) {
+            throw new AppointmentConflictException(
+                "Médico já possui uma consulta agendada para este horário"
+            );
+        }
     }
 }

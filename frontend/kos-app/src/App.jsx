@@ -1,18 +1,23 @@
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
-
 import { PrivateRoute } from "./components/PrivateRoute";
 import { PublicRoute } from "./components/PublicRoute";
+import MainLayout from "./components/layout/MainLayout";
 
+// Páginas públicas
 import Login from "./pages/auth/Login";
-import Dashboard from "./pages/dashboard/Dashboard.jsx";
+import Register from "./pages/auth/Register";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import ResetPassword from "./pages/auth/ResetPassword";
-import Register from "./pages/auth/Register";
+
+// Páginas/Componentes privados (conteúdo da área central)
+import Dashboard from "./pages/dashboard/Dashboard";
+import AppointmentList from "./pages/appointment/AppointmentList";
 
 function App() {
   return (
     <Routes>
+      {/* ============ ROTAS PÚBLICAS ============ */}
       <Route
         path="/"
         element={
@@ -46,10 +51,10 @@ function App() {
           <PublicRoute>
             <ForgotPassword />
           </PublicRoute>
-        } 
+        }
       />
-          
-      <Route 
+
+      <Route
         path="/reset-password"
         element={
           <PublicRoute>
@@ -58,16 +63,26 @@ function App() {
         }
       />
 
+      {/* ============ ROTAS PRIVADAS COM LAYOUT PERSISTENTE ============ */}
       <Route
-        path="/dashboard"
         element={
           <PrivateRoute>
-            <Dashboard />
+            <MainLayout />
           </PrivateRoute>
         }
-      />
+      >
+        {/* Dashboard - apenas para ADMIN */}
+        <Route path="/dashboard" element={<Dashboard />} />
 
-      <Route path="*" element={<Navigate to="/" />} />
+        {/* Agendamentos - para PATIENT, DOCTOR, RECEPTIONIST */}
+        <Route path="/appointments" element={<AppointmentList />} />
+
+        {/* Redireciona qualquer outra rota privada para dashboard */}
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+      </Route>
+
+      {/* Rota 404 */}
+      <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );
 }

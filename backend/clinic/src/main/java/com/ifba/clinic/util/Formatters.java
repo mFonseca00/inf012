@@ -43,4 +43,9 @@ public class Formatters {
         if (digits.isEmpty() || state.length() != 2) return crm;
         return digits + "/" + state;
     }
+
+    public static String formatEmail(String email) {
+        if (email == null) return null;
+        return email.trim().toLowerCase();
+    }
 }
