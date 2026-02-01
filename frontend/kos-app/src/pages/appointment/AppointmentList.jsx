@@ -76,6 +76,11 @@ const AppointmentList = () => {
     setCurrentPage(1);
   };
 
+  const handleStatusFilterChange = (e) => {
+    setStatusFilter(e.target.value);
+    setCurrentPage(1);
+  };
+
   if (loading && showSkeleton) {
     return <AppointmentListSkeleton title={pageTitle} />;
   }
@@ -98,7 +103,7 @@ const AppointmentList = () => {
         isDoctorAndPatient={isDoctorAndPatient}
       />
 
-      <StatusFilter value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} />
+      <StatusFilter value={statusFilter} onChange={handleStatusFilterChange} />
 
       {consultas.length === 0 ? (
         <div className={styles.emptyState}>
