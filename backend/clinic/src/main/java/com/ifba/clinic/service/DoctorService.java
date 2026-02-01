@@ -116,9 +116,9 @@ public class DoctorService {
         Page<Doctor> doctors = doctorRepository.findAll(pageable);
         return doctors.map(doctor -> new DoctorResponseDTO(
                 doctor.getId(),
+                doctor.getCrm(),
                 doctor.getName(),
                 doctor.getUser().getEmail(),
-                doctor.getCrm(),
                 doctor.getSpeciality(),
                 doctor.getIsActive()
         ));
@@ -144,9 +144,9 @@ public class DoctorService {
         }
         return new DoctorResponseDTO(
                 doctor.getId(),
+                doctor.getCrm(),
                 doctor.getName(),
                 doctor.getUser().getEmail(),
-                doctor.getCrm(),
                 doctor.getSpeciality(),
                 doctor.getIsActive()
         );

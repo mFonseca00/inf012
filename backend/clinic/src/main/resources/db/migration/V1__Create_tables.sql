@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS appointment (
     patient_id BIGINT NOT NULL,
     doctor_id BIGINT NOT NULL,
     appointment_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
-    appointment_status VARCHAR(50) NOT NULL DEFAULT 'ATIVO',
+    appointment_status VARCHAR(50) NOT NULL DEFAULT 'ATIVA',
     CONSTRAINT fk_appointment_patient FOREIGN KEY (patient_id) REFERENCES patient(id),
     CONSTRAINT fk_appointment_doctor FOREIGN KEY (doctor_id) REFERENCES doctor(id)
 );

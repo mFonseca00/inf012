@@ -2,33 +2,43 @@ import React, { useState, useEffect, useContext } from "react";
 import { toast } from "react-toastify";
 import { AuthContext } from "../../contexts/AuthContext";
 import styles from "./AppointmentList.module.css";
-import AppointmentCard from "../../components/appointment/AppointmentCard";
-import AppointmentTabs from "../../components/appointment/AppointmentTabs";
+import AppointmentCard from "../../components/appointment/card/AppointmentCard";
+import AppointmentTabs from "../../components/appointment/tabs/AppointmentTabs";
 import Button from "../../components/ui/button/Button";
 import Pagination from "../../components/ui/Pagination";
 import StatusFilter from "../../components/ui/selectors/StatusFilter";
 import appointmentService from "../../services/appointmentService";
-import AppointmentListSkeleton from "../../components/appointment/AppointmentListSkeleton";
+import AppointmentListSkeleton from "../../components/appointment/skeleton/AppointmentListSkeleton";
+import ScheduleModal from "../../components/appointment/schedule/ScheduleModal";
 
 const AppointmentList = () => {
   const { user } = useContext(AuthContext);
   const [consultas, setConsultas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showSkeleton, setShowSkeleton] = useState(false);
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
 
   // Paginação
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const itemsPerPage = 12;
   const [totalPages, setTotalPages] = useState(1);
 
   // Filtros
   const [statusFilter, setStatusFilter] = useState("");
 
   // Abas para médico que também é paciente
-  const [activeTab, setActiveTab] = useState("PATIENT");
   const isDoctorAndPatient = user?.roles?.includes("DOCTOR") && user?.roles?.includes("PATIENT");
+  
+  // Define o activeTab inicial baseado na role do usuário
+  const getInitialTab = () => {
+    if (isDoctorAndPatient) return "PATIENT";
+    if (user?.roles?.includes("DOCTOR")) return "DOCTOR";
+    return "PATIENT";
+  };
+  
+  const [activeTab, setActiveTab] = useState(getInitialTab);
 
-  useEffect(() => {
+  const fetchAppointments = () => {
     setLoading(true);
     setShowSkeleton(false);
 
@@ -62,6 +72,10 @@ const AppointmentList = () => {
         setLoading(false);
         setShowSkeleton(false);
       });
+  };
+
+  useEffect(() => {
+    fetchAppointments();
   }, [currentPage, statusFilter, activeTab, isDoctorAndPatient, user?.roles]);
 
   let pageTitle = "Meus Agendamentos";
@@ -76,6 +90,17 @@ const AppointmentList = () => {
     setCurrentPage(1);
   };
 
+  // Determina o viewMode correto para passar ao AppointmentCard
+  const getViewMode = () => {
+    if (isDoctorAndPatient) return activeTab;
+    if (user?.roles?.includes("DOCTOR")) return "DOCTOR";
+    return "PATIENT";
+  };
+
+  const handleScheduleSuccess = () => {
+    fetchAppointments();
+  };
+
   if (loading && showSkeleton) {
     return <AppointmentListSkeleton title={pageTitle} />;
   }
@@ -86,7 +111,7 @@ const AppointmentList = () => {
         <h1 className={styles.pageTitle}>{pageTitle}</h1>
         <Button
           className={styles.btnNew}
-          onClick={() => toast.info("Funcionalidade de agendamento será implementada em breve!")}
+          onClick={() => setShowScheduleModal(true)}
         >
           Agendar nova consulta
         </Button>
@@ -111,7 +136,8 @@ const AppointmentList = () => {
               <AppointmentCard
                 key={consulta.id}
                 consulta={consulta}
-                viewMode={activeTab}
+                viewMode={getViewMode()}
+                onActionSuccess={fetchAppointments}
               />
             ))}
           </div>
@@ -121,6 +147,13 @@ const AppointmentList = () => {
             onPageChange={setCurrentPage}
           />
         </>
+      )}
+
+      {showScheduleModal && (
+        <ScheduleModal
+          onClose={() => setShowScheduleModal(false)}
+          onSuccess={handleScheduleSuccess}
+        />
       )}
     </div>
   );
