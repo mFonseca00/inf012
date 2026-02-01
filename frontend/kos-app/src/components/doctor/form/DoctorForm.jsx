@@ -113,13 +113,10 @@ export default function DoctorForm({ onClose, onSuccess, initialData }) {
   };
 
   const preencherDadosPaciente = (patient) => {
-    console.log("Preenchendo dados do paciente:", patient); // DEBUG
     
     if (patient) {
       const address = patient.address || INITIAL_ADDRESS_STATE;
-      
-      console.log("Endereço do paciente:", address); // DEBUG
-      
+            
       setFormData((prev) => {
         const newFormData = {
           ...prev,
@@ -136,7 +133,6 @@ export default function DoctorForm({ onClose, onSuccess, initialData }) {
             cep: address.cep || "",
           },
         };
-        console.log("FormData atualizado:", newFormData); // DEBUG
         return newFormData;
       });
 
@@ -154,24 +150,20 @@ export default function DoctorForm({ onClose, onSuccess, initialData }) {
       setLoadingPatient(true);
 
       const timeout = setTimeout(() => {
-        console.log("Buscando paciente com username:", formData.username); // DEBUG
         
         patientService
           .getByUsername(formData.username)
           .then((patient) => {
-            console.log("Paciente encontrado:", patient); // DEBUG
             
             if (patient) {
               setLinkedPatient(patient);
               // Pré-preencher todos os dados do paciente
               preencherDadosPaciente(patient);
             } else {
-              console.log("Paciente não encontrado"); // DEBUG
               setLinkedPatient(null);
             }
           })
           .catch((error) => {
-            console.error("Erro na busca do paciente:", error); // DEBUG
             setLinkedPatient(null);
           })
           .finally(() => {
@@ -255,12 +247,9 @@ export default function DoctorForm({ onClose, onSuccess, initialData }) {
 
         await doctorService.update(updateData);
         
-        // ✅ CORRIGIDO: Verificar se nome OU endereço foram alterados
         const nameChanged = formData.name !== originalName;
         const addrChanged = addressChanged();
         
-        console.log("Nome alterado:", nameChanged); // DEBUG
-        console.log("Endereço alterado:", addrChanged); // DEBUG
         
         if (linkedPatient && (nameChanged || addrChanged)) {
           try {

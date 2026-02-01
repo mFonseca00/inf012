@@ -34,7 +34,6 @@ const patientService = {
   getByUsername: async (username) => {
     try {
       const response = await api.get(`/patient/info/${username}`);
-      console.log("Dados do paciente retornados:", response.data);
       return response.data;
     } catch (error) {
       console.error("Erro ao buscar paciente por username:", error);
