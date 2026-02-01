@@ -65,6 +65,18 @@ public class DoctorController {
         return ResponseEntity.ok(doctors);
     }
 
+    @GetMapping("/search")
+    @Operation(summary = "Buscar médicos por nome", description = "Retorna uma lista paginada de médicos filtrados pelo nome.")
+    public ResponseEntity<Page<DoctorResponseDTO>> searchByName(
+        @RequestParam String name,
+        Pageable pageable) {
+        Page<DoctorResponseDTO> doctors = doctorService.getDoctorsByName(name, pageable);
+        if (doctors.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(doctors);
+    }
+
     @GetMapping
     @Operation(summary = "Obter médico por CRM", description = "Retorna os dados do médico com base no CRM.")
     public ResponseEntity<DoctorResponseDTO> getDoctor(

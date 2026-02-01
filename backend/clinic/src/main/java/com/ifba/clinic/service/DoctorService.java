@@ -124,6 +124,18 @@ public class DoctorService {
         ));
     }
 
+    public Page<DoctorResponseDTO> getDoctorsByName(String name, Pageable pageable) {
+        Page<Doctor> doctors = doctorRepository.findByNameContainingIgnoreCase(name, pageable);
+        return doctors.map(doctor -> new DoctorResponseDTO(
+                doctor.getId(),
+                doctor.getName(),
+                doctor.getUser().getEmail(),
+                doctor.getCrm(),
+                doctor.getSpeciality(),
+                doctor.getIsActive()
+        ));
+    }
+
     public DoctorResponseDTO getDoctor(String crm) {
         String formattedCrm = Formatters.formatCRM(crm);
         Doctor doctor = doctorRepository.findByCrm(formattedCrm);

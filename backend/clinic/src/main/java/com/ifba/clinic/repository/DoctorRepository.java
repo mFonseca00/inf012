@@ -1,5 +1,7 @@
 package com.ifba.clinic.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -15,4 +17,5 @@ public interface DoctorRepository extends JpaRepository<Doctor, Long> {
     Doctor findByCrm(String crm);
     Doctor findByUserUsername(String username);
     Doctor findByUserId(Long id);
+    Page<Doctor> findByNameContainingIgnoreCase(String name, Pageable pageable);
 }
