@@ -66,13 +66,17 @@ public class User implements UserDetails {
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
-        this.email = this.email.toLowerCase();
+        if (this.email != null) {
+            this.email = this.email.toLowerCase();
+        }
     }
 
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
-        this.email = this.email.toLowerCase();
+        if (this.email != null) {
+            this.email = this.email.toLowerCase();
+        }
     }
 
     @Override
