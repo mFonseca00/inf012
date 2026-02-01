@@ -30,6 +30,10 @@ const patientService = {
     const response = await api.get("/patient", { params: { cpf } });
     return response.data;
   },
+
+  getByUsername: (username) => {
+    return api.get(`/patient/${username}`).then(res => res.data);
+  },
 };
 
 export default patientService;

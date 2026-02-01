@@ -5,9 +5,9 @@ import styles from "./DoctorList.module.css";
 import DoctorRow from "../../components/doctor/row/DoctorRow";
 import Button from "../../components/ui/button/Button";
 import Pagination from "../../components/ui/Pagination";
+import DoctorForm from "../../components/doctor/form/DoctorForm";
 import doctorService from "../../services/doctorService";
 import DoctorListSkeleton from "../../components/doctor/skeleton/DoctorListSkeleton";
-import DoctorForm from "../../components/doctor/form/DoctorForm";
 
 const DoctorList = () => {
   const { user } = useContext(AuthContext);
@@ -16,6 +16,7 @@ const DoctorList = () => {
   const [showSkeleton, setShowSkeleton] = useState(false);
   const [showDoctorForm, setShowDoctorForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [initialData, setInitialData] = useState(null);
 
   // Paginação
   const [currentPage, setCurrentPage] = useState(1);
@@ -64,13 +65,23 @@ const DoctorList = () => {
     setCurrentPage(newPage);
   };
 
+  const handleAddButtonClick = () => {
+    setInitialData(null);
+    setShowDoctorForm(true);
+  };
+
+  const handleEdit = (doctor) => {
+    setInitialData(doctor);
+    setShowDoctorForm(true);
+  };
+
   const handleActionSuccess = () => {
     fetchDoctors();
   };
 
-  const handleAddButtonClick = () => {
-    console.log("Botão clicado, abrindo modal"); // Debug
-    setShowDoctorForm(true);
+  const handleCloseForm = () => {
+    setShowDoctorForm(false);
+    setInitialData(null);
   };
 
   if (loading && showSkeleton) {
@@ -85,6 +96,7 @@ const DoctorList = () => {
           Cadastrar médico
         </Button>
       </div>
+
       <div className={styles.searchBarWrapper}>
         <label className={styles.searchLabel} htmlFor="doctorSearch">Buscar:</label>
         <input
@@ -96,6 +108,7 @@ const DoctorList = () => {
           className={styles.searchInput}
         />
       </div>
+
       <div className={styles.tableContainer}>
         <div className={styles.tableHeader}>
           <div className={styles.headerCell}>Nome</div>
@@ -117,6 +130,7 @@ const DoctorList = () => {
                 key={doctor.id}
                 doctor={doctor}
                 onActionSuccess={handleActionSuccess}
+                onEdit={handleEdit}
               />
             ))}
           </div>
@@ -133,11 +147,12 @@ const DoctorList = () => {
 
       {showDoctorForm && (
         <DoctorForm
-          onClose={() => setShowDoctorForm(false)}
+          onClose={handleCloseForm}
           onSuccess={() => {
-            setShowDoctorForm(false);
+            handleCloseForm();
             fetchDoctors();
           }}
+          initialData={initialData}
         />
       )}
     </div>

@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -68,7 +69,7 @@ public class PatientController {
     @Operation(summary = "Obter meus dados de paciente", description = "Retorna os dados do paciente vinculado ao usuário autenticado.")
     public ResponseEntity<PatientResponseDTO> getMyPatient(Authentication authentication) {
         String username = authentication.getName();
-        PatientResponseDTO patient = patientService.getMyPatient(username);
+        PatientResponseDTO patient = patientService.getPatient(username);
         return ResponseEntity.ok(patient);
     }
 
@@ -89,6 +90,13 @@ public class PatientController {
             @Pattern(regexp = "^(\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}|\\d{11})$", message = "CPF inválido")
             String cpf) {
         PatientResponseDTO patient = patientService.getPatientByCPF(cpf);
+        return ResponseEntity.ok(patient);
+    }
+
+    @GetMapping("/{username}")
+    @Operation(summary = "Buscar paciente por username", description = "Retorna os dados do paciente vinculado a um username, se existir.")
+    public ResponseEntity<PatientResponseDTO> getPatientByUsername(@PathVariable String username) {
+        PatientResponseDTO patient = patientService.getPatient(username);
         return ResponseEntity.ok(patient);
     }
 }

@@ -166,7 +166,7 @@ public class PatientService {
         );
     }
 
-    public PatientResponseDTO getMyPatient(String username) {
+    public PatientResponseDTO getPatient(String username) {
         Patient patient = getPatientByUsername(username);
         return new PatientResponseDTO(
             patient.getId(),

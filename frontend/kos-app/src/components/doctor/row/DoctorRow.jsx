@@ -4,7 +4,7 @@ import styles from "./DoctorRow.module.css";
 import Button from "../../ui/button/Button";
 import doctorService from "../../../services/doctorService";
 
-export default function DoctorRow({ doctor, onActionSuccess }) {
+export default function DoctorRow({ doctor, onActionSuccess, onEdit }) {
   const [loading, setLoading] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [actionType, setActionType] = useState(null);
@@ -38,7 +38,11 @@ export default function DoctorRow({ doctor, onActionSuccess }) {
   };
 
   const handleEdit = () => {
-    console.log("Editar médico:", doctor.id);
+    if (onEdit) {
+      onEdit(doctor);
+    } else {
+      console.log("Editar médico:", doctor.id);
+    }
   };
 
   const openConfirmModal = (type) => {

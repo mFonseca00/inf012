@@ -6,6 +6,7 @@ import DoctorUserFields from "../../doctor/user_fields/DoctorUserFields";
 import AddressFields from "../../auth/address_fields/AddressFields";
 import doctorService from "../../../services/doctorService";
 import { toast } from "react-toastify";
+import patientService from "../../../services/patientService";
 
 const SPECIALITIES = [
   { value: "", label: "Selecione uma especialidade" },
@@ -36,6 +37,9 @@ export default function DoctorForm({ onClose, onSuccess, initialData }) {
 
   const [loading, setLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [linkedPatient, setLinkedPatient] = useState(null);
+  const [loadingPatient, setLoadingPatient] = useState(false);
+  const [usernameTimeout, setUsernameTimeout] = useState(null);
 
   useEffect(() => {
     if (initialData) {
@@ -44,10 +48,56 @@ export default function DoctorForm({ onClose, onSuccess, initialData }) {
     }
   }, [initialData]);
 
+  useEffect(() => {
+    // Limpar timeout anterior
+    if (usernameTimeout) {
+      clearTimeout(usernameTimeout);
+    }
+
+    // Se não está editando e tem username, buscar dados do paciente
+    if (!isEditing && formData.username && formData.username.length > 2) {
+      setLoadingPatient(true);
+
+      const timeout = setTimeout(() => {
+        patientService
+          .getByUsername(formData.username)
+          .then((patient) => {
+            if (patient) {
+              setLinkedPatient(patient);
+              // Pré-preencher nome com o nome do paciente
+              setFormData((prev) => ({
+                ...prev,
+                name: patient.name || "",
+              }));
+            } else {
+              setLinkedPatient(null);
+            }
+          })
+          .catch(() => {
+            // Silenciosamente ignorar erro (usuário pode não estar vinculado a paciente)
+            setLinkedPatient(null);
+          })
+          .finally(() => {
+            setLoadingPatient(false);
+          });
+      }, 500);
+
+      setUsernameTimeout(timeout);
+    } else {
+      setLinkedPatient(null);
+      setLoadingPatient(false);
+    }
+
+    return () => {
+      if (usernameTimeout) {
+        clearTimeout(usernameTimeout);
+      }
+    };
+  }, [formData.username, isEditing]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     
-    // Tratamento de campos aninhados (address.*)
     if (name.startsWith("address.")) {
       const addrField = name.split(".")[1];
       setFormData((prev) => ({
@@ -102,11 +152,26 @@ export default function DoctorForm({ onClose, onSuccess, initialData }) {
       }
       onSuccess();
     } catch (err) {
-      const errorMessage = err.response?.data?.message || "Erro ao salvar médico. Verifique os dados.";
-      toast.error(errorMessage);
-    } finally {
-      setLoading(false);
+    let errorMessage = "Erro ao salvar médico. Verifique os dados.";
+    
+    if (err.response?.data?.message) {
+      errorMessage = err.response.data.message;
+    } else if (err.response?.data?.fieldErrors) {
+      const fieldErrors = Object.entries(err.response.data.fieldErrors)
+        .map(([field, error]) => `${field}: ${error}`)
+        .join(", ");
+      errorMessage = fieldErrors;
+    } else if (typeof err.response?.data === "string") {
+      errorMessage = err.response.data;
+    } else if (err.message) {
+      errorMessage = err.message;
     }
+    
+    toast.error(errorMessage);
+    console.error("Erro ao salvar médico:", err);
+  } finally {
+    setLoading(false);
+  }
   };
 
   return ReactDOM.createPortal(
@@ -133,6 +198,8 @@ export default function DoctorForm({ onClose, onSuccess, initialData }) {
             onChange={handleChange}
             loading={loading}
             usernameDisabled={isEditing}
+            nameDisabled={!isEditing && !!linkedPatient}
+            loadingPatient={loadingPatient}
           />
 
           <div className={styles.formGroup}>

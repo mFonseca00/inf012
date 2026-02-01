@@ -10,7 +10,9 @@ export default function DoctorUserFields({
   phoneNumber, 
   onChange, 
   loading,
-  usernameDisabled 
+  usernameDisabled,
+  nameDisabled,
+  loadingPatient
 }) {
   const [emailError, setEmailError] = React.useState("");
   const [usernameError, setUsernameError] = React.useState("");
@@ -36,7 +38,7 @@ export default function DoctorUserFields({
     const value = e.target.value;
     
     if (value && value.length < 3) {
-      setUsernameError("Usuário deve ter ser preenchido por completo");
+      setUsernameError("Usuário deve ter pelo menos 3 caracteres");
     } else {
       setUsernameError("");
     }
@@ -56,11 +58,16 @@ export default function DoctorUserFields({
           label="Nome completo:"
           value={name}
           onChange={onChange}
-          disabled={loading}
+          disabled={loading || nameDisabled || loadingPatient}
           placeholder="Seu nome completo"
           autoComplete="name"
           required={true}
         />
+        {nameDisabled && (
+          <span className={styles.helperText}>
+            Nome preenchido automaticamente, o usuário já tem um paciente vinculado
+          </span>
+        )}
       </div>
 
       <div className={styles.gridTwoCols}>
