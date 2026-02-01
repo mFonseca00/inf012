@@ -112,6 +112,19 @@ public class DoctorService {
         doctorRepository.save(doctor);
     }
 
+    public void reactivate(DoctorInactivationDTO doctorDTO) {
+        String formattedCRM = Formatters.formatCRM(doctorDTO.crm());
+        Doctor doctor = doctorRepository.findByCrm(formattedCRM);
+        if (doctor == null) {
+            throw new EntityNotFoundException("Médico de CRM " + doctorDTO.crm() + " não encontrado");
+        }
+        if (doctor.getIsActive()) {
+            throw new InvalidOperationException("Médico de CRM " + doctorDTO.crm() + " já está ativo");
+        }
+        doctor.setIsActive(true);
+        doctorRepository.save(doctor);
+    }
+
     public Page<DoctorResponseDTO> getAllDoctors(Pageable pageable) {
         Page<Doctor> doctors = doctorRepository.findAll(pageable);
         return doctors.map(doctor -> new DoctorResponseDTO(
@@ -128,9 +141,9 @@ public class DoctorService {
         Page<Doctor> doctors = doctorRepository.findByNameContainingIgnoreCase(name, pageable);
         return doctors.map(doctor -> new DoctorResponseDTO(
                 doctor.getId(),
+                doctor.getCrm(),
                 doctor.getName(),
                 doctor.getUser().getEmail(),
-                doctor.getCrm(),
                 doctor.getSpeciality(),
                 doctor.getIsActive()
         ));

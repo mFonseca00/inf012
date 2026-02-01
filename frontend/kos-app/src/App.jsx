@@ -12,9 +12,9 @@ import ResetPassword from "./pages/auth/ResetPassword";
 
 // Páginas/Componentes privados (conteúdo da área central)
 import Dashboard from "./pages/dashboard/Dashboard";
-import MonitoringPage from "./pages/dashboard/MonitoringPage";
+import MonitoringPage from "./pages/monitoring/MonitoringPage";
 import AppointmentList from "./pages/appointment/AppointmentList";
-import DoctorList from "./pages/usersScreen/DoctorList";
+import DoctorList from "./pages/doctor/DoctorList";
 
 function App() {
   return (

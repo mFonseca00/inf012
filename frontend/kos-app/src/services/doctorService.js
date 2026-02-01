@@ -16,6 +16,11 @@ const doctorService = {
     return response.data;
   },
 
+  reactivate: async (doctorData) => {
+    const response = await api.patch("/doctor/reactivate", doctorData);
+    return response.data;
+  },
+
   getAll: async (pageable = { page: 0, size: 10 }) => {
     const response = await api.get("/doctor/all", { params: pageable });
     return response.data;
@@ -30,21 +35,7 @@ const doctorService = {
     const response = await api.get("/doctor", { params: { crm } });
     return response.data;
   },
-};
-
-export default doctorService;
-import api from "./api";
-
-const doctorService = {
-  getAll: async (page = 0, size = 100) => {
-    const response = await api.get(`/doctor/all?page=${page}&size=${size}`);
-    return response.data;
-  },
-
-  getDoctor: async (crm) => {
-    const response = await api.get(`/doctor?crm=${crm}`);
-    return response.data;
-  },
+  
 };
 
 export default doctorService;

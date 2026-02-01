@@ -55,6 +55,13 @@ public class DoctorController {
         return ResponseEntity.ok("Médico inativado com sucesso");
     }
 
+    @PatchMapping("/reactivate")
+    @Operation(summary = "Reativar médico", description = "Reativa um médico inativo.")
+    public ResponseEntity<String> reactivate(@RequestBody @Valid DoctorInactivationDTO doctorDTO) {
+        doctorService.reactivate(doctorDTO);
+        return ResponseEntity.ok("Médico reativado com sucesso");
+    }
+
     @GetMapping("/all")
     @Operation(summary = "Listar todos os médicos", description = "Retorna uma lista paginada de todos os médicos.")
     public ResponseEntity<Page<DoctorResponseDTO>> getAllDoctors(Pageable pageable) {
