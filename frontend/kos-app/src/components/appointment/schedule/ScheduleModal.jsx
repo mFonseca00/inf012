@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useContext } from "react";
 import ReactDOM from "react-dom";
 import { toast } from "react-toastify";
-import { AuthContext } from "../../contexts/AuthContext";
+import { AuthContext } from "../../../contexts/AuthContext";
 import styles from "./ScheduleModal.module.css";
-import appointmentService from "../../services/appointmentService";
-import doctorService from "../../services/doctorService";
-import patientService from "../../services/patientService";
-import PatientSelect from "../ui/selectors/PatientSelect";
-import DoctorSelect from "../ui/selectors/DoctorSelect";
-import DateTimeSelect from "../ui/selectors/DateTimeSelect";
+import appointmentService from "../../../services/appointmentService";
+import doctorService from "../../../services/doctorService";
+import patientService from "../../../services/patientService";
+import PatientSelect from "../../ui/selectors/PatientSelect";
+import DoctorSelect from "../../ui/selectors/DoctorSelect";
+import DateTimeSelect from "../../ui/selectors/DateTimeSelect";
 
 export default function ScheduleModal({ onClose, onSuccess }) {
   const { user } = useContext(AuthContext);

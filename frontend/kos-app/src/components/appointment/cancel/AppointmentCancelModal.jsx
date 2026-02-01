@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import ReactDOM from "react-dom";
 import { toast } from "react-toastify";
 import styles from "./AppointmentCancelModal.module.css";
-import appointmentService from "../../services/appointmentService";
+import appointmentService from "../../../services/appointmentService";
 
 export default function CancelModal({ appointmentId, newStatus, onClose, onSuccess }) {
   const [reason, setReason] = useState("");

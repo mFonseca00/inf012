@@ -1,6 +1,6 @@
 import React from "react";
 import styles from "./AppointmentListSkeleton.module.css";
-import Button from "../ui/button/Button";
+import Button from "../../ui/button/Button";
 
 export default function AppointmentListSkeleton({ title = "Meus Agendamentos" }) {
   return (
