@@ -51,7 +51,6 @@ export default function ScheduleModal({ onClose, onSuccess }) {
           const patientsData = await patientService.getAll();
           setPatients(patientsData.content || []);
         } else {
-          // Paciente comum: usa seu próprio ID
           const myPatient = await patientService.getMyPatientId();
           setSelectedPatient(myPatient.id);
         }
@@ -128,8 +127,15 @@ export default function ScheduleModal({ onClose, onSuccess }) {
       return false;
     }
 
-    const hour = dateTime.getHours();
-    if (hour < 7 || hour >= 19) {
+    const openingTime = new Date(dateTime);
+    openingTime.setHours(7, 0, 0, 0);
+
+    const closingTime = new Date(dateTime);
+    closingTime.setHours(19, 0, 0, 0);
+
+    const endTime = new Date(dateTime.getTime() + 60 * 60000);
+
+    if (dateTime < openingTime || endTime > closingTime) {
       toast.warning("Horário de funcionamento: 07:00 às 19:00");
       return false;
     }

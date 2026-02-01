@@ -2,14 +2,14 @@ import React, { useState, useEffect, useContext } from "react";
 import { toast } from "react-toastify";
 import { AuthContext } from "../../contexts/AuthContext";
 import styles from "./AppointmentList.module.css";
-import AppointmentCard from "../../components/appointment/AppointmentCard";
+import AppointmentCard from "../../components/appointment/card/AppointmentCard";
 import AppointmentTabs from "../../components/appointment/tabs/AppointmentTabs";
 import Button from "../../components/ui/button/Button";
 import Pagination from "../../components/ui/Pagination";
 import StatusFilter from "../../components/ui/selectors/StatusFilter";
 import appointmentService from "../../services/appointmentService";
 import AppointmentListSkeleton from "../../components/appointment/skeleton/AppointmentListSkeleton";
-import ScheduleModal from "../../components/appointment/ScheduleModal";
+import ScheduleModal from "../../components/appointment/schedule/ScheduleModal";
 
 const AppointmentList = () => {
   const { user } = useContext(AuthContext);

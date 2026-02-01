@@ -11,8 +11,18 @@ const patientService = {
     return response.data;
   },
 
+  getMyPatient: async () => {
+    const response = await api.get("/patient/me");
+    return response.data;
+  },
+
   getMyPatientId: async () => {
     const response = await api.get("/patient/me");
+    return response.data.id;
+  },
+
+  registerWithUser: async (data) => {
+    const response = await api.post("/patient/register-with-user", data);
     return response.data;
   },
 };

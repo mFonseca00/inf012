@@ -35,12 +35,12 @@ export default function AppointmentCard({ consulta, viewMode = "PATIENT", onActi
 
   const isAppointmentActive = localStatus === "ATIVA";
 
-  // Define o status de cancelamento baseado no viewMode
-  const cancelStatus = viewMode === "DOCTOR" ? "CANCELADA" : "DESISTENCIA";
+  // Define o status de cancelamento baseado no viewMode e privilégios de admin
+  const isAdmin = user?.roles?.includes("ADMIN") || user?.roles?.includes("MASTER");
+  const cancelStatus = (isAdmin || viewMode === "DOCTOR") ? "CANCELADA" : "DESISTENCIA";
 
   // Botão de concluir só aparece quando viewMode é DOCTOR
   // Admin/Master sempre pode concluir independente do viewMode
-  const isAdmin = user?.roles?.includes("ADMIN") || user?.roles?.includes("MASTER");
   const canConclude = viewMode === "DOCTOR" || isAdmin;
 
   const handleConclude = async () => {

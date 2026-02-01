@@ -277,8 +277,8 @@ public class AppointmentService {
             newStatus != AppointmentStatus.DESISTENCIA) {
             throw new BusinessRuleException(
                 "Status de cancelamento inválido. " +
-                "Motivo de cancelamento deve ser: CANCELADA (médico cancelou), " +
-                "DESISTENCIA (paciente desistiu) ou OUTRO (outros motivos)"
+                "Motivo de cancelamento deve ser: CANCELADA (médico cancelou) " +
+                "ou DESISTENCIA (paciente desistiu)"
             );
         }
     }
