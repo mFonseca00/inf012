@@ -1,8 +1,8 @@
 package com.ifba.clinic.model.enums;
 
 public enum AppointmentStatus {
-    ATIVO("Consulta ativa"),
-    CANCELADO("Consulta cancelada pelo médico"),
+    ATIVA("Consulta ativa"),
+    CANCELADA("Consulta cancelada pelo médico"),
     DESISTENCIA("Consulta cancelada pelo paciente"),
     REALIZADA("Consulta realizada");
 

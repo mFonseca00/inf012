@@ -144,9 +144,9 @@ public class PatientService {
         Page<Patient> patients = patientRepository.findAll(pageable);
         return patients.map(patient -> new PatientResponseDTO(
             patient.getId(),
+            patient.getCpf(),
             patient.getName(),
             patient.getUser().getEmail(),
-            patient.getCpf(),
             patient.getIsActive()
         ));
     }
@@ -159,9 +159,20 @@ public class PatientService {
         }
         return new PatientResponseDTO(
             patient.getId(),
+            patient.getCpf(),
             patient.getName(),
             patient.getUser().getEmail(),
+            patient.getIsActive()
+        );
+    }
+
+    public PatientResponseDTO getMyPatient(String username) {
+        Patient patient = getPatientByUsername(username);
+        return new PatientResponseDTO(
+            patient.getId(),
             patient.getCpf(),
+            patient.getName(),
+            patient.getUser().getEmail(),
             patient.getIsActive()
         );
     }

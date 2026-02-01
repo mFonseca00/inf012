@@ -1,0 +1,87 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.modal {
+  background: white;
+  border-radius: 8px;
+  padding: 2rem;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.modal h2 {
+  margin: 0 0 0.5rem 0;
+  color: #333;
+}
+
+.modal p {
+  margin: 0 0 1rem 0;
+  color: #666;
+}
+
+.modal textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
+  box-sizing: border-box;
+  resize: vertical;
+}
+
+.modal textarea:focus {
+  outline: none;
+  border-color: #f44336;
+}
+
+.buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+
+.btnSecondary,
+.btnDanger {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btnSecondary {
+  background-color: #e0e0e0;
+  color: #333;
+}
+
+.btnSecondary:hover:not(:disabled) {
+  background-color: #d0d0d0;
+}
+
+.btnDanger {
+  background-color: #f44336;
+  color: white;
+}
+
+.btnDanger:hover:not(:disabled) {
+  background-color: #d32f2f;
+}
+
+.btnSecondary:disabled,
+.btnDanger:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

@@ -1,8 +1,18 @@
 import api from "./api";
 
 const patientService = {
-  registerWithUser: async (userData) => {
-    const response = await api.post("/patient/register-with-user", userData);
+  getAll: async (page = 0, size = 100) => {
+    const response = await api.get(`/patient/all?page=${page}&size=${size}`);
+    return response.data;
+  },
+
+  getPatient: async (cpf) => {
+    const response = await api.get(`/patient?cpf=${cpf}`);
+    return response.data;
+  },
+
+  getMyPatientId: async () => {
+    const response = await api.get("/patient/me");
     return response.data;
   },
 };

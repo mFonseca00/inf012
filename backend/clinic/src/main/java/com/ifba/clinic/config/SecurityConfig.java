@@ -44,6 +44,7 @@ public class SecurityConfig {
                     // qualquer usuário autenticado pode alterar sua própria senha e obter seu perfil
                     .requestMatchers(HttpMethod.PATCH, "/user/change-password").authenticated()
                     .requestMatchers(HttpMethod.GET, "/user/me").authenticated()
+                    .requestMatchers(HttpMethod.GET, "/patient/me").authenticated()
 
                     // PERMISSÕES GERAIS
                     .requestMatchers(HttpMethod.GET, "/appointment/all").hasAnyAuthority("PATIENT", "DOCTOR", "ADMIN", "MASTER")

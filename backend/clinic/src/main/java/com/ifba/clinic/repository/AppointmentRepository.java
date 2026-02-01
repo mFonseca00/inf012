@@ -20,7 +20,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     @Query("SELECT d FROM Doctor d WHERE d.isActive = true " +
             "AND d.id NOT IN (SELECT a.doctor.id FROM Appointment a " +
             "WHERE a.appointmentDate BETWEEN :startTime AND :endTime " +
-            "AND a.appointmentStatus = 'ATIVO')")
+            "AND a.appointmentStatus = 'ATIVA')")
     List<Doctor> findAvailableDoctors(@Param("startTime") LocalDateTime startTime, @Param("endTime") LocalDateTime endTime);
     Page<Appointment> findByPatientId(Long patientId, Pageable pageable);
     Page<Appointment> findByDoctorId(Long doctorId, Pageable pageable);
@@ -28,7 +28,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     // Verifica se há conflito de horário para o paciente (se o paciente já tem outra consulta no mesmo horário)
     @Query("SELECT a FROM Appointment a WHERE a.patient.id = :patientId " +
            "AND a.appointmentDate = :appointmentDate " +
-           "AND a.appointmentStatus NOT IN ('CANCELADO', 'DESISTENCIA')")
+           "AND a.appointmentStatus NOT IN ('CANCELADA', 'DESISTENCIA')")
     List<Appointment> findConflictingAppointmentForPatient(
         @Param("patientId") Long patientId,
         @Param("appointmentDate") LocalDateTime appointmentDate
@@ -37,7 +37,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     // Verifica se há conflito de horário para o médico (se o médico já tem outra consulta no mesmo horário)
     @Query("SELECT a FROM Appointment a WHERE a.doctor.id = :doctorId " +
            "AND a.appointmentDate = :appointmentDate " +
-           "AND a.appointmentStatus NOT IN ('CANCELADO', 'DESISTENCIA')")
+           "AND a.appointmentStatus NOT IN ('CANCELADA', 'DESISTENCIA')")
     List<Appointment> findConflictingAppointmentForDoctor(
         @Param("doctorId") Long doctorId,
         @Param("appointmentDate") LocalDateTime appointmentDate
