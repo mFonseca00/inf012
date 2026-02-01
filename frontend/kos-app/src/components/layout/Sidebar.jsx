@@ -55,10 +55,10 @@ const Sidebar = () => {
 
           {/* Menu Administrativo (Admin, Master) */}
           {hasRole(["ADMIN", "MASTER"]) && (
-            <>
+            <>              
               <li>
-                <Link to="/dashboard" className={isActive("/dashboard")}>
-                  Dashboard
+                <Link to="/monitoring" className={isActive("/monitoring")}>
+                  Monitoramento
                 </Link>
               </li>
               <li className={styles.sectionTitle}>Gerenciamento</li>

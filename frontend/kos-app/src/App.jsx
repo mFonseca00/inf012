@@ -12,6 +12,7 @@ import ResetPassword from "./pages/auth/ResetPassword";
 
 // Páginas/Componentes privados (conteúdo da área central)
 import Dashboard from "./pages/dashboard/Dashboard";
+import MonitoringPage from "./pages/dashboard/MonitoringPage";
 import AppointmentList from "./pages/appointment/AppointmentList";
 
 function App() {
@@ -73,6 +74,9 @@ function App() {
       >
         {/* Dashboard - apenas para ADMIN */}
         <Route path="/dashboard" element={<Dashboard />} />
+
+        {/* Monitoring Dashboard */}
+        <Route path="/monitoring" element={<MonitoringPage />} />
 
         {/* Agendamentos - para PATIENT, DOCTOR, RECEPTIONIST */}
         <Route path="/appointments" element={<AppointmentList />} />

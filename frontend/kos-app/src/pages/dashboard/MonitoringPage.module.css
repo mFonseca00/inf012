@@ -1,0 +1,231 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  width: 100%;
+}
+
+/* Header Section */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #eee;
+}
+
+.title {
+  font-size: 2rem;
+  color: #333;
+  margin: 0 0 0.5rem 0;
+  font-weight: 700;
+}
+
+.subtitle {
+  color: #666;
+  margin: 0;
+  font-size: 1rem;
+}
+
+.headerActions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.5rem;
+}
+
+.lastUpdate {
+    font-size: 0.8rem;
+    color: #999;
+}
+
+.refreshBtn {
+    min-width: 140px;
+}
+
+/* System Banner (Overall Status) */
+.systemBanner {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    border: 1px solid transparent;
+}
+
+.bannerOk {
+    background-color: #f0fff4;
+    border-color: #c6f6d5;
+    color: #276749;
+}
+
+.bannerError {
+    background-color: #fff5f5;
+    border-color: #fed7d7;
+    color: #c53030;
+}
+
+.bannerTitle {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.bannerDesc {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+/* Cards Grid */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+.card {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 15px rgba(0,0,0,0.1);
+}
+
+.cardDown {
+    border-color: #fed7d7;
+    background-color: #fffafa;
+}
+
+/* Card Header */
+.cardHeader {
+  padding: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border-bottom: 1px solid #f7fafc;
+}
+
+.iconBox {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.iconBoxUp { background-color: #ebf8ff; }
+.iconBoxDown { background-color: #fff5f5; }
+
+.cardTitleWrapper {
+    flex: 1;
+}
+
+.serviceName {
+  margin: 0 0 4px 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #2d3748;
+}
+
+.statusBadge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 99px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+}
+
+.badgeUp { background-color: #c6f6d5; color: #22543d; }
+.badgeDown { background-color: #fed7d7; color: #822727; }
+
+/* Card Body */
+.cardBody {
+  padding: 1.25rem;
+  background-color: #fcfcfc;
+  flex-grow: 1;
+}
+
+.metric {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #718096;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.instanceList {
+    background: white;
+    border: 1px solid #edf2f7;
+    border-radius: 6px;
+    padding: 0.5rem;
+}
+
+.instanceItem {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    font-family: monospace;
+    font-size: 0.85rem;
+    color: #4a5568;
+    border-bottom: 1px dashed #edf2f7;
+}
+
+.instanceItem:last-child { border-bottom: none; }
+
+.led {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #48bb78;
+    box-shadow: 0 0 0 2px #c6f6d5;
+}
+
+.noInstances {
+    font-size: 0.85rem;
+    color: #a0aec0;
+    font-style: italic;
+    padding: 4px;
+    display: block;
+    text-align: center;
+}
+
+/* Loading */
+.loadingState {
+    text-align: center;
+    padding: 4rem;
+    color: #a0aec0;
+    font-size: 1.2rem;
+    grid-column: 1 / -1;
+}
+
+.emptyState {
+    text-align: center;
+    padding: 3rem;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border: 2px dashed #dee2e6;
+    margin-top: 2rem;
+    color: #6c757d;
+}
+
+.emptyState h3 {
+    margin-top: 1rem;
+    color: #343a40;
+}
+
+@keyframes spin { 100% { transform: rotate(360deg); } }
+.spin { animation: spin 1s linear infinite; }
