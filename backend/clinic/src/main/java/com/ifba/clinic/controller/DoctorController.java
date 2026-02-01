@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ifba.clinic.dto.doctor.DoctorDetailDTO;
 import com.ifba.clinic.dto.doctor.DoctorInactivationDTO;
 import com.ifba.clinic.dto.doctor.DoctorRegDTO;
 import com.ifba.clinic.dto.doctor.DoctorResponseDTO;
@@ -55,10 +56,29 @@ public class DoctorController {
         return ResponseEntity.ok("Médico inativado com sucesso");
     }
 
+    @PatchMapping("/reactivate")
+    @Operation(summary = "Reativar médico", description = "Reativa um médico inativo.")
+    public ResponseEntity<String> reactivate(@RequestBody @Valid DoctorInactivationDTO doctorDTO) {
+        doctorService.reactivate(doctorDTO);
+        return ResponseEntity.ok("Médico reativado com sucesso");
+    }
+
     @GetMapping("/all")
     @Operation(summary = "Listar todos os médicos", description = "Retorna uma lista paginada de todos os médicos.")
     public ResponseEntity<Page<DoctorResponseDTO>> getAllDoctors(Pageable pageable) {
         Page<DoctorResponseDTO> doctors = doctorService.getAllDoctors(pageable);
+        if (doctors.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(doctors);
+    }
+
+    @GetMapping("/search")
+    @Operation(summary = "Buscar médicos por nome", description = "Retorna uma lista paginada de médicos filtrados pelo nome.")
+    public ResponseEntity<Page<DoctorResponseDTO>> searchByName(
+        @RequestParam String name,
+        Pageable pageable) {
+        Page<DoctorResponseDTO> doctors = doctorService.getDoctorsByName(name, pageable);
         if (doctors.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
@@ -72,6 +92,16 @@ public class DoctorController {
         @Pattern(regexp = "^(\\d{6}-\\d{2}\\/[A-Z]{2}|\\d{8}[A-Z]{2})$", message = "CRM inválido")
         String crm) {
         DoctorResponseDTO doctor = doctorService.getDoctor(crm);
+        return ResponseEntity.ok(doctor);
+    }
+
+    @GetMapping("/info")
+    @Operation(summary = "Obter informações completas do médico", description = "Retorna todos os dados do médico incluindo endereço e telefone para edição.")
+    public ResponseEntity<DoctorDetailDTO> getDoctorInfo(
+        @RequestParam
+        @Pattern(regexp = "^(\\d{6}-\\d{2}\\/[A-Z]{2}|\\d{8}[A-Z]{2})$", message = "CRM inválido")
+        String crm) {
+        DoctorDetailDTO doctor = doctorService.getDoctorInfo(crm);
         return ResponseEntity.ok(doctor);
     }
 }

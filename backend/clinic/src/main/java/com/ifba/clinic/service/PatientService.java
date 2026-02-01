@@ -4,7 +4,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.ifba.clinic.dto.address.AddressDTO;
 import com.ifba.clinic.dto.mix.UserPatientRegDTO;
+import com.ifba.clinic.dto.patient.PatientDetailDTO;
 import com.ifba.clinic.dto.patient.PatientInactivationDTO;
 import com.ifba.clinic.dto.patient.PatientRegDTO;
 import com.ifba.clinic.dto.patient.PatientResponseDTO;
@@ -166,13 +168,46 @@ public class PatientService {
         );
     }
 
-    public PatientResponseDTO getMyPatient(String username) {
+    public PatientResponseDTO getPatient(String username) {
         Patient patient = getPatientByUsername(username);
         return new PatientResponseDTO(
             patient.getId(),
             patient.getCpf(),
             patient.getName(),
             patient.getUser().getEmail(),
+            patient.getIsActive()
+        );
+    }
+
+    public PatientDetailDTO getPatientInfo(String username) {
+        User user = (User) userRepository.findByUsername(username);
+        if (user == null) {
+            throw new EntityNotFoundException("Usuário não encontrado");
+        }
+        
+        Patient patient = patientRepository.findByUserId(user.getId());
+        if (patient == null) {
+            throw new EntityNotFoundException("Paciente não encontrado para este usuário");
+        }
+        
+        AddressDTO addressDTO = new AddressDTO(
+            patient.getAddress().getStreet(),
+            patient.getAddress().getNumber(),
+            patient.getAddress().getComplement(),
+            patient.getAddress().getDistrict(),
+            patient.getAddress().getCity(),
+            patient.getAddress().getState(),
+            patient.getAddress().getCep()
+        );
+        
+        return new PatientDetailDTO(
+            patient.getId(),
+            patient.getName(),
+            user.getEmail(),
+            user.getUsername(),
+            patient.getPhoneNumber(),
+            patient.getCpf(),
+            addressDTO,
             patient.getIsActive()
         );
     }

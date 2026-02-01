@@ -25,6 +25,26 @@ const patientService = {
     const response = await api.post("/patient/register-with-user", data);
     return response.data;
   },
+
+  getByCpf: async (cpf) => {
+    const response = await api.get("/patient", { params: { cpf } });
+    return response.data;
+  },
+
+  getByUsername: async (username) => {
+    try {
+      const response = await api.get(`/patient/info/${username}`);
+      return response.data;
+    } catch (error) {
+      console.error("Erro ao buscar paciente por username:", error);
+      return null;
+    }
+  },
+
+  update: async (patientData) => {
+    const response = await api.patch("/patient/update", patientData);
+    return response.data;
+  },
 };
 
 export default patientService;

@@ -1,0 +1,275 @@
+.row {
+  display: grid;
+  grid-template-columns: 2fr 2fr 1.2fr 1.5fr 1fr 1.5fr;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border-color, #e0e0e0);
+  gap: 1rem;
+  background: white;
+  transition: background-color 0.2s;
+}
+
+.row:hover {
+  background-color: #fafafa;
+}
+
+.cellName {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.name {
+  font-weight: 600;
+  color: #333;
+  font-size: 0.95rem;
+}
+
+.cellEmail {
+  text-align: center;
+  font-size: 0.9rem;
+  color: #555;
+  word-break: break-word;
+}
+
+.cellCrm {
+  text-align: center;
+  font-size: 0.9rem;
+  color: #555;
+  font-family: 'Courier New', monospace;
+  font-weight: 500;
+}
+
+.cellSpeciality {
+  text-align: center;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.cellStatus {
+  text-align: center;
+}
+
+.statusBadge {
+  display: inline-block;
+  padding: 0.35rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.statusBadge.active {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.statusBadge.inactive {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+.cellActions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.btnEdit,
+.btnInactivate,
+.btnReactivate {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.btnEdit {
+  background-color: #e3f2fd;
+  color: #1976d2;
+  border: 1px solid #90caf9;
+}
+
+.btnEdit:hover:not(:disabled) {
+  background-color: #bbdefb;
+  border-color: #64b5f6;
+}
+
+.btnInactivate {
+  background-color: #fff3e0;
+  color: #e65100;
+  border: 1px solid #ffb74d;
+}
+
+.btnInactivate:hover:not(:disabled) {
+  background-color: #ffe0b2;
+  border-color: #ffa726;
+}
+
+.btnReactivate {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  border: 1px solid #81c784;
+}
+
+.btnReactivate:hover:not(:disabled) {
+  background-color: #c8e6c9;
+  border-color: #66bb6a;
+}
+
+.btnEdit:disabled,
+.btnInactivate:disabled,
+.btnReactivate:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modalContent {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  max-width: 400px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.modalContent h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: #333;
+  font-size: 1.1rem;
+}
+
+.modalContent p {
+  color: #666;
+  margin: 1rem 0;
+  line-height: 1.5;
+}
+
+.modalActions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+}
+
+.btnConfirm {
+  background-color: #4caf50;
+  color: white;
+}
+
+.btnConfirm:hover:not(:disabled) {
+  background-color: #388e3c;
+}
+
+@media (max-width: 1024px) {
+  .row {
+    grid-template-columns: 1.5fr 1.5fr 1fr 1.2fr 0.8fr 1.5fr;
+    padding: 0.9rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  .cellEmail {
+    font-size: 0.85rem;
+  }
+
+  .btnEdit,
+  .btnInactivate,
+  .btnReactivate {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .row {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+    padding: 1rem 0.75rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    margin-bottom: 0.75rem;
+  }
+
+  .cellName::before {
+    content: "Nome: ";
+    font-weight: 600;
+    display: block;
+    color: #999;
+    font-size: 0.75rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .cellEmail::before {
+    content: "Email: ";
+    font-weight: 600;
+    display: block;
+    color: #999;
+    font-size: 0.75rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .cellCrm::before {
+    content: "CRM: ";
+    font-weight: 600;
+    display: block;
+    color: #999;
+    font-size: 0.75rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .cellCrm {
+    text-align: left;
+  }
+
+  .cellSpeciality::before {
+    content: "Especialidade: ";
+    font-weight: 600;
+    display: block;
+    color: #999;
+    font-size: 0.75rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .cellSpeciality {
+    text-align: left;
+  }
+
+  .cellStatus::before {
+    content: "Status: ";
+    font-weight: 600;
+    display: block;
+    color: #999;
+    font-size: 0.75rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .cellStatus {
+    text-align: left;
+  }
+
+  .cellActions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-start;
+    margin-top: 0.75rem;
+  }
+
+}

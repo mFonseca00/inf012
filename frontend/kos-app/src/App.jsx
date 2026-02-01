@@ -12,8 +12,9 @@ import ResetPassword from "./pages/auth/ResetPassword";
 
 // Páginas/Componentes privados (conteúdo da área central)
 import Dashboard from "./pages/dashboard/Dashboard";
-import MonitoringPage from "./pages/dashboard/MonitoringPage";
+import MonitoringPage from "./pages/monitoring/MonitoringPage";
 import AppointmentList from "./pages/appointment/AppointmentList";
+import DoctorList from "./pages/doctor/DoctorList";
 
 function App() {
   return (
@@ -80,6 +81,9 @@ function App() {
 
         {/* Agendamentos - para PATIENT, DOCTOR, RECEPTIONIST */}
         <Route path="/appointments" element={<AppointmentList />} />
+
+        {/* Gerenciamento de Médicos */}
+        <Route path="/doctors" element={<DoctorList />} />
 
         {/* Redireciona qualquer outra rota privada para dashboard */}
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
