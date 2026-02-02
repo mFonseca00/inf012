@@ -9,6 +9,11 @@
   margin-bottom: 1rem;
 }
 
+.fieldContainer {
+  display: flex;
+  flex-direction: column;
+}
+
 .helperText {
   display: block;
   color: #1976d2;
