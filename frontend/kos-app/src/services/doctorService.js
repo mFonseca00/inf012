@@ -7,6 +7,8 @@ const doctorService = {
   },
 
   update: async (doctorData) => {
+    console.log("DADOS DE MEDICO DOUTOR");
+    console.log(doctorData);
     const response = await api.patch("/doctor/update", doctorData);
     return response.data;
   },
@@ -27,7 +29,9 @@ const doctorService = {
   },
 
   searchByName: async (name, pageable = { page: 0, size: 10 }) => {
-    const response = await api.get("/doctor/search", { params: { name, ...pageable } });
+    const response = await api.get("/doctor/search", {
+      params: { name, ...pageable },
+    });
     return response.data;
   },
 
@@ -40,7 +44,6 @@ const doctorService = {
     const response = await api.get("/doctor", { params: { crm } });
     return response.data;
   },
-
 };
 
 export default doctorService;
