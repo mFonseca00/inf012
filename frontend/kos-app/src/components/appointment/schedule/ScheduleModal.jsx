@@ -6,8 +6,7 @@ import styles from "./ScheduleModal.module.css";
 import appointmentService from "../../../services/appointmentService";
 import doctorService from "../../../services/doctorService";
 import patientService from "../../../services/patientService";
-import PatientSelect from "../../ui/selectors/PatientSelect";
-import DoctorSelect from "../../ui/selectors/DoctorSelect";
+import AutocompleteSelect from "../../ui/selectors/AutocompleteSelect";
 import DateTimeSelect from "../../ui/selectors/DateTimeSelect";
 
 export default function ScheduleModal({ onClose, onSuccess }) {
@@ -28,16 +27,12 @@ export default function ScheduleModal({ onClose, onSuccess }) {
   const isPatient = user?.roles?.includes("PATIENT");
   const isAdmin = user?.roles?.includes("ADMIN") || user?.roles?.includes("MASTER");
 
-  // Médico pode selecionar paciente (para marcar consulta consigo mesmo)
-  // Admin/Master pode selecionar qualquer paciente
   const canSelectPatient = isAdmin || isDoctor;
 
-  // Verifica se o paciente selecionado é o próprio usuário (médico marcando como paciente)
   const isSelectingSelfAsPatient = selectedPatient && 
     user?.patientId && 
     String(selectedPatient) === String(user.patientId);
 
-  // Médico: select de médico fica travado por padrão, só destrava se selecionar a si mesmo como paciente
   const isDoctorSelectLocked = isDoctor && !isAdmin && !isSelectingSelfAsPatient;
 
   useEffect(() => {
@@ -64,7 +59,7 @@ export default function ScheduleModal({ onClose, onSuccess }) {
     fetchData();
   }, [canSelectPatient]);
 
-  // Filtra médicos e auto-seleciona quando necessário
+  // Filtra médicos quando necessário
   useEffect(() => {
     if (!doctors.length) {
       setFilteredDoctors([]);
@@ -75,18 +70,14 @@ export default function ScheduleModal({ onClose, onSuccess }) {
 
     if (isDoctor && !isAdmin) {
       if (isSelectingSelfAsPatient) {
-        // Médico selecionou a si mesmo como paciente: remove ele da lista de médicos
         availableDoctors = doctors.filter(
           (doctor) => String(doctor.id) !== String(user.doctorId)
         );
-        // Reseta seleção de médico pois ele não pode se consultar
         setSelectedDoctor("");
       } else {
-        // Médico NÃO se selecionou como paciente: só pode marcar consigo mesmo
         availableDoctors = doctors.filter(
           (doctor) => String(doctor.id) === String(user.doctorId)
         );
-        // Auto-seleciona o próprio médico
         if (availableDoctors.length === 1) {
           setSelectedDoctor(String(availableDoctors[0].id));
         }
@@ -180,7 +171,6 @@ export default function ScheduleModal({ onClose, onSuccess }) {
     }
   };
 
-  // Mensagem de ajuda contextual
   const getDoctorHint = () => {
     if (isDoctor && !isAdmin) {
       if (isSelectingSelfAsPatient) {
@@ -188,11 +178,9 @@ export default function ScheduleModal({ onClose, onSuccess }) {
       }
       return "Como médico, você só pode marcar consultas de pacientes consigo mesmo.";
     }
-    return "Se não selecionar, o sistema escolherá um médico disponível automaticamente.";
+    return "Caso não seja selecionado, escolheremos um médico disponível automaticamente.";
   };
 
-  // Verifica se deve mostrar seleção automática
-  // Mostra "selecionar automaticamente" para: admin, paciente comum, ou médico se selecionando como paciente
   const showAutoSelect = isAdmin || (!isDoctor && isPatient) || isSelectingSelfAsPatient;
 
   return ReactDOM.createPortal(
@@ -204,6 +192,7 @@ export default function ScheduleModal({ onClose, onSuccess }) {
             className={styles.closeBtn} 
             onClick={onClose} 
             disabled={loading}
+            type="button"
           >
             ✕
           </button>
@@ -213,23 +202,48 @@ export default function ScheduleModal({ onClose, onSuccess }) {
           <div className={styles.loading}>Carregando...</div>
         ) : (
           <div className={styles.body}>
-            <PatientSelect
-              canSelectPatient={canSelectPatient}
-              patients={patients}
-              selectedPatient={selectedPatient}
-              setSelectedPatient={setSelectedPatient}
-              userName={user?.name}
-              disabled={loading}
-            />
+            {canSelectPatient && (
+              <div className={styles.field}>
+                <label>Paciente *</label>
+                <AutocompleteSelect
+                  items={patients}
+                  selectedItem={selectedPatient}
+                  setSelectedItem={setSelectedPatient}
+                  disabled={loading}
+                  placeholder="Digite o nome do paciente..."
+                  labelKey="name"
+                  valueKey="id"
+                />
+              </div>
+            )}
 
-            <DoctorSelect
-              doctors={filteredDoctors}
-              selectedDoctor={selectedDoctor}
-              setSelectedDoctor={setSelectedDoctor}
-              disabled={loading || isDoctorSelectLocked}
-              hint={getDoctorHint()}
-              showAutoSelect={showAutoSelect}
-            />
+            {!canSelectPatient && (
+              <div className={styles.field}>
+                <label>Paciente</label>
+                <input 
+                  type="text" 
+                  value={user?.name || "Você"} 
+                  disabled 
+                  className={styles.input}
+                />
+              </div>
+            )}
+
+            <div className={styles.field}>
+              <label>Médico {showAutoSelect ? "(opcional)" : "*"}</label>
+              <AutocompleteSelect
+                items={filteredDoctors}
+                selectedItem={selectedDoctor}
+                setSelectedItem={setSelectedDoctor}
+                disabled={loading || isDoctorSelectLocked}
+                placeholder="Digite o nome do médico ou especialidade..."
+                labelKey="name"
+                valueKey="id"
+              />
+              {getDoctorHint() && (
+                <small className={styles.hint}>{getDoctorHint()}</small>
+              )}
+            </div>
 
             <DateTimeSelect
               appointmentDate={appointmentDate}
