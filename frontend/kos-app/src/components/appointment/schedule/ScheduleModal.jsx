@@ -7,7 +7,6 @@ import appointmentService from "../../../services/appointmentService";
 import doctorService from "../../../services/doctorService";
 import patientService from "../../../services/patientService";
 import AutocompleteSelect from "../../ui/selectors/AutocompleteSelect";
-import DateTimeSelect from "../../ui/selectors/DateTimeSelect";
 
 export default function ScheduleModal({ onClose, onSuccess }) {
   const { user } = useContext(AuthContext);
@@ -20,6 +19,7 @@ export default function ScheduleModal({ onClose, onSuccess }) {
 
   const [selectedDoctor, setSelectedDoctor] = useState("");
   const [selectedPatient, setSelectedPatient] = useState("");
+
   const [appointmentDate, setAppointmentDate] = useState("");
   const [appointmentTime, setAppointmentTime] = useState("");
 
@@ -43,37 +43,33 @@ export default function ScheduleModal({ onClose, onSuccess }) {
       setLoadingData(true);
       try {
         const doctorsData = await doctorService.getAll();
-        setDoctors(doctorsData.content || []);
+        const allDoctors = doctorsData.content || [];
+        const activeDoctors = allDoctors.filter(
+          (doctor) => doctor.isActive === true,
+        );
+        setDoctors(activeDoctors);
 
         if (canSelectPatient) {
           const patientsData = await patientService.getAll();
-
-          // Garante que é um array
           const allPatients = patientsData.content || [];
-
-          // FILTRAGEM CORRETA:
-          // Baseado no seu PatientRow, isActive é uma propriedade (true/false), não função.
           const activePatients = allPatients.filter(
             (patient) => patient.isActive === true,
           );
-
           setPatients(activePatients);
         } else {
           const myPatientId = await patientService.getMyPatientId();
           setSelectedPatient(myPatientId);
         }
       } catch (error) {
-        console.error(error); // Bom para ver o erro real no console
+        console.error(error);
         toast.error("Erro ao carregar dados");
       } finally {
         setLoadingData(false);
       }
     };
-
     fetchData();
   }, [canSelectPatient]);
 
-  // Filtra médicos quando necessário
   useEffect(() => {
     if (!doctors.length) {
       setFilteredDoctors([]);
@@ -97,7 +93,6 @@ export default function ScheduleModal({ onClose, onSuccess }) {
         }
       }
     }
-
     setFilteredDoctors(availableDoctors);
   }, [
     doctors,
@@ -113,12 +108,10 @@ export default function ScheduleModal({ onClose, onSuccess }) {
       toast.warning("Selecione um paciente");
       return false;
     }
-
     if (!appointmentDate) {
       toast.warning("Selecione uma data");
       return false;
     }
-
     if (!appointmentTime) {
       toast.warning("Selecione um horário");
       return false;
@@ -130,7 +123,7 @@ export default function ScheduleModal({ onClose, onSuccess }) {
 
     if (dateTime < minTime) {
       toast.warning(
-        "Consultas devem ser agendadas com antecedência mínima de 30 minutos",
+        "A consulta deve ser marcada com pelo menos 30 min de antecedência.",
       );
       return false;
     }
@@ -141,15 +134,8 @@ export default function ScheduleModal({ onClose, onSuccess }) {
       return false;
     }
 
-    const openingTime = new Date(dateTime);
-    openingTime.setHours(7, 0, 0, 0);
-
-    const closingTime = new Date(dateTime);
-    closingTime.setHours(19, 0, 0, 0);
-
-    const endTime = new Date(dateTime.getTime() + 60 * 60000);
-
-    if (dateTime < openingTime || endTime > closingTime) {
+    const hour = dateTime.getHours();
+    if (hour < 7 || hour >= 19) {
       toast.warning("Horário de funcionamento: 07:00 às 19:00");
       return false;
     }
@@ -163,7 +149,6 @@ export default function ScheduleModal({ onClose, onSuccess }) {
     setLoading(true);
     try {
       const dateTime = `${appointmentDate}T${appointmentTime}:00`;
-
       await appointmentService.scheduleAppointment(
         selectedPatient,
         selectedDoctor || null,
@@ -177,17 +162,10 @@ export default function ScheduleModal({ onClose, onSuccess }) {
       let errorMsg = "Erro ao agendar consulta";
       if (error.response?.data) {
         const data = error.response.data;
-        if (typeof data === "string") {
-          errorMsg = data;
-        } else if (data.message) {
-          errorMsg = data.message;
-        } else if (typeof data === "object") {
-          errorMsg = JSON.stringify(data);
-        }
-      } else if (error.message) {
-        errorMsg = error.message;
-      }
-
+        if (typeof data === "string") errorMsg = data;
+        else if (data.message) errorMsg = data.message;
+        else if (typeof data === "object") errorMsg = JSON.stringify(data);
+      } else if (error.message) errorMsg = error.message;
       toast.error(errorMsg);
     } finally {
       setLoading(false);
@@ -197,7 +175,7 @@ export default function ScheduleModal({ onClose, onSuccess }) {
   const getDoctorHint = () => {
     if (isDoctor && !isAdmin) {
       if (isSelectingSelfAsPatient) {
-        return "Você selecionou a si mesmo como paciente. Escolha outro médico para a consulta.";
+        return "Você selecionou a si mesmo como paciente. Escolha outro médico.";
       }
       return "Como médico, você só pode marcar consultas de pacientes consigo mesmo.";
     }
@@ -206,6 +184,29 @@ export default function ScheduleModal({ onClose, onSuccess }) {
 
   const showAutoSelect =
     isAdmin || (!isDoctor && isPatient) || isSelectingSelfAsPatient;
+
+  // --- FUNÇÃO AUXILIAR PARA ABRIR O PICKER ---
+  // Isso força o navegador a abrir o relógio/calendário nativo ao clicar no input
+  const handleInputClick = (e) => {
+    try {
+      // Verifica se o navegador suporta a API showPicker (Chrome, Edge, Firefox moderno, Mobile)
+      if (e.target.showPicker) {
+        e.target.showPicker();
+      }
+    } catch (error) {
+      // Se der erro ou não suportar, apenas foca no input (comportamento padrão)
+      console.log("Picker not supported programmatically");
+    }
+  };
+
+  // Estilos de layout
+  const rowStyle = { display: "flex", gap: "15px", marginTop: "10px" };
+  const colStyle = {
+    flex: 1,
+    display: "flex",
+    flexDirection: "column",
+    gap: "5px",
+  };
 
   return ReactDOM.createPortal(
     <div className={styles.overlay} onClick={() => !loading && onClose()}>
@@ -226,7 +227,7 @@ export default function ScheduleModal({ onClose, onSuccess }) {
           <div className={styles.loading}>Carregando...</div>
         ) : (
           <div className={styles.body}>
-            {canSelectPatient && (
+            {canSelectPatient ? (
               <div className={styles.field}>
                 <label>Paciente *</label>
                 <AutocompleteSelect
@@ -239,9 +240,7 @@ export default function ScheduleModal({ onClose, onSuccess }) {
                   valueKey="id"
                 />
               </div>
-            )}
-
-            {!canSelectPatient && (
+            ) : (
               <div className={styles.field}>
                 <label>Paciente</label>
                 <input
@@ -260,7 +259,7 @@ export default function ScheduleModal({ onClose, onSuccess }) {
                 selectedItem={selectedDoctor}
                 setSelectedItem={setSelectedDoctor}
                 disabled={loading || isDoctorSelectLocked}
-                placeholder="Digite o nome do médico ou especialidade..."
+                placeholder="Busque por nome ou especialidade..."
                 labelKey="name"
                 valueKey="id"
               />
@@ -269,13 +268,47 @@ export default function ScheduleModal({ onClose, onSuccess }) {
               )}
             </div>
 
-            <DateTimeSelect
-              appointmentDate={appointmentDate}
-              setAppointmentDate={setAppointmentDate}
-              appointmentTime={appointmentTime}
-              setAppointmentTime={setAppointmentTime}
-              disabled={loading}
-            />
+            {/* --- DATA E HORA LADO A LADO --- */}
+            <div style={rowStyle}>
+              {/* CAMPO DE DATA */}
+              <div style={colStyle}>
+                <label style={{ fontWeight: 500, fontSize: "0.9rem" }}>
+                  Data *
+                </label>
+                <input
+                  type="date"
+                  className={styles.input}
+                  value={appointmentDate}
+                  min={new Date().toISOString().split("T")[0]}
+                  onChange={(e) => setAppointmentDate(e.target.value)}
+                  onClick={handleInputClick} // <--- TRUQUE AQUI
+                  disabled={loading}
+                  style={{ cursor: "pointer" }} // Mostra a mãozinha para indicar clique
+                />
+              </div>
+
+              {/* CAMPO DE HORA (RELÓGIO NATIVO) */}
+              <div style={colStyle}>
+                <label style={{ fontWeight: 500, fontSize: "0.9rem" }}>
+                  Horário *
+                </label>
+                <input
+                  type="time"
+                  className={styles.input}
+                  value={appointmentTime}
+                  onChange={(e) => setAppointmentTime(e.target.value)}
+                  onClick={handleInputClick} // <--- TRUQUE AQUI
+                  disabled={loading}
+                  style={{ cursor: "pointer" }} // Mostra a mãozinha para indicar clique
+                />
+              </div>
+            </div>
+
+            <div
+              style={{ marginTop: "5px", fontSize: "0.75rem", color: "#666" }}
+            >
+              Horário de funcionamento: 07:00 às 19:00 (Seg a Sáb)
+            </div>
           </div>
         )}
 
