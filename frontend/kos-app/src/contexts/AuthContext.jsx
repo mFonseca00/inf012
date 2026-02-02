@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
+import Cookies from "js-cookie"; // Importação adicionada
 import authService from "../services/authService";
 import userService from "../services/userService";
 
@@ -11,17 +12,14 @@ export function AuthProvider({ children }) {
 
   const getBestRole = (roles) => {
     if (!roles || roles.length === 0) return "USER";
-
     if (roles.includes("MASTER")) return "MASTER";
     if (roles.includes("ADMIN")) return "ADMIN";
     if (roles.includes("DOCTOR")) return "DOCTOR";
     if (roles.includes("RECEPTIONIST")) return "RECEPTIONIST";
     if (roles.includes("PATIENT")) return "PATIENT";
-
     return roles[0];
   };
 
-  // Função para formatar o usuário com dados do backend
   const formatUser = (profileData) => {
     return {
       userId: profileData.userId,
@@ -34,20 +32,17 @@ export function AuthProvider({ children }) {
     };
   };
 
-  // Ao fazer login: salva token e busca dados do usuário
+  // Ao fazer login
   const login = async (username, password) => {
     try {
-      // 1. Faz login e recebe o token
       const response = await authService.login(username, password);
       const token = response.token;
 
-      // 2. Salva o token no localStorage
-      localStorage.setItem("token", token);
+      // [CHECKLIST]: Remover localStorage e usar Cookie simples
+      // expires: 1 define que o cookie expira em 1 dia (ajuste conforme necessário)
+      Cookies.set("token", token, { expires: 1 });
 
-      // 3. Busca os dados completos do usuário via /user/me
       const profileData = await userService.getProfile();
-
-      // 4. Formata e salva o usuário no estado
       const userData = formatUser(profileData);
       setUser(userData);
 
@@ -58,28 +53,27 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // Ao inicializar: recupera token e busca dados do usuário
+  // Ao inicializar
   useEffect(() => {
-    const recoveredToken = localStorage.getItem("token");
+    // [CHECKLIST]: Leitura do cookie em vez do localStorage
+    const recoveredToken = Cookies.get("token");
 
     if (recoveredToken) {
       const initializeUser = async () => {
         try {
-          // Valida se o token ainda é válido
           const decoded = jwtDecode(recoveredToken);
           if (decoded.exp * 1000 > Date.now()) {
-            // Busca os dados completos do usuário
             const profileData = await userService.getProfile();
             const userData = formatUser(profileData);
             setUser(userData);
           } else {
             // Token expirado
-            localStorage.removeItem("token");
+            Cookies.remove("token");
             setUser(null);
           }
         } catch (error) {
           console.error("Erro ao recuperar usuário:", error);
-          localStorage.removeItem("token");
+          Cookies.remove("token");
           setUser(null);
         } finally {
           setLoading(false);
@@ -93,7 +87,8 @@ export function AuthProvider({ children }) {
   }, []);
 
   const logout = () => {
-    localStorage.removeItem("token");
+    // [CHECKLIST]: Remoção do cookie
+    Cookies.remove("token");
     setUser(null);
   };
 
