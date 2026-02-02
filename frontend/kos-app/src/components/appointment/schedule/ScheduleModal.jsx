@@ -23,16 +23,12 @@ export default function ScheduleModal({ onClose, onSuccess }) {
   const [appointmentDate, setAppointmentDate] = useState("");
   const [appointmentTime, setAppointmentTime] = useState("");
 
-  // --- HACK CSS PARA O FIREFOX (Reincluindo para garantir funcionamento) ---
+  // CSS Hack para os inputs nativos
   const customStyles = `
-    .native-input-picker {
-      position: relative;
-    }
+    .native-input-picker { position: relative; }
     .native-input-picker::-webkit-calendar-picker-indicator {
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      width: 100%; height: 100%;
-      opacity: 0; cursor: pointer;
+      position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      width: 100%; height: 100%; opacity: 0; cursor: pointer;
     }
   `;
 
@@ -40,18 +36,13 @@ export default function ScheduleModal({ onClose, onSuccess }) {
   const isPatient = user?.roles?.includes("PATIENT");
   const isAdmin =
     user?.roles?.includes("ADMIN") || user?.roles?.includes("MASTER");
-
   const canSelectPatient = isAdmin || isDoctor;
-
   const isSelectingSelfAsPatient =
     selectedPatient &&
     user?.patientId &&
     String(selectedPatient) === String(user.patientId);
-
   const isDoctorSelectLocked =
     isDoctor && !isAdmin && !isSelectingSelfAsPatient;
-
-  // Define se a seleção é automática (opcional)
   const showAutoSelect =
     isAdmin || (!isDoctor && isPatient) || isSelectingSelfAsPatient;
 
@@ -60,17 +51,15 @@ export default function ScheduleModal({ onClose, onSuccess }) {
       setLoadingData(true);
       try {
         const doctorsData = await doctorService.getAll();
-        const allDoctors = doctorsData.content || [];
-        const activeDoctors = allDoctors.filter(
-          (doctor) => doctor.isActive === true,
+        const activeDoctors = (doctorsData.content || []).filter(
+          (d) => d.isActive,
         );
         setDoctors(activeDoctors);
 
         if (canSelectPatient) {
           const patientsData = await patientService.getAll();
-          const allPatients = patientsData.content || [];
-          const activePatients = allPatients.filter(
-            (patient) => patient.isActive === true,
+          const activePatients = (patientsData.content || []).filter(
+            (p) => p.isActive,
           );
           setPatients(activePatients);
         } else {
@@ -78,7 +67,6 @@ export default function ScheduleModal({ onClose, onSuccess }) {
           setSelectedPatient(myPatientId);
         }
       } catch (error) {
-        console.error(error);
         toast.error("Erro ao carregar dados");
       } finally {
         setLoadingData(false);
@@ -92,22 +80,19 @@ export default function ScheduleModal({ onClose, onSuccess }) {
       setFilteredDoctors([]);
       return;
     }
-
     let availableDoctors = [...doctors];
-
     if (isDoctor && !isAdmin) {
       if (isSelectingSelfAsPatient) {
         availableDoctors = doctors.filter(
-          (doctor) => String(doctor.id) !== String(user.doctorId),
+          (d) => String(d.id) !== String(user.doctorId),
         );
         setSelectedDoctor("");
       } else {
         availableDoctors = doctors.filter(
-          (doctor) => String(doctor.id) === String(user.doctorId),
+          (d) => String(d.id) === String(user.doctorId),
         );
-        if (availableDoctors.length === 1) {
+        if (availableDoctors.length === 1)
           setSelectedDoctor(String(availableDoctors[0].id));
-        }
       }
     }
     setFilteredDoctors(availableDoctors);
@@ -134,7 +119,7 @@ export default function ScheduleModal({ onClose, onSuccess }) {
       return false;
     }
 
-    // Se NÃO for seleção automática (ou seja, é obrigatório), valida se tem médico
+    // Se não é opcional e está vazio
     if (!showAutoSelect && !selectedDoctor) {
       toast.warning("Selecione um médico");
       return false;
@@ -142,28 +127,36 @@ export default function ScheduleModal({ onClose, onSuccess }) {
 
     const dateTime = new Date(`${appointmentDate}T${appointmentTime}`);
     const now = new Date();
-    const minTime = new Date(now.getTime() + 30 * 60000);
+    const minTime = new Date(now.getTime() + 30 * 60000); // 30 min antecedência
 
     if (dateTime < minTime) {
-      toast.warning(
-        "A consulta deve ser marcada com pelo menos 30 min de antecedência.",
-      );
+      toast.warning("Antecedência mínima de 30 minutos necessária.");
       return false;
     }
-
-    const dayOfWeek = dateTime.getDay();
-    if (dayOfWeek === 0) {
-      toast.warning("A clínica não funciona aos domingos");
+    if (dateTime.getDay() === 0) {
+      toast.warning("Domingo fechado.");
       return false;
     }
-
     const hour = dateTime.getHours();
     if (hour < 7 || hour >= 19) {
-      toast.warning("Horário de funcionamento: 07:00 às 19:00");
+      toast.warning("Funcionamento: 07:00 às 19:00");
       return false;
     }
-
     return true;
+  };
+
+  // --- NOVA LÓGICA DE VERIFICAÇÃO DE CONFLITO ---
+  const checkAvailabilityConflict = (existingDateStr, newDateObj) => {
+    // existingDateStr vem do backend (ex: "2023-10-25T13:00:00")
+    const existingTime = new Date(existingDateStr).getTime();
+    const newTime = newDateObj.getTime();
+
+    // Calcula diferença em minutos
+    const diffInMs = Math.abs(newTime - existingTime);
+    const diffInMinutes = diffInMs / (1000 * 60);
+
+    // Se a diferença for menor que 60 minutos, há conflito (overlap)
+    return diffInMinutes < 60;
   };
 
   const handleSubmit = async () => {
@@ -171,61 +164,87 @@ export default function ScheduleModal({ onClose, onSuccess }) {
 
     setLoading(true);
     try {
-      // --- LÓGICA DE SELEÇÃO ALEATÓRIA (NOVO) ---
+      const dateTimeStr = `${appointmentDate}T${appointmentTime}:00`;
+      const desiredDateObj = new Date(dateTimeStr);
       let finalDoctorId = selectedDoctor;
 
-      // Se não escolheu médico E a lista de médicos disponíveis não está vazia
+      // === SELEÇÃO AUTOMÁTICA INTELIGENTE ===
       if (!finalDoctorId && filteredDoctors.length > 0) {
-        // Gera um índice aleatório entre 0 e o tamanho da lista
-        const randomIndex = Math.floor(Math.random() * filteredDoctors.length);
-        // Seleciona o ID desse médico sorteado
-        finalDoctorId = filteredDoctors[randomIndex].id;
-      }
-      // -------------------------------------------
+        // 1. Busca agendamentos JÁ EXISTENTES naquele dia para saber quem está ocupado
+        // ATENÇÃO: Verifique se o seu service tem esse método ou algo similar
+        // Se não tiver, você precisará criar um endpoint tipo 'GET /appointments?date=YYYY-MM-DD'
+        let existingAppointments = [];
+        try {
+          const response =
+            await appointmentService.getAppointmentsByDate(appointmentDate);
+          existingAppointments = response.content || response || [];
+        } catch (err) {
+          console.warn(
+            "Não foi possível verificar agenda do dia. Sorteio será cego.",
+            err,
+          );
+        }
 
-      const dateTime = `${appointmentDate}T${appointmentTime}:00`;
+        // 2. Filtra os médicos que NÃO têm conflito de horário
+        const availableCandidates = filteredDoctors.filter((doc) => {
+          // Pega todas as consultas desse médico específico no dia
+          const doctorAppointments = existingAppointments.filter(
+            (appt) =>
+              String(appt.doctorId) === String(doc.id) &&
+              appt.status !== "CANCELED",
+          );
+
+          // Verifica se ALGUMA consulta dele bate com o horário desejado (menos de 1h de diferença)
+          const hasConflict = doctorAppointments.some((appt) =>
+            checkAvailabilityConflict(appt.dateTime, desiredDateObj),
+          );
+
+          // Se tiver conflito, retorna false (remove da lista). Se não tiver, true (mantém).
+          return !hasConflict;
+        });
+
+        // 3. Sorteia entre os disponíveis
+        if (availableCandidates.length > 0) {
+          const randomIndex = Math.floor(
+            Math.random() * availableCandidates.length,
+          );
+          finalDoctorId = availableCandidates[randomIndex].id;
+        } else {
+          toast.warning(
+            "Nenhum médico disponível neste horário (todos ocupados). Tente outro horário.",
+          );
+          setLoading(false);
+          return; // Para tudo, não deixa agendar
+        }
+      }
+      // =======================================
+
+      // Verifica se mesmo selecionando manualmente, o médico não está ocupado (Opcional, mas recomendado)
+      // Se quiser aplicar a regra de 1h também para seleção manual, coloque a lógica aqui.
 
       await appointmentService.scheduleAppointment(
         selectedPatient,
-        finalDoctorId || null, // Envia o médico escolhido (ou sorteado)
-        dateTime,
+        finalDoctorId,
+        dateTimeStr,
       );
 
       toast.success("Consulta agendada com sucesso!");
       if (onSuccess) onSuccess();
       onClose();
     } catch (error) {
-      let errorMsg = "Erro ao agendar consulta";
-      if (error.response?.data) {
-        const data = error.response.data;
-        if (typeof data === "string") errorMsg = data;
-        else if (data.message) errorMsg = data.message;
-        else if (typeof data === "object") errorMsg = JSON.stringify(data);
-      } else if (error.message) errorMsg = error.message;
+      let errorMsg = "Erro ao agendar";
+      const data = error.response?.data;
+      if (typeof data === "string") errorMsg = data;
+      else if (data?.message) errorMsg = data.message;
+      else if (error.message) errorMsg = error.message;
       toast.error(errorMsg);
     } finally {
       setLoading(false);
     }
   };
 
-  const getDoctorHint = () => {
-    if (isDoctor && !isAdmin) {
-      if (isSelectingSelfAsPatient) {
-        return "Você selecionou a si mesmo como paciente. Escolha outro médico.";
-      }
-      return "Como médico, você só pode marcar consultas de pacientes consigo mesmo.";
-    }
-    return "Caso não seja selecionado, escolheremos um médico disponível automaticamente.";
-  };
-
   const handleInputClick = (e) => {
-    try {
-      if (e.target.showPicker) {
-        e.target.showPicker();
-      }
-    } catch (error) {
-      console.log("Picker not supported programmatically");
-    }
+    if (e.target.showPicker) e.target.showPicker();
   };
 
   const rowStyle = { display: "flex", gap: "15px", marginTop: "10px" };
@@ -238,9 +257,7 @@ export default function ScheduleModal({ onClose, onSuccess }) {
 
   return ReactDOM.createPortal(
     <div className={styles.overlay} onClick={() => !loading && onClose()}>
-      {/* CSS Hack reincluído para garantir funcionamento no Firefox */}
       <style>{customStyles}</style>
-
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div className={styles.header}>
           <h2>Agendar Consulta</h2>
@@ -248,7 +265,6 @@ export default function ScheduleModal({ onClose, onSuccess }) {
             className={styles.closeBtn}
             onClick={onClose}
             disabled={loading}
-            type="button"
           >
             ✕
           </button>
@@ -266,7 +282,7 @@ export default function ScheduleModal({ onClose, onSuccess }) {
                   selectedItem={selectedPatient}
                   setSelectedItem={setSelectedPatient}
                   disabled={loading}
-                  placeholder="Digite o nome do paciente..."
+                  placeholder="Nome do paciente..."
                   labelKey="name"
                   valueKey="id"
                 />
@@ -294,8 +310,10 @@ export default function ScheduleModal({ onClose, onSuccess }) {
                 labelKey="name"
                 valueKey="id"
               />
-              {getDoctorHint() && (
-                <small className={styles.hint}>{getDoctorHint()}</small>
+              {showAutoSelect && (
+                <small className={styles.hint} style={{ color: "#666" }}>
+                  Se deixar em branco, buscaremos um médico livre neste horário.
+                </small>
               )}
             </div>
 
@@ -314,7 +332,6 @@ export default function ScheduleModal({ onClose, onSuccess }) {
                   disabled={loading}
                 />
               </div>
-
               <div style={colStyle}>
                 <label style={{ fontWeight: 500, fontSize: "0.9rem" }}>
                   Horário *
@@ -329,7 +346,6 @@ export default function ScheduleModal({ onClose, onSuccess }) {
                 />
               </div>
             </div>
-
             <div
               style={{ marginTop: "5px", fontSize: "0.75rem", color: "#666" }}
             >
@@ -351,7 +367,7 @@ export default function ScheduleModal({ onClose, onSuccess }) {
             onClick={handleSubmit}
             disabled={loading || loadingData}
           >
-            {loading ? "Agendando..." : "Agendar Consulta"}
+            {loading ? "Verificando agenda..." : "Agendar Consulta"}
           </button>
         </div>
       </div>
