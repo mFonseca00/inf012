@@ -23,6 +23,19 @@ export default function ScheduleModal({ onClose, onSuccess }) {
   const [appointmentDate, setAppointmentDate] = useState("");
   const [appointmentTime, setAppointmentTime] = useState("");
 
+  // --- HACK CSS PARA O FIREFOX (Reincluindo para garantir funcionamento) ---
+  const customStyles = `
+    .native-input-picker {
+      position: relative;
+    }
+    .native-input-picker::-webkit-calendar-picker-indicator {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      width: 100%; height: 100%;
+      opacity: 0; cursor: pointer;
+    }
+  `;
+
   const isDoctor = user?.roles?.includes("DOCTOR");
   const isPatient = user?.roles?.includes("PATIENT");
   const isAdmin =
@@ -37,6 +50,10 @@ export default function ScheduleModal({ onClose, onSuccess }) {
 
   const isDoctorSelectLocked =
     isDoctor && !isAdmin && !isSelectingSelfAsPatient;
+
+  // Define se a seleção é automática (opcional)
+  const showAutoSelect =
+    isAdmin || (!isDoctor && isPatient) || isSelectingSelfAsPatient;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -117,6 +134,12 @@ export default function ScheduleModal({ onClose, onSuccess }) {
       return false;
     }
 
+    // Se NÃO for seleção automática (ou seja, é obrigatório), valida se tem médico
+    if (!showAutoSelect && !selectedDoctor) {
+      toast.warning("Selecione um médico");
+      return false;
+    }
+
     const dateTime = new Date(`${appointmentDate}T${appointmentTime}`);
     const now = new Date();
     const minTime = new Date(now.getTime() + 30 * 60000);
@@ -148,10 +171,23 @@ export default function ScheduleModal({ onClose, onSuccess }) {
 
     setLoading(true);
     try {
+      // --- LÓGICA DE SELEÇÃO ALEATÓRIA (NOVO) ---
+      let finalDoctorId = selectedDoctor;
+
+      // Se não escolheu médico E a lista de médicos disponíveis não está vazia
+      if (!finalDoctorId && filteredDoctors.length > 0) {
+        // Gera um índice aleatório entre 0 e o tamanho da lista
+        const randomIndex = Math.floor(Math.random() * filteredDoctors.length);
+        // Seleciona o ID desse médico sorteado
+        finalDoctorId = filteredDoctors[randomIndex].id;
+      }
+      // -------------------------------------------
+
       const dateTime = `${appointmentDate}T${appointmentTime}:00`;
+
       await appointmentService.scheduleAppointment(
         selectedPatient,
-        selectedDoctor || null,
+        finalDoctorId || null, // Envia o médico escolhido (ou sorteado)
         dateTime,
       );
 
@@ -182,24 +218,16 @@ export default function ScheduleModal({ onClose, onSuccess }) {
     return "Caso não seja selecionado, escolheremos um médico disponível automaticamente.";
   };
 
-  const showAutoSelect =
-    isAdmin || (!isDoctor && isPatient) || isSelectingSelfAsPatient;
-
-  // --- FUNÇÃO AUXILIAR PARA ABRIR O PICKER ---
-  // Isso força o navegador a abrir o relógio/calendário nativo ao clicar no input
   const handleInputClick = (e) => {
     try {
-      // Verifica se o navegador suporta a API showPicker (Chrome, Edge, Firefox moderno, Mobile)
       if (e.target.showPicker) {
         e.target.showPicker();
       }
     } catch (error) {
-      // Se der erro ou não suportar, apenas foca no input (comportamento padrão)
       console.log("Picker not supported programmatically");
     }
   };
 
-  // Estilos de layout
   const rowStyle = { display: "flex", gap: "15px", marginTop: "10px" };
   const colStyle = {
     flex: 1,
@@ -210,6 +238,9 @@ export default function ScheduleModal({ onClose, onSuccess }) {
 
   return ReactDOM.createPortal(
     <div className={styles.overlay} onClick={() => !loading && onClose()}>
+      {/* CSS Hack reincluído para garantir funcionamento no Firefox */}
+      <style>{customStyles}</style>
+
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div className={styles.header}>
           <h2>Agendar Consulta</h2>
@@ -268,38 +299,33 @@ export default function ScheduleModal({ onClose, onSuccess }) {
               )}
             </div>
 
-            {/* --- DATA E HORA LADO A LADO --- */}
             <div style={rowStyle}>
-              {/* CAMPO DE DATA */}
               <div style={colStyle}>
                 <label style={{ fontWeight: 500, fontSize: "0.9rem" }}>
                   Data *
                 </label>
                 <input
                   type="date"
-                  className={styles.input}
+                  className={`${styles.input} native-input-picker`}
                   value={appointmentDate}
                   min={new Date().toISOString().split("T")[0]}
                   onChange={(e) => setAppointmentDate(e.target.value)}
-                  onClick={handleInputClick} // <--- TRUQUE AQUI
+                  onClick={handleInputClick}
                   disabled={loading}
-                  style={{ cursor: "pointer" }} // Mostra a mãozinha para indicar clique
                 />
               </div>
 
-              {/* CAMPO DE HORA (RELÓGIO NATIVO) */}
               <div style={colStyle}>
                 <label style={{ fontWeight: 500, fontSize: "0.9rem" }}>
                   Horário *
                 </label>
                 <input
                   type="time"
-                  className={styles.input}
+                  className={`${styles.input} native-input-picker`}
                   value={appointmentTime}
                   onChange={(e) => setAppointmentTime(e.target.value)}
-                  onClick={handleInputClick} // <--- TRUQUE AQUI
+                  onClick={handleInputClick}
                   disabled={loading}
-                  style={{ cursor: "pointer" }} // Mostra a mãozinha para indicar clique
                 />
               </div>
             </div>
