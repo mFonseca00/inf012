@@ -293,10 +293,16 @@ public class AppointmentService {
                 "Não é possível agendar consulta para paciente inativo"
             );
         }
+        
+        // Verifica limite diário (Cuidado: este método existsBy... pode retornar true 
+        // mesmo para consultas canceladas dependendo da implementação do Repository.
+        // Se o erro persistir aqui, será necessário alterar o Repository para retornar uma Lista e filtrar).
         LocalDateTime startOfDay = appointmentDate.toLocalDate().atStartOfDay();
         LocalDateTime endOfDay = appointmentDate.toLocalDate().atTime(23, 59, 59);
         if (appointmentRepository.existsByPatientIdAndAppointmentDateBetween(
                 patientId, startOfDay, endOfDay)) {
+             // TODO: Para corrigir totalmente o bug de cancelamento, substituir este existsBy por uma busca de lista e filtro.
+             // Como não tenho acesso ao código do Repository, mantive o original com este aviso.
             throw new BusinessRuleException(
                 "Paciente já possui consulta agendada neste dia"
             );
@@ -327,8 +333,17 @@ public class AppointmentService {
                 "Não é possível agendar consulta com médico inativo"
             );
         }
-        if (appointmentRepository.existsByDoctorIdAndAppointmentDateBetween(
-                doctor.getId(), appointmentDate, endTime)) {
+
+        // CORREÇÃO: Substituído existsByDoctorIdAndAppointmentDateBetween por verificação manual
+        // para poder filtrar os CANCELADOS/DESISTENCIA.
+        List<Appointment> conflicts = appointmentRepository
+            .findConflictingAppointmentForDoctor(doctor.getId(), appointmentDate);
+
+        boolean hasActiveConflict = conflicts.stream()
+            .anyMatch(a -> a.getAppointmentStatus() != AppointmentStatus.CANCELADA && 
+                           a.getAppointmentStatus() != AppointmentStatus.DESISTENCIA);
+
+        if (hasActiveConflict) {
             throw new BusinessRuleException(
                 "Médico já possui consulta agendada neste horário"
             );
@@ -369,9 +384,14 @@ public class AppointmentService {
         List<Appointment> conflicts = appointmentRepository
             .findConflictingAppointmentForPatient(patientId, appointmentDate);
         
-        if (!conflicts.isEmpty()) {
+        // CORREÇÃO: Filtra para ignorar status de CANCELADA ou DESISTENCIA
+        boolean hasActiveConflict = conflicts.stream()
+            .anyMatch(a -> a.getAppointmentStatus() != AppointmentStatus.CANCELADA && 
+                           a.getAppointmentStatus() != AppointmentStatus.DESISTENCIA);
+        
+        if (hasActiveConflict) {
             throw new AppointmentConflictException(
-                "Paciente já possui uma consulta agendada para este horário"
+                "Paciente já possui uma consulta ativa agendada para este horário"
             );
         }
     }
@@ -380,9 +400,14 @@ public class AppointmentService {
         List<Appointment> conflicts = appointmentRepository
             .findConflictingAppointmentForDoctor(doctorId, appointmentDate);
         
-        if (!conflicts.isEmpty()) {
+        // CORREÇÃO: Filtra para ignorar status de CANCELADA ou DESISTENCIA
+        boolean hasActiveConflict = conflicts.stream()
+            .anyMatch(a -> a.getAppointmentStatus() != AppointmentStatus.CANCELADA && 
+                           a.getAppointmentStatus() != AppointmentStatus.DESISTENCIA);
+        
+        if (hasActiveConflict) {
             throw new AppointmentConflictException(
-                "Médico já possui uma consulta agendada para este horário"
+                "Médico já possui uma consulta ativa agendada para este horário"
             );
         }
     }
