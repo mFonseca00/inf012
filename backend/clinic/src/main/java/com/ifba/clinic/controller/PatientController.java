@@ -66,6 +66,13 @@ public class PatientController {
         return ResponseEntity.ok("Paciente inativado com sucesso");
     }
 
+    @PatchMapping("/reactivate")
+    @Operation(summary = "Reativar paciente", description = "Reativa um paciente inativo.")
+    public ResponseEntity<String> reactivate(@RequestBody @Valid PatientInactivationDTO patientDTO) {
+        patientService.reactivate(patientDTO);
+        return ResponseEntity.ok("Paciente reativado com sucesso");
+    }
+
     @GetMapping("/me")
     @Operation(summary = "Obter meus dados de paciente", description = "Retorna os dados do paciente vinculado ao usuário autenticado.")
     public ResponseEntity<PatientResponseDTO> getMyPatient(Authentication authentication) {
@@ -78,6 +85,18 @@ public class PatientController {
     @Operation(summary = "Listar todos os pacientes", description = "Retorna uma lista paginada de todos os pacientes.")
     public ResponseEntity<Page<PatientResponseDTO>> getAllPatients(Pageable pageable) {
         Page<PatientResponseDTO> patients = patientService.getAllPatients(pageable);
+        if (patients.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(patients);
+    }
+
+    @GetMapping("/search")
+    @Operation(summary = "Buscar pacientes por nome", description = "Retorna uma lista paginada de pacientes filtrados pelo nome.")
+    public ResponseEntity<Page<PatientResponseDTO>> searchByName(
+        @RequestParam String name,
+        Pageable pageable) {
+        Page<PatientResponseDTO> patients = patientService.getPatientsByName(name, pageable);
         if (patients.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
@@ -103,8 +122,18 @@ public class PatientController {
 
     @GetMapping("/info/{username}")
     @Operation(summary = "Obter informações completas do paciente por username", description = "Retorna todos os dados do paciente vinculado a um username, se existir.")
-    public ResponseEntity<PatientDetailDTO> getPatientInfo(@PathVariable String username) {
+    public ResponseEntity<PatientDetailDTO> getPatientInfoByUsername(@PathVariable String username) {
         PatientDetailDTO patient = patientService.getPatientInfo(username);
+        return ResponseEntity.ok(patient);
+    }
+
+    @GetMapping("/info")
+    @Operation(summary = "Obter informações completas do paciente por CPF", description = "Retorna todos os dados do paciente incluindo endereço e telefone para edição.")
+    public ResponseEntity<PatientDetailDTO> getPatientInfo(
+        @RequestParam
+        @Pattern(regexp = "^(\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}|\\d{11})$", message = "CPF inválido")
+        String cpf) {
+        PatientDetailDTO patient = patientService.getPatientInfoByCpf(cpf);
         return ResponseEntity.ok(patient);
     }
 }

@@ -15,6 +15,7 @@ import Dashboard from "./pages/dashboard/Dashboard";
 import MonitoringPage from "./pages/monitoring/MonitoringPage";
 import AppointmentList from "./pages/appointment/AppointmentList";
 import DoctorList from "./pages/doctor/DoctorList";
+import PatientList from "./pages/patient/PatientList";
 
 function App() {
   return (
@@ -84,6 +85,9 @@ function App() {
 
         {/* Gerenciamento de Médicos */}
         <Route path="/doctors" element={<DoctorList />} />
+
+        {/* Gerenciamento de Pacientes */}
+        <Route path="/patients" element={<PatientList />} />
 
         {/* Redireciona qualquer outra rota privada para dashboard */}
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
