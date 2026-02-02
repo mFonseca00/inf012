@@ -6,6 +6,7 @@ import PatientUserFields from "../user_fields/PatientUserFields";
 import AddressFields from "../../auth/address_fields/AddressFields";
 import patientService from "../../../services/patientService";
 import { toast } from "react-toastify";
+import doctorService from "../../../services/doctorService";
 
 const INITIAL_FORM_STATE = {
   id: null,
@@ -41,6 +42,9 @@ export default function PatientForm({ onClose, onSuccess, initialData }) {
   const [isEditing, setIsEditing] = useState(false);
   const [originalName, setOriginalName] = useState("");
   const [originalAddress, setOriginalAddress] = useState(INITIAL_ADDRESS_STATE);
+  const [linkedDoctor, setLinkedDoctor] = useState(null);
+  const [loadingDoctor, setLoadingDoctor] = useState(false);
+  const [usernameTimeout, setUsernameTimeout] = useState(null);
 
   useEffect(() => {
     if (initialData) {
@@ -66,12 +70,101 @@ export default function PatientForm({ onClose, onSuccess, initialData }) {
       setOriginalName(initialData.name || "");
       setOriginalAddress(completeData.address);
       setIsEditing(true);
+      
+      if (initialData.username) {
+        fetchLinkedDoctorForEdit(initialData.username);
+      }
     } else {
       setFormData(INITIAL_FORM_STATE);
       setOriginalAddress(INITIAL_ADDRESS_STATE);
       setIsEditing(false);
     }
   }, [initialData]);
+
+  const fetchLinkedDoctorForEdit = (username) => {
+    if (username) {
+      setLoadingDoctor(true);
+      doctorService
+        .getByUsername(username)
+        .then((doctor) => {
+          if (doctor) {
+            setLinkedDoctor(doctor);
+          } else {
+            setLinkedDoctor(null);
+          }
+        })
+        .catch(() => {
+          setLinkedDoctor(null);
+        })
+        .finally(() => {
+          setLoadingDoctor(false);
+        });
+    }
+  };
+
+  const preencherDadosMedico = (doctor) => {
+    if (doctor) {
+      const address = doctor.address || INITIAL_ADDRESS_STATE;
+
+      setFormData((prev) => ({
+        ...prev,
+        name: doctor.name || prev.name,
+        email: doctor.email || prev.email,
+        phoneNumber: doctor.phoneNumber || prev.phoneNumber,
+        address: {
+          street: address.street || "",
+          number: address.number || "",
+          complement: address.complement || "",
+          district: address.district || "",
+          city: address.city || "",
+          state: address.state || "",
+          cep: address.cep || "",
+        },
+      }));
+
+      setOriginalAddress(address);
+    }
+  };
+
+  useEffect(() => {
+    if (usernameTimeout) {
+      clearTimeout(usernameTimeout);
+    }
+
+    // Se não está editando e tem username, buscar dados do médico
+    if (!isEditing && formData.username && formData.username.length > 2) {
+      setLoadingDoctor(true);
+
+      const timeout = setTimeout(() => {
+        doctorService
+          .getByUsername(formData.username)
+          .then((doctor) => {
+            if (doctor) {
+              setLinkedDoctor(doctor);
+              preencherDadosMedico(doctor);
+            } else {
+              setLinkedDoctor(null);
+            }
+          })
+          .catch(() => {
+            setLinkedDoctor(null);
+          })
+          .finally(() => {
+            setLoadingDoctor(false);
+          });
+      }, 500);
+
+      setUsernameTimeout(timeout);
+    } else {
+      setLoadingDoctor(false);
+    }
+
+    return () => {
+      if (usernameTimeout) {
+        clearTimeout(usernameTimeout);
+      }
+    };
+  }, [formData.username, isEditing]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -129,7 +222,32 @@ export default function PatientForm({ onClose, onSuccess, initialData }) {
         };
 
         await patientService.update(updateData);
-        toast.success("Dados do paciente atualizados!");
+
+        const nameChanged = formData.name !== originalName;
+        const addrChanged = addressChanged();
+
+        if (linkedDoctor && (nameChanged || addrChanged)) {
+          try {
+            await doctorService.update({
+              crm: linkedDoctor.crm,
+              name: formData.name,
+              phoneNumber: formData.phoneNumber,
+              address: formData.address,
+            });
+            toast.success("Dados do paciente e médico atualizados!");
+          } catch (doctorErr) {
+            toast.warning(
+              "Paciente atualizado, mas houve erro ao atualizar dados do médico",
+            );
+            console.error("Erro ao atualizar médico:", doctorErr);
+          }
+        } else {
+          toast.success("Dados do paciente atualizados!");
+        }
+
+        setOriginalName(formData.name);
+        setOriginalAddress(formData.address);
+
       } else {
         await patientService.register(formData);
         toast.success("Paciente cadastrado com sucesso!");
@@ -156,6 +274,10 @@ export default function PatientForm({ onClose, onSuccess, initialData }) {
     } finally {
       setLoading(false);
     }
+  };
+
+  const addressChanged = () => {
+    return JSON.stringify(formData.address) !== JSON.stringify(originalAddress);
   };
 
   return ReactDOM.createPortal(

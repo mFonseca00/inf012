@@ -7,8 +7,6 @@ const doctorService = {
   },
 
   update: async (doctorData) => {
-    console.log("DADOS DE MEDICO DOUTOR");
-    console.log(doctorData);
     const response = await api.patch("/doctor/update", doctorData);
     return response.data;
   },
@@ -43,6 +41,16 @@ const doctorService = {
   getByCrm: async (crm) => {
     const response = await api.get("/doctor", { params: { crm } });
     return response.data;
+  },
+
+  getByUsername: async (username) => {
+    try {
+      const response = await api.get(`/doctor/info/${username}`);
+      return response.data;
+    } catch (error) {
+      console.error("Erro ao buscar médico por username:", error);
+      return null;
+    }
   },
 };
 

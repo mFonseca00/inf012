@@ -255,7 +255,7 @@ export default function DoctorForm({ onClose, onSuccess, initialData }) {
               phoneNumber: formData.phoneNumber,
               address: formData.address,
             });
-            toast.success("Médico e dados do paciente atualizados!");
+            toast.success("Dados do médico e paciente atualizados!");
           } catch (patientErr) {
             toast.warning(
               "Médico atualizado, mas houve erro ao atualizar dados do paciente",
@@ -265,6 +265,10 @@ export default function DoctorForm({ onClose, onSuccess, initialData }) {
         } else {
           toast.success("Dados do médico atualizados!");
         }
+
+        setOriginalName(formData.name);
+        setOriginalAddress(formData.address);
+
       } else {
         await doctorService.register(formData);
         toast.success("Médico cadastrado com sucesso!");

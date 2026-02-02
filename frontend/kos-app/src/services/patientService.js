@@ -59,8 +59,6 @@ const patientService = {
   },
 
   update: async (patientData) => {
-    console.log("DADOS DE PACIENTE");
-    console.log(patientData);
     const response = await api.patch("/patient/update", patientData);
     return response.data;
   },

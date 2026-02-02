@@ -5,16 +5,22 @@ import org.springframework.stereotype.Service;
 import com.ifba.clinic.dto.address.AddressDTO;
 import com.ifba.clinic.model.entity.Address;
 import com.ifba.clinic.repository.AddressRepository;
+import com.ifba.clinic.repository.DoctorRepository;
+import com.ifba.clinic.repository.PatientRepository;
 import com.ifba.clinic.util.Formatters;
 
 @Service
 public class AddressService {
 
     private final AddressRepository addressRepository;
+    private final PatientRepository patientRepository;
+    private final DoctorRepository doctorRepository;
 
     @SuppressWarnings("unused")
-    AddressService(AddressRepository addressRepository){
+    AddressService(AddressRepository addressRepository, PatientRepository patientRepository, DoctorRepository doctorRepository){
         this.addressRepository = addressRepository;
+        this.patientRepository = patientRepository;
+        this.doctorRepository = doctorRepository;
     }
 
     public Address register(AddressDTO newAddress){
@@ -45,7 +51,9 @@ public class AddressService {
         );
     }
 
-    public void delete(Long addressId) {
-        addressRepository.deleteById(addressId);
+    public void deleteAddressIfUnused(Address address) {
+        if (!patientRepository.existsByAddress(address) && !doctorRepository.existsByAddress(address)) {
+            addressRepository.deleteById(address.getId());
+        }
     }
 }
