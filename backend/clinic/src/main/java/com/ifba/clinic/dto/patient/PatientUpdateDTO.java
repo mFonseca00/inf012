@@ -1,8 +1,10 @@
 package com.ifba.clinic.dto.patient;
 
 import com.ifba.clinic.dto.address.AddressDTO;
+
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 public record PatientUpdateDTO(
     @NotBlank(message = "CPF é obrigatório")
@@ -11,7 +13,7 @@ public record PatientUpdateDTO(
     String name,
     @NotBlank(message = "Numero de telefone é obrigatório")
     String phoneNumber,
-    @NotBlank(message = "CPF é obrigatório")
+    @NotNull(message = "Endereço é obrigatório")
     @Valid
     AddressDTO address
 ) { }

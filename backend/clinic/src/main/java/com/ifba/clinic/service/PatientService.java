@@ -15,6 +15,7 @@ import com.ifba.clinic.dto.user.UserFromEntityDTO;
 import com.ifba.clinic.dto.user.UserRegDTO;
 import com.ifba.clinic.exception.BusinessRuleException;
 import com.ifba.clinic.exception.EntityNotFoundException;
+import com.ifba.clinic.exception.InvalidOperationException;
 import com.ifba.clinic.model.entity.Address;
 import com.ifba.clinic.model.entity.Patient;
 import com.ifba.clinic.model.entity.Role;
@@ -136,14 +137,38 @@ public class PatientService {
             throw new EntityNotFoundException("Paciente de CPF " + patientDTO.cpf() + " não encontrado");
         }
         if (!patient.getIsActive()) {
-            throw new BusinessRuleException("Paciente de CPF " + patientDTO.cpf() + " já está inativo");
+            throw new InvalidOperationException("Paciente de CPF " + patientDTO.cpf() + " já está inativo");
         }
         patient.setIsActive(false);
         patientRepository.save(patient);
     }
 
+    public void reactivate(PatientInactivationDTO patientDTO) {
+        String formattedCPF = Formatters.formatCPF(patientDTO.cpf());
+        Patient patient = patientRepository.findByCpf(formattedCPF);
+        if (patient == null) {
+            throw new EntityNotFoundException("Paciente de CPF " + patientDTO.cpf() + " não encontrado");
+        }
+        if (patient.getIsActive()) {
+            throw new InvalidOperationException("Paciente de CPF " + patientDTO.cpf() + " já está ativo");
+        }
+        patient.setIsActive(true);
+        patientRepository.save(patient);
+    }
+
     public Page<PatientResponseDTO> getAllPatients(Pageable pageable) {
         Page<Patient> patients = patientRepository.findAll(pageable);
+        return patients.map(patient -> new PatientResponseDTO(
+            patient.getId(),
+            patient.getCpf(),
+            patient.getName(),
+            patient.getUser().getEmail(),
+            patient.getIsActive()
+        ));
+    }
+
+    public Page<PatientResponseDTO> getPatientsByName(String name, Pageable pageable) {
+        Page<Patient> patients = patientRepository.findByNameContainingIgnoreCase(name, pageable);
         return patients.map(patient -> new PatientResponseDTO(
             patient.getId(),
             patient.getCpf(),
@@ -205,6 +230,35 @@ public class PatientService {
             patient.getName(),
             user.getEmail(),
             user.getUsername(),
+            patient.getPhoneNumber(),
+            patient.getCpf(),
+            addressDTO,
+            patient.getIsActive()
+        );
+    }
+
+    public PatientDetailDTO getPatientInfoByCpf(String cpf) {
+        String formattedCpf = Formatters.formatCPF(cpf);
+        Patient patient = patientRepository.findByCpf(formattedCpf);
+        if (patient == null) {
+            throw new EntityNotFoundException("Paciente de CPF " + cpf + " não encontrado");
+        }
+        
+        AddressDTO addressDTO = new AddressDTO(
+            patient.getAddress().getStreet(),
+            patient.getAddress().getNumber(),
+            patient.getAddress().getComplement(),
+            patient.getAddress().getDistrict(),
+            patient.getAddress().getCity(),
+            patient.getAddress().getState(),
+            patient.getAddress().getCep()
+        );
+        
+        return new PatientDetailDTO(
+            patient.getId(),
+            patient.getName(),
+            patient.getUser().getEmail(),
+            patient.getUser().getUsername(),
             patient.getPhoneNumber(),
             patient.getCpf(),
             addressDTO,

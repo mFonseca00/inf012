@@ -26,6 +26,11 @@ const patientService = {
     return response.data;
   },
 
+  register: async (patientData) => {
+    const response = await api.post("/patient/register", patientData);
+    return response.data;
+  },
+
   getByCpf: async (cpf) => {
     const response = await api.get("/patient", { params: { cpf } });
     return response.data;
@@ -41,8 +46,28 @@ const patientService = {
     }
   },
 
+  getPatientInfo: async (cpf) => {
+    const response = await api.get("/patient/info", { params: { cpf } });
+    return response.data;
+  },
+
+  searchByName: async (name, page = 0, size = 10) => {
+    const response = await api.get("/patient/search", { params: { name, page, size } });
+    return response.data;
+  },
+
   update: async (patientData) => {
     const response = await api.patch("/patient/update", patientData);
+    return response.data;
+  },
+
+  inactivate: async (patientData) => {
+    const response = await api.patch("/patient/inactivate", patientData);
+    return response.data;
+  },
+
+  reactivate: async (patientData) => {
+    const response = await api.patch("/patient/reactivate", patientData);
     return response.data;
   },
 };
