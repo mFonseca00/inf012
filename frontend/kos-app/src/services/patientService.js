@@ -52,11 +52,15 @@ const patientService = {
   },
 
   searchByName: async (name, page = 0, size = 10) => {
-    const response = await api.get("/patient/search", { params: { name, page, size } });
+    const response = await api.get("/patient/search", {
+      params: { name, page, size },
+    });
     return response.data;
   },
 
   update: async (patientData) => {
+    console.log("DADOS DE PACIENTE");
+    console.log(patientData);
     const response = await api.patch("/patient/update", patientData);
     return response.data;
   },
