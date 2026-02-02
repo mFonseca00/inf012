@@ -1,4 +1,19 @@
-import api from "./api";
+import axios from "axios";
+import Cookies from "js-cookie";
+
+// API separada para monitoramento - conecta diretamente ao gateway
+// Isso garante que o monitoramento funcione mesmo quando clinic está down
+const monitoringApi = axios.create({
+  baseURL: "http://localhost:8090",
+});
+
+monitoringApi.interceptors.request.use((config) => {
+  const token = Cookies.get("token");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
 
 const monitoringService = {
   /**
@@ -6,7 +21,7 @@ const monitoringService = {
    * GET /monitoring/services
    */
   async getServices() {
-    const response = await api.get("/monitoring/services");
+    const response = await monitoringApi.get("/monitoring/services");
     return response.data;
   },
 
@@ -15,7 +30,7 @@ const monitoringService = {
    * GET /monitoring/services/details
    */
   async getServicesDetails() {
-    const response = await api.get("/monitoring/services/details");
+    const response = await monitoringApi.get("/monitoring/services/details");
     return response.data;
   },
 
@@ -24,7 +39,7 @@ const monitoringService = {
    * GET /monitoring/health
    */
   async getHealth() {
-    const response = await api.get("/monitoring/health");
+    const response = await monitoringApi.get("/monitoring/health");
     return response.data;
   },
 };
