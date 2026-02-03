@@ -1,6 +1,6 @@
 import React from "react";
 import TextField from "../../ui/text_field/TextField";
-import { formatCPF, formatPhone, isValidEmail, isValidPassword } from "../../../utils/formatters";
+import { formatCPF, formatPhone, isValidEmail, isValidPassword, formatName } from "../../../utils/formatters";
 import styles from "./UserFields.module.css";
 
 export default function UserFields({ form, handleChange, loading }) {
@@ -52,6 +52,7 @@ export default function UserFields({ form, handleChange, loading }) {
           disabled={loading}
           placeholder="Seu nome completo"
           autoComplete="name"
+          formatter={formatName}
           required={true}
         />
       </div>

@@ -25,22 +25,34 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     Page<Appointment> findByPatientId(Long patientId, Pageable pageable);
     Page<Appointment> findByDoctorId(Long doctorId, Pageable pageable);
 
-    // Verifica se há conflito de horário para o paciente (se o paciente já tem outra consulta no mesmo horário)
+    // Verifica se o paciente tem consulta ativa no dia
     @Query("SELECT a FROM Appointment a WHERE a.patient.id = :patientId " +
-           "AND a.appointmentDate = :appointmentDate " +
-           "AND a.appointmentStatus NOT IN ('CANCELADA', 'DESISTENCIA')")
-    List<Appointment> findConflictingAppointmentForPatient(
-        @Param("patientId") Long patientId,
-        @Param("appointmentDate") LocalDateTime appointmentDate
+            "AND a.appointmentDate >= :startOfDay " +
+            "AND a.appointmentDate <= :endOfDay " +
+            "AND a.appointmentStatus NOT IN ('CANCELADA', 'DESISTENCIA')")
+    List<Appointment> findActiveAppointmentsByPatientAndDay(
+            @Param("patientId") Long patientId,
+            @Param("startOfDay") LocalDateTime startOfDay,
+            @Param("endOfDay") LocalDateTime endOfDay
     );
 
     // Verifica se há conflito de horário para o médico (se o médico já tem outra consulta no mesmo horário)
     @Query("SELECT a FROM Appointment a WHERE a.doctor.id = :doctorId " +
-           "AND a.appointmentDate = :appointmentDate " +
-           "AND a.appointmentStatus NOT IN ('CANCELADA', 'DESISTENCIA')")
+            "AND a.appointmentStatus NOT IN ('CANCELADA', 'DESISTENCIA') " +
+            "AND a.appointmentDate >= :startRange " +
+            "AND a.appointmentDate <= :endRange")
     List<Appointment> findConflictingAppointmentForDoctor(
-        @Param("doctorId") Long doctorId,
-        @Param("appointmentDate") LocalDateTime appointmentDate
+            @Param("doctorId") Long doctorId,
+            @Param("startRange") LocalDateTime startRange,
+            @Param("endRange") LocalDateTime endRange
+    );
+
+    @Query("SELECT a FROM Appointment a WHERE a.doctor.id = :doctorId " +
+            "AND a.appointmentStatus NOT IN ('CANCELADA', 'DESISTENCIA') " +
+            "AND a.appointmentDate < :end")
+    List<Appointment> findPotentiallyConflictingAppointments(
+            @Param("doctorId") Long doctorId,
+            @Param("end") LocalDateTime end
     );
 
 }

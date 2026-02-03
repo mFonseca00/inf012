@@ -10,6 +10,10 @@ export function capitalizeFirstLetter(value) {
     .join(" ");
 }
 
+export function formatName(value) {
+  return value.replace(/[0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/g, "");
+}
+
 export function formatCPF(value) {
   const v = onlyDigits(value).slice(0, 11);
   return v
