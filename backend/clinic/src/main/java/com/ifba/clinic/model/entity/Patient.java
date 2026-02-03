@@ -45,5 +45,4 @@ public class Patient {
         this.address = address;
         this.user = user;
     }
-    // TODO: Possivel adição futura - Criação de cadastro a partir de cadastro de usuário
 }

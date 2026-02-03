@@ -5,7 +5,6 @@
   width: 100%;
 }
 
-/* Header Section */
 .header {
   display: flex;
   justify-content: space-between;
@@ -44,7 +43,6 @@
     min-width: 140px;
 }
 
-/* System Banner (Overall Status) */
 .systemBanner {
     display: flex;
     align-items: center;
@@ -78,7 +76,6 @@
     opacity: 0.9;
 }
 
-/* Cards Grid */
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -106,7 +103,6 @@
     background-color: #fffafa;
 }
 
-/* Card Header */
 .cardHeader {
   padding: 1.25rem;
   display: flex;
@@ -150,7 +146,6 @@
 .badgeUp { background-color: #c6f6d5; color: #22543d; }
 .badgeDown { background-color: #fed7d7; color: #822727; }
 
-/* Card Body */
 .cardBody {
   padding: 1.25rem;
   background-color: #fcfcfc;
@@ -203,7 +198,6 @@
     text-align: center;
 }
 
-/* Loading */
 .loadingState {
     text-align: center;
     padding: 4rem;

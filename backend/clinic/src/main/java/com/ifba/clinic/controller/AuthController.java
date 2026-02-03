@@ -37,20 +37,17 @@ public class AuthController {
 
     @PostMapping("/login")
     @Operation(summary = "Login de usuário", description = "Autentica um usuário.")
-    // MUDANÇA 1: Alterado para Object ou Map, já que não vamos retornar o TokenDTO
     public ResponseEntity<Object> login(@RequestBody @Valid LoginDTO login) {
         String token = userService.login(login);
         
         ResponseCookie cookie = ResponseCookie.from("accessToken", token)
                 .httpOnly(true)
-                .secure(false)// [ATENÇÃO]: Use 'false' se estiver rodando em localhost (HTTP). 
-                              // Se colocar 'true' aqui e testar sem HTTPS, o navegador IGNORA o cookie.
+                .secure(false)
                 .path("/")
                 .maxAge(24 * 60 * 60)
                 .sameSite("Strict")
                 .build();
         
-        // MUDANÇA 2: Retornando um objeto JSON simples
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
                 .body(java.util.Map.of("message", "Login realizado com sucesso"));
@@ -66,11 +63,11 @@ public class AuthController {
     @PostMapping("/logout")
     @Operation(summary = "Logout", description = "Remove o cookie de acesso.")
     public ResponseEntity<String> logout() {
-        ResponseCookie cookie = ResponseCookie.from("accessToken", "") // O valor pode ser vazio
+        ResponseCookie cookie = ResponseCookie.from("accessToken", "") 
                 .httpOnly(true)
-                .secure(false)        // Deve ser igual ao do login (false local, true prod)
-                .path("/")            // Deve ser igual ao do login
-                .maxAge(0)            // <--- O SEGREDO: 0 segundos de vida
+                .secure(false)
+                .path("/")
+                .maxAge(0)
                 .sameSite("Strict")
                 .build();
 
@@ -78,8 +75,6 @@ public class AuthController {
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
                 .body("Logout realizado com sucesso");
     }
-
-    // AuthController.java
 
     @GetMapping("/session")
     @Operation(summary = "Obter usuário atual", description = "Retorna os dados do usuário logado baseado no cookie.")
@@ -89,22 +84,17 @@ public class AuthController {
         if (authentication != null && authentication.getPrincipal() instanceof UserDetails) {
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
             
-            // 1. Busca a entidade completa no banco (lembre-se de deixar o método 'public' no Service)
-            // Assumindo que o método retorna sua entidade 'User' personalizada
             var userEntity = userService.findUserDTOByUsername(userDetails.getUsername()); 
             
-            // 2. Converte as Roles (que geralmente vêm como GrantedAuthority) para List<String>
-            // Ajuste o 'getRoles()' ou 'getAuthorities()' conforme sua entidade User
             List<String> roles = userEntity.getAuthorities().stream()
                     .map(authority -> authority.getAuthority())
                     .toList();
 
-            // 3. Cria o DTO (Record) manualmente
             UserResponseDTO userDTO = new UserResponseDTO(
                 userEntity.getId(),
                 userEntity.getUsername(),
-                userEntity.getEmail(), // Certifique-se que sua entidade tem getEmail()
-                userEntity.isEnabled(), // ou userEntity.getIsActive()
+                userEntity.getEmail(),
+                userEntity.isEnabled(),
                 roles
             );
             

@@ -28,35 +28,35 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(authorize -> authorize
-                    // recursos públicos / docs
+                    // Recursos públicos / docs
                     .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                     
-                    // endpoints de autenticação públicos
+                    // Endpoints de autenticação públicos
                     .requestMatchers(HttpMethod.POST, "/auth/login", "/auth/register", "/patient/register-with-user", "/user/forgot-password", "/user/reset-password").permitAll()
 
-                    // qualquer usuário autenticado pode alterar sua própria senha e obter seu perfil
+                    // Qualquer usuário autenticado pode alterar sua própria senha e obter seu perfil
                     .requestMatchers(HttpMethod.PATCH, "/user/change-password").authenticated()
                     .requestMatchers(HttpMethod.GET, "/user/me").authenticated()
                     .requestMatchers(HttpMethod.GET, "/patient/me").authenticated()
 
-                    // PERMISSÕES GERAIS
+                    // Permissões Gerais
                     .requestMatchers(HttpMethod.GET, "/appointment/all").hasAnyAuthority("PATIENT", "DOCTOR", "ADMIN", "MASTER")
                     .requestMatchers(HttpMethod.GET, "/appointment/{id}").hasAnyAuthority("PATIENT", "DOCTOR", "ADMIN", "MASTER")
                     .requestMatchers(HttpMethod.POST, "/appointment/schedule").hasAnyAuthority("PATIENT", "DOCTOR", "ADMIN", "MASTER")
                     .requestMatchers(HttpMethod.PATCH, "/appointment/cancel").hasAnyAuthority("PATIENT", "DOCTOR", "ADMIN", "MASTER")
                     .requestMatchers(HttpMethod.GET, "/doctor/all").hasAnyAuthority("PATIENT", "DOCTOR", "ADMIN", "MASTER")
 
-                    // PERMISSÕES ADICIONAIS PARA MÉDICOS E ADMINs
+                    // Permissões adicionais para médicos e admins
                     .requestMatchers(HttpMethod.PATCH, "/appointment/conclude").hasAnyAuthority("DOCTOR", "ADMIN", "MASTER")
                     .requestMatchers(HttpMethod.GET, "/patient/all").hasAnyAuthority( "DOCTOR", "ADMIN", "MASTER")
 
-                    // PERMISSÕES PARA ADMIN/MASTER
+                    // Permissões adicionais para admins
                     .requestMatchers("/user/**").hasAnyAuthority("ADMIN", "MASTER")
                     .requestMatchers("/patient/**").hasAnyAuthority("ADMIN", "MASTER")
                     .requestMatchers("/doctor/**").hasAnyAuthority("ADMIN", "MASTER")
                     .requestMatchers("/monitoring/**").hasAnyAuthority("ADMIN", "MASTER")
 
-                    // qualquer outro request exige autenticação
+                    // Qualquer outro request exige autenticação
                     .anyRequest().authenticated()
             )
             .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class);

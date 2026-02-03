@@ -14,16 +14,6 @@ function Dashboard() {
     return user.roles.includes(targetRole) || user.roles.includes("MASTER");
   };
 
-  // Exemplo de ação com toast
-  function handleAdminAction() {
-    try {
-      // ...ação administrativa...
-      toast.success("Ação administrativa realizada com sucesso!");
-    } catch (err) {
-      toast.error("Erro ao executar ação administrativa.");
-    }
-  }
-
   return (
     <div className={styles.dashboardGrid}>
       <div className={styles.card}>

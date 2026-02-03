@@ -8,11 +8,11 @@
   display: flex;
   flex: 1;
   background-color: #f4f4f9;
-  overflow: hidden; /* Evita scroll duplo */
+  overflow: hidden;
 }
 
 .contentArea {
   flex: 1;
   padding: 2rem;
-  overflow-y: auto; /* Scroll apenas no conteúdo */
+  overflow-y: auto;
 }

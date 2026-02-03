@@ -13,7 +13,7 @@ import com.ifba.clinic.service.TokenService;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie; // <--- Importante: Import do Cookie
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -35,7 +35,7 @@ public class SecurityFilter extends OncePerRequestFilter {
         if (token != null) {
             var login = tokenService.validateToken(token);
             
-            if (login != null && !login.isEmpty()) { // Validação extra para garantir que login não é nulo
+            if (login != null && !login.isEmpty()) {
                 UserDetails user = userRepository.findByUsername(login);
                 
                 if (user != null) {
@@ -47,9 +47,7 @@ public class SecurityFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    // Método modificado para buscar no Cookie
     private String recoverToken(HttpServletRequest request) {
-        // 1. Tenta buscar nos Cookies (Prioridade para o Frontend/React)
         if (request.getCookies() != null) {
             for (Cookie cookie : request.getCookies()) {
                 if ("accessToken".equals(cookie.getName())) {
@@ -58,8 +56,6 @@ public class SecurityFilter extends OncePerRequestFilter {
             }
         }
 
-        // 2. (Opcional) Fallback para Header Authorization 
-        // Útil se você quiser testar via Postman/Insomnia sem gerenciar cookies
         var authHeader = request.getHeader("Authorization");
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             return authHeader.replace("Bearer ", "");

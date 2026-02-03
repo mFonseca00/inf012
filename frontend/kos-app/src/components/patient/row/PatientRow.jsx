@@ -62,7 +62,6 @@ export default function PatientRow({ patient, onActionSuccess, onEdit }) {
     }
   };
 
-  // Formatar CPF para exibição
   const formatCPFDisplay = (cpf) => {
     if (!cpf) return "";
     const cleaned = cpf.replace(/\D/g, "");

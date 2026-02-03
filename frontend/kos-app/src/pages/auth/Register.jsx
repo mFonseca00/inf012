@@ -14,7 +14,6 @@ function Register() {
   const navigate = useNavigate();
 
   async function handleSubmit(form) {
-    // Validações finais antes de enviar (segurança extra)
     if (!isValidEmail(form.email)) {
       toast.error("Por favor, informe um e-mail válido.");
       return;
