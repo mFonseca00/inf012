@@ -1,8 +1,8 @@
 import React, { createContext, useState, useEffect } from "react";
-import { jwtDecode } from "jwt-decode";
 import Cookies from "js-cookie"; // Importação adicionada
 import authService from "../services/authService";
 import userService from "../services/userService";
+import api from "../services/api";
 
 export const AuthContext = createContext();
 
@@ -32,71 +32,79 @@ export function AuthProvider({ children }) {
     };
   };
 
-  // Ao fazer login
   const login = async (username, password) => {
     try {
-      const response = await authService.login(username, password);
-      const token = response.token;
+      // 1. Apenas chamamos o endpoint.
+      // O navegador vai ler o header 'Set-Cookie' da resposta e guardar o token.
+      await authService.login(username, password);
 
-      // [CHECKLIST]: Remover localStorage e usar Cookie simples
-      // expires: 1 define que o cookie expira em 1 dia (ajuste conforme necessário)
-      Cookies.set("token", token, { expires: 1 });
+      // [REMOVIDO]: const token = response.token;
+      // (O token não vem mais no corpo do JSON, ele está escondido no cookie)
 
+      // [REMOVIDO]: Cookies.set("token", token, ...);
+      // (Não precisamos salvar manualmente, e nem conseguiríamos se for HttpOnly)
+
+      // 2. Como o cookie já está salvo no navegador, a próxima requisição
+      // enviará o token automaticamente (se o axios tiver withCredentials: true).
       const profileData = await userService.getProfile();
+
       const userData = formatUser(profileData);
       setUser(userData);
 
       return userData;
     } catch (error) {
       console.error("Erro no login:", error);
-      throw error;
+      throw error; // Repassa o erro para o componente tratar (ex: mostrar msg na tela)
     }
   };
 
   // Ao inicializar
   useEffect(() => {
     // [CHECKLIST]: Leitura do cookie em vez do localStorage
-    const recoveredToken = Cookies.get("token");
+    const recoverSession = async () => {
+      try {
+        // Tenta bater no endpoint /me
+        // O cookie vai ir automaticamente graças ao withCredentials: true
+        const response = await api.get("/auth/session");
 
-    if (recoveredToken) {
-      const initializeUser = async () => {
-        try {
-          const decoded = jwtDecode(recoveredToken);
-          if (decoded.exp * 1000 > Date.now()) {
-            const profileData = await userService.getProfile();
-            const userData = formatUser(profileData);
-            setUser(userData);
-          } else {
-            // Token expirado
-            Cookies.remove("token");
-            setUser(null);
-          }
-        } catch (error) {
-          console.error("Erro ao recuperar usuário:", error);
-          Cookies.remove("token");
-          setUser(null);
-        } finally {
-          setLoading(false);
-        }
-      };
+        // Se der certo, restaura o usuário no estado
+        setUser(response.data);
+      } catch (error) {
+        // Se der erro (401), significa que o cookie expirou ou não existe
+        setUser(null);
+      } finally {
+        // Terminou a verificação, libera a tela
+        setLoading(false);
+      }
+    };
 
-      initializeUser();
-    } else {
-      setLoading(false);
-    }
+    recoverSession();
   }, []);
 
-  const logout = () => {
-    // [CHECKLIST]: Remoção do cookie
-    Cookies.remove("token");
-    setUser(null);
+  if (loading) {
+    return <div>Carregando sistema...</div>;
+  }
+
+  const logout = async () => {
+    try {
+      // 1. Chama o backend para ele mandar o comando de "apagar cookie"
+      await authService.logout();
+    } catch (error) {
+      console.error("Erro ao tentar deslogar no servidor", error);
+      // Mesmo se der erro no servidor, limpamos o estado local abaixo
+    } finally {
+      // 2. [CHECKLIST]: Removemos apenas o estado do React
+      // Não usamos mais Cookies.remove()
+      setUser(null);
+
+      // Opcional: Redirecionar para login
+      // navigate("/login");
+    }
   };
 
   return (
-    <AuthContext.Provider
-      value={{ isAuthenticated: !!user, user, login, logout, loading }}
-    >
-      {!loading && children}
+    <AuthContext.Provider value={{ user, login, logout }}>
+      {children}
     </AuthContext.Provider>
   );
 }
