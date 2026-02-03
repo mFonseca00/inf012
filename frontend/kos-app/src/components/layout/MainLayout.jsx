@@ -13,7 +13,7 @@ const MainLayout = () => {
         <Sidebar />
         <div className={styles.contentArea}>
           <Breadcrumbs />
-          <Outlet /> {/* Aqui o conteúdo dinâmico será renderizado */}
+          <Outlet />
         </div>
       </div>
     </div>

@@ -42,7 +42,6 @@ const AppointmentList = () => {
     setLoading(true);
     setShowSkeleton(false);
 
-    // Define qual role usar baseado na aba ativa ou no perfil do usuário
     let roleParam = null;
     if (isDoctorAndPatient) {
       roleParam = activeTab;

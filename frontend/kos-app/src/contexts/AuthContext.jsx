@@ -1,8 +1,8 @@
 import React, { createContext, useState, useEffect } from "react";
-import { jwtDecode } from "jwt-decode";
-import Cookies from "js-cookie"; // Importação adicionada
+import Cookies from "js-cookie";
 import authService from "../services/authService";
 import userService from "../services/userService";
+import api from "../services/api";
 
 export const AuthContext = createContext();
 
@@ -32,17 +32,12 @@ export function AuthProvider({ children }) {
     };
   };
 
-  // Ao fazer login
   const login = async (username, password) => {
     try {
-      const response = await authService.login(username, password);
-      const token = response.token;
-
-      // [CHECKLIST]: Remover localStorage e usar Cookie simples
-      // expires: 1 define que o cookie expira em 1 dia (ajuste conforme necessário)
-      Cookies.set("token", token, { expires: 1 });
+      await authService.login(username, password);
 
       const profileData = await userService.getProfile();
+
       const userData = formatUser(profileData);
       setUser(userData);
 
@@ -53,50 +48,45 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // Ao inicializar
   useEffect(() => {
-    // [CHECKLIST]: Leitura do cookie em vez do localStorage
-    const recoveredToken = Cookies.get("token");
+    const recoverSession = async () => {
+      try {
+        const response = await api.get("/auth/session");
 
-    if (recoveredToken) {
-      const initializeUser = async () => {
-        try {
-          const decoded = jwtDecode(recoveredToken);
-          if (decoded.exp * 1000 > Date.now()) {
-            const profileData = await userService.getProfile();
-            const userData = formatUser(profileData);
-            setUser(userData);
-          } else {
-            // Token expirado
-            Cookies.remove("token");
-            setUser(null);
-          }
-        } catch (error) {
-          console.error("Erro ao recuperar usuário:", error);
-          Cookies.remove("token");
-          setUser(null);
-        } finally {
-          setLoading(false);
-        }
-      };
+        // Se der certo, restaura o usuário no estado
+        setUser(response.data);
+      } catch (error) {
+        // Se der erro (401), significa que o cookie expirou ou não existe
+        setUser(null);
+      } finally {
+        // Terminou a verificação, libera a tela
+        setLoading(false);
+      }
+    };
 
-      initializeUser();
-    } else {
-      setLoading(false);
-    }
+    recoverSession();
   }, []);
 
-  const logout = () => {
-    // [CHECKLIST]: Remoção do cookie
-    Cookies.remove("token");
-    setUser(null);
+  if (loading) {
+    return <div>Carregando sistema...</div>;
+  }
+
+  const logout = async () => {
+    try {
+      await authService.logout();
+    } catch (error) {
+      console.error("Erro ao tentar deslogar no servidor", error);
+      // Mesmo se der erro no servidor, limpamos o estado local abaixo
+    } finally {
+      setUser(null);
+
+      // navigate("/login");
+    }
   };
 
   return (
-    <AuthContext.Provider
-      value={{ isAuthenticated: !!user, user, login, logout, loading }}
-    >
-      {!loading && children}
+    <AuthContext.Provider value={{ user, login, logout }}>
+      {children}
     </AuthContext.Provider>
   );
 }

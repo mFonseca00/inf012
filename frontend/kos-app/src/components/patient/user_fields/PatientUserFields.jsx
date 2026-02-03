@@ -1,6 +1,6 @@
 import React from "react";
 import TextField from "../../ui/text_field/TextField";
-import { formatPhone, formatCPF, isValidEmail } from "../../../utils/formatters";
+import { formatPhone, formatCPF, isValidEmail, formatName } from "../../../utils/formatters";
 import styles from "./PatientUserFields.module.css";
 
 export default function PatientUserFields({ 
@@ -61,6 +61,7 @@ export default function PatientUserFields({
           disabled={loading}
           placeholder="Nome completo do paciente"
           autoComplete="name"
+          formatter={formatName}
           required={true}
         />
       </div>
@@ -115,7 +116,7 @@ export default function PatientUserFields({
             value={email}
             onChange={handleEmailChange}
             placeholder="email@exemplo.com"
-            disabled={loading || emailDisabled || (!isEditing && !!username)}
+            disabled={loading || emailDisabled || (!isEditing && !!email && !username)}
             autoComplete="email"
             required={!isEditing && !username}
             errorMessage={emailError}

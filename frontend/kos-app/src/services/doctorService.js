@@ -21,14 +21,14 @@ const doctorService = {
     return response.data;
   },
 
-  getAll: async (pageable = { page: 0, size: 10 }) => {
-    const response = await api.get("/doctor/all", { params: pageable });
+  getAll: async (page = 0, size = 10) => {
+    const response = await api.get("/doctor/all", { params: { page, size } });
     return response.data;
   },
 
-  searchByName: async (name, pageable = { page: 0, size: 10 }) => {
+  searchByName: async (name, page = 0, size = 10) => {
     const response = await api.get("/doctor/search", {
-      params: { name, ...pageable },
+      params: { name, page, size },
     });
     return response.data;
   },

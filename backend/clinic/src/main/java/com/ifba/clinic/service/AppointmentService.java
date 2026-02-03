@@ -285,69 +285,47 @@ public class AppointmentService {
 
     private Patient validatePatient(Long patientId, LocalDateTime appointmentDate) {
         Patient patient = patientRepository.findById(patientId)
-            .orElseThrow(() -> new EntityNotFoundException(
-                "Paciente não encontrado com ID: " + patientId
-            ));
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Paciente não encontrado com ID: " + patientId
+                ));
+
         if (!patient.getIsActive()) {
             throw new BusinessRuleException(
-                "Não é possível agendar consulta para paciente inativo"
+                    "Não é possível agendar consulta para paciente inativo"
             );
         }
-        
-        // Verifica limite diário (Cuidado: este método existsBy... pode retornar true 
-        // mesmo para consultas canceladas dependendo da implementação do Repository.
-        // Se o erro persistir aqui, será necessário alterar o Repository para retornar uma Lista e filtrar).
-        LocalDateTime startOfDay = appointmentDate.toLocalDate().atStartOfDay();
-        LocalDateTime endOfDay = appointmentDate.toLocalDate().atTime(23, 59, 59);
-        if (appointmentRepository.existsByPatientIdAndAppointmentDateBetween(
-                patientId, startOfDay, endOfDay)) {
-             // TODO: Para corrigir totalmente o bug de cancelamento, substituir este existsBy por uma busca de lista e filtro.
-             // Como não tenho acesso ao código do Repository, mantive o original com este aviso.
-            throw new BusinessRuleException(
-                "Paciente já possui consulta agendada neste dia"
-            );
-        }
+
         return patient;
     }
 
     private Doctor getOrSelectDoctor(Long doctorId, LocalDateTime appointmentDate) {
         Doctor doctor;
         LocalDateTime endTime = appointmentDate.plusHours(1);
+
         if (doctorId != null) {
             doctor = doctorRepository.findById(doctorId)
-                .orElseThrow(() -> new EntityNotFoundException(
-                    "Médico não encontrado com ID: " + doctorId
-                ));
+                    .orElseThrow(() -> new EntityNotFoundException(
+                            "Médico não encontrado com ID: " + doctorId
+                    ));
         } else {
             List<Doctor> availableDoctors = appointmentRepository
-                .findAvailableDoctors(appointmentDate, endTime);
+                    .findAvailableDoctors(appointmentDate, endTime);
             if (availableDoctors.isEmpty()) {
                 throw new BusinessRuleException(
-                    "Não há médicos disponíveis para este horário"
+                        "Não há médicos disponíveis para este horário"
                 );
             }
             doctor = availableDoctors.get(new Random().nextInt(availableDoctors.size()));
         }
+
         if (!doctor.getIsActive()) {
             throw new BusinessRuleException(
-                "Não é possível agendar consulta com médico inativo"
+                    "Não é possível agendar consulta com médico inativo"
             );
         }
 
-        // CORREÇÃO: Substituído existsByDoctorIdAndAppointmentDateBetween por verificação manual
-        // para poder filtrar os CANCELADOS/DESISTENCIA.
-        List<Appointment> conflicts = appointmentRepository
-            .findConflictingAppointmentForDoctor(doctor.getId(), appointmentDate);
+        validateDoctorConflict(doctor.getId(), appointmentDate);
 
-        boolean hasActiveConflict = conflicts.stream()
-            .anyMatch(a -> a.getAppointmentStatus() != AppointmentStatus.CANCELADA && 
-                           a.getAppointmentStatus() != AppointmentStatus.DESISTENCIA);
-
-        if (hasActiveConflict) {
-            throw new BusinessRuleException(
-                "Médico já possui consulta agendada neste horário"
-            );
-        }
         return doctor;
     }
 
@@ -381,33 +359,32 @@ public class AppointmentService {
     }
 
     private void validatePatientConflict(Long patientId, LocalDateTime appointmentDate) {
-        List<Appointment> conflicts = appointmentRepository
-            .findConflictingAppointmentForPatient(patientId, appointmentDate);
-        
-        // CORREÇÃO: Filtra para ignorar status de CANCELADA ou DESISTENCIA
-        boolean hasActiveConflict = conflicts.stream()
-            .anyMatch(a -> a.getAppointmentStatus() != AppointmentStatus.CANCELADA && 
-                           a.getAppointmentStatus() != AppointmentStatus.DESISTENCIA);
-        
-        if (hasActiveConflict) {
+        LocalDateTime startOfDay = appointmentDate.toLocalDate().atStartOfDay();
+        LocalDateTime endOfDay = appointmentDate.toLocalDate().atTime(23, 59, 59);
+
+        List<Appointment> appointmentsOnDay = appointmentRepository
+                .findActiveAppointmentsByPatientAndDay(patientId, startOfDay, endOfDay);
+
+        if (!appointmentsOnDay.isEmpty()) {
             throw new AppointmentConflictException(
-                "Paciente já possui uma consulta ativa agendada para este horário"
+                    "Paciente já possui uma consulta ativa agendada para este dia"
             );
         }
     }
 
     private void validateDoctorConflict(Long doctorId, LocalDateTime appointmentDate) {
-        List<Appointment> conflicts = appointmentRepository
-            .findConflictingAppointmentForDoctor(doctorId, appointmentDate);
-        
-        // CORREÇÃO: Filtra para ignorar status de CANCELADA ou DESISTENCIA
-        boolean hasActiveConflict = conflicts.stream()
-            .anyMatch(a -> a.getAppointmentStatus() != AppointmentStatus.CANCELADA && 
-                           a.getAppointmentStatus() != AppointmentStatus.DESISTENCIA);
-        
-        if (hasActiveConflict) {
+        LocalDateTime start = appointmentDate;
+        LocalDateTime end = appointmentDate.plusHours(1);
+
+        List<Appointment> potentialConflicts = appointmentRepository
+                .findPotentiallyConflictingAppointments(doctorId, end);
+
+        boolean hasConflict = potentialConflicts.stream()
+                .anyMatch(a -> a.getAppointmentDate().plusHours(1).isAfter(start));
+
+        if (hasConflict) {
             throw new AppointmentConflictException(
-                "Médico já possui uma consulta ativa agendada para este horário"
+                    "Conflito de agenda: O médico já possui agendamento neste intervalo de horário."
             );
         }
     }

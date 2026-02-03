@@ -5,9 +5,8 @@ import { AuthContext } from "../contexts/AuthContext";
 export function PrivateRoute({ children }) {
   const { user, loading } = useContext(AuthContext);
 
-  // Aguarda o carregamento antes de decidir
   if (loading) {
-    return null; // ou um componente de loading
+    return null;
   }
 
   if (!user) {

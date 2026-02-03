@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import ReactDOM from "react-dom";
 import { toast } from "react-toastify";
-import styles from "./AppointmentCancelModal.module.css";
 import appointmentService from "../../../services/appointmentService";
+import styles from "./AppointmentCancelModal.module.css";
 
 export default function CancelModal({ appointmentId, newStatus, onClose, onSuccess }) {
   const [reason, setReason] = useState("");
@@ -20,7 +20,11 @@ export default function CancelModal({ appointmentId, newStatus, onClose, onSucce
       toast.success("Consulta cancelada com sucesso!");
       onSuccess();
     } catch (error) {
-      toast.error(error.response?.data?.message || "Erro ao cancelar consulta");
+      const errorMessage = 
+        error.response?.data || 
+        "Erro ao cancelar consulta";
+      
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }

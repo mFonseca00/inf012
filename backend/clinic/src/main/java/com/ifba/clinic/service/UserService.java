@@ -289,6 +289,14 @@ public class UserService {
         }
         return user;
     }
+    public User findUserDTOByUsername(String username) {
+        User user = (User) userRepository.findByUsername(username);
+        
+        if (user == null) {
+            throw new EntityNotFoundException("Usuário " + username + " não encontrado");
+        }
+        return user;
+    }
 
     private void validateUniqueUsername(String username) {
         if (userRepository.existsByUsername(username)) {

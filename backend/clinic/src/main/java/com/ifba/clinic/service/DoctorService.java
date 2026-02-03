@@ -172,7 +172,7 @@ public class DoctorService {
         }
         Doctor doctor = doctorRepository.findByUserId(user.getId());
         if (doctor == null) {
-            return null; // Retorna null se não for médico
+            return null;
         }
         return doctor;
     }

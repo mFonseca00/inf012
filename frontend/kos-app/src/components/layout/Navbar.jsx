@@ -2,6 +2,7 @@ import React, { useContext } from "react";
 import { AuthContext } from "../../contexts/AuthContext";
 import styles from "./Navbar.module.css";
 import logoKos from "../../assets/kos-logo-mono-side.png";
+
 const Navbar = () => {
   const { user, logout } = useContext(AuthContext);
 
@@ -12,7 +13,14 @@ const Navbar = () => {
     PATIENT: "Paciente",
     DOCTOR: "Médico",
     RECEPTIONIST: "Recepção",
+    // Caso o Spring mande com prefixo:
+    ROLE_MASTER: "Administrador Master",
+    ROLE_ADMIN: "Administrador",
+    ROLE_DOCTOR: "Médico",
   };
+
+  // Lógica para descobrir a role atual
+  const currentRoleCode = user?.roles?.[0] || user?.mainRole || "";
 
   return (
     <header className={styles.header}>
@@ -26,7 +34,7 @@ const Navbar = () => {
             Olá, <strong>{user?.username}</strong>
           </span>
           <span className={styles.userRole}>
-            {roleLabels[user?.mainRole] || user?.mainRole}
+            {roleLabels[currentRoleCode] || currentRoleCode}
           </span>
         </div>
 

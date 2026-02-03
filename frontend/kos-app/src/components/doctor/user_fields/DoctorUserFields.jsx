@@ -1,6 +1,6 @@
 import React from "react";
 import TextField from "../../ui/text_field/TextField";
-import { formatPhone, isValidEmail } from "../../../utils/formatters";
+import { formatPhone, isValidEmail, formatName } from "../../../utils/formatters";
 import styles from "./DoctorUserFields.module.css";
 
 export default function DoctorUserFields({ 
@@ -62,6 +62,7 @@ export default function DoctorUserFields({
           disabled={loading || nameDisabled || loadingPatient}
           placeholder="Seu nome completo"
           autoComplete="name"
+          formatter={formatName}
           required={true}
         />
         {nameDisabled && (
@@ -93,7 +94,7 @@ export default function DoctorUserFields({
           value={username}
           onChange={handleUsernameChange}
           placeholder="Escolha seu usuário"
-          disabled={loading || usernameDisabled || (!isEditing && !!email)}
+          disabled={loading || usernameDisabled || (!isEditing && !!email && !username)}
           autoComplete="username"
           required={!isEditing && !email}
         />

@@ -2,7 +2,7 @@
   width: 250px;
   background-color: #fff;
   border-right: 1px solid #e0e0e0;
-  min-height: calc(100vh - 70px); /* Altura total menos a Navbar */
+  min-height: calc(100vh - 70px);
   padding: 1.5rem 1rem;
 }
 
@@ -30,7 +30,6 @@
   color: #0056b3;
 }
 
-/* Link ativo */
 .active {
   background-color: #e6f0ff !important;
   color: #0056b3 !important;
