@@ -479,7 +479,7 @@ Devido ao prazo de entrega do projeto acadêmico, essa funcionalidade ficou plan
 
 ## 📝 Licença
 
-Este projeto foi desenvolvido como trabalho acadêmico para o IFBA - Instituto Federal da Bahia, disciplina INF012 - Análise e Desenvolvimento de Sistemas.
+Este projeto foi desenvolvido como trabalho acadêmico para o IFBA - Instituto Federal da Bahia, disciplina INF012 - Programação Web, do curso Análise e Desenvolvimento de Sistemas.
 
 ---
 
