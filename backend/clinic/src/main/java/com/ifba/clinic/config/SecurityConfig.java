@@ -26,7 +26,6 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .csrf(csrf -> csrf.disable())
-            // .cors(Customizer.withDefaults()) // Agora no gateway
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(authorize -> authorize
                     // recursos públicos / docs
@@ -62,26 +61,7 @@ public class SecurityConfig {
             )
             .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
-    }
-
-    // Agora no gateway
-    // @Bean
-    // public CorsConfigurationSource corsConfigurationSource() {
-    //     CorsConfiguration configuration = new CorsConfiguration();
-        
-    //     configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://localhost:3000")); 
-        
-    //     configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH"));
-        
-    //     configuration.setAllowedHeaders(Arrays.asList("*"));
-        
-    //     // Pra usar Cookies no futuro
-    //     configuration.setAllowCredentials(true);
-        
-    //     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-    //     source.registerCorsConfiguration("/**", configuration);
-    //     return source;
-    // }
+    }       
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {

@@ -32,24 +32,29 @@ export function AuthProvider({ children }) {
     };
   };
 
-  // Ao fazer login
   const login = async (username, password) => {
     try {
-      const response = await authService.login(username, password);
-      const token = response.token;
+      // 1. Apenas chamamos o endpoint.
+      // O navegador vai ler o header 'Set-Cookie' da resposta e guardar o token.
+      await authService.login(username, password);
 
-      // [CHECKLIST]: Remover localStorage e usar Cookie simples
-      // expires: 1 define que o cookie expira em 1 dia (ajuste conforme necessário)
-      Cookies.set("token", token, { expires: 1 });
+      // [REMOVIDO]: const token = response.token;
+      // (O token não vem mais no corpo do JSON, ele está escondido no cookie)
 
+      // [REMOVIDO]: Cookies.set("token", token, ...);
+      // (Não precisamos salvar manualmente, e nem conseguiríamos se for HttpOnly)
+
+      // 2. Como o cookie já está salvo no navegador, a próxima requisição
+      // enviará o token automaticamente (se o axios tiver withCredentials: true).
       const profileData = await userService.getProfile();
+
       const userData = formatUser(profileData);
       setUser(userData);
 
       return userData;
     } catch (error) {
       console.error("Erro no login:", error);
-      throw error;
+      throw error; // Repassa o erro para o componente tratar (ex: mostrar msg na tela)
     }
   };
 
@@ -86,10 +91,21 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
-  const logout = () => {
-    // [CHECKLIST]: Remoção do cookie
-    Cookies.remove("token");
-    setUser(null);
+  const logout = async () => {
+    try {
+      // 1. Chama o backend para ele mandar o comando de "apagar cookie"
+      await authService.logout();
+    } catch (error) {
+      console.error("Erro ao tentar deslogar no servidor", error);
+      // Mesmo se der erro no servidor, limpamos o estado local abaixo
+    } finally {
+      // 2. [CHECKLIST]: Removemos apenas o estado do React
+      // Não usamos mais Cookies.remove()
+      setUser(null);
+
+      // Opcional: Redirecionar para login
+      // navigate("/login");
+    }
   };
 
   return (
