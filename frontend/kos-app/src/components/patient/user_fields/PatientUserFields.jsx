@@ -116,7 +116,7 @@ export default function PatientUserFields({
             value={email}
             onChange={handleEmailChange}
             placeholder="email@exemplo.com"
-            disabled={loading || emailDisabled || (!isEditing && !!username)}
+            disabled={loading || emailDisabled || (!isEditing && !!email && !username)}
             autoComplete="email"
             required={!isEditing && !username}
             errorMessage={emailError}

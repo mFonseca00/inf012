@@ -94,7 +94,7 @@ export default function DoctorUserFields({
           value={username}
           onChange={handleUsernameChange}
           placeholder="Escolha seu usuário"
-          disabled={loading || usernameDisabled || (!isEditing && !!email)}
+          disabled={loading || usernameDisabled || (!isEditing && !!email && !username)}
           autoComplete="username"
           required={!isEditing && !email}
         />
