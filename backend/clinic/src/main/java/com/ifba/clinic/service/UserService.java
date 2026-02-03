@@ -289,16 +289,16 @@ public class UserService {
         }
         return user;
     }
-    // public User findUserDTOByUsername(String username) {
-    //     // Se o seu repositório retorna UserDetails, mantenha o cast (User).
-    //     // Se retornar Optional<User>, mude a lógica. Assumindo que seu código original funcionava:
-    //     User user = (User) userRepository.findByUsername(username);
+    public User findUserDTOByUsername(String username) {
+        // Se o seu repositório retorna UserDetails, mantenha o cast (User).
+        // Se retornar Optional<User>, mude a lógica. Assumindo que seu código original funcionava:
+        User user = (User) userRepository.findByUsername(username);
         
-    //     if (user == null) {
-    //         throw new EntityNotFoundException("Usuário " + username + " não encontrado");
-    //     }
-    //     return user;
-    // }
+        if (user == null) {
+            throw new EntityNotFoundException("Usuário " + username + " não encontrado");
+        }
+        return user;
+    }
 
     private void validateUniqueUsername(String username) {
         if (userRepository.existsByUsername(username)) {

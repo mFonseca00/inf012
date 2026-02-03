@@ -1,9 +1,15 @@
 package com.ifba.clinic.controller;
 
+import java.util.List;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ifba.clinic.dto.user.LoginDTO;
 import com.ifba.clinic.dto.user.UserRegDTO;
+import com.ifba.clinic.dto.user.UserResponseDTO;
 import com.ifba.clinic.service.UserService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -74,22 +81,36 @@ public class AuthController {
 
     // AuthController.java
 
-//     @GetMapping("/me")
-//     @Operation(summary = "Obter usuário atual", description = "Retorna os dados do usuário logado baseado no cookie.")
-//     public ResponseEntity<UserResponseDTO> getCurrentUser() { // Use o DTO de resposta do seu usuário
-//         // 1. Recupera o usuário do contexto de segurança (que o SecurityFilter já preencheu)
-//         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    @GetMapping("/session")
+    @Operation(summary = "Obter usuário atual", description = "Retorna os dados do usuário logado baseado no cookie.")
+    public ResponseEntity<UserResponseDTO> getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-//         if (authentication != null && authentication.getPrincipal() instanceof UserDetails) {
-//             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        if (authentication != null && authentication.getPrincipal() instanceof UserDetails) {
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
             
-//             // 2. Busca os dados completos no serviço se necessário, ou monta o DTO direto
-//             UserResponseDTO userDTO = userService.findUserDTOByUsername(userDetails.getUsername()); 
+            // 1. Busca a entidade completa no banco (lembre-se de deixar o método 'public' no Service)
+            // Assumindo que o método retorna sua entidade 'User' personalizada
+            var userEntity = userService.findUserDTOByUsername(userDetails.getUsername()); 
             
-//             return ResponseEntity.ok(userDTO);
-//         }
+            // 2. Converte as Roles (que geralmente vêm como GrantedAuthority) para List<String>
+            // Ajuste o 'getRoles()' ou 'getAuthorities()' conforme sua entidade User
+            List<String> roles = userEntity.getAuthorities().stream()
+                    .map(authority -> authority.getAuthority())
+                    .toList();
+
+            // 3. Cria o DTO (Record) manualmente
+            UserResponseDTO userDTO = new UserResponseDTO(
+                userEntity.getId(),
+                userEntity.getUsername(),
+                userEntity.getEmail(), // Certifique-se que sua entidade tem getEmail()
+                userEntity.isEnabled(), // ou userEntity.getIsActive()
+                roles
+            );
+            
+            return ResponseEntity.ok(userDTO);
+        }
         
-//         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-// }
-
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
 }

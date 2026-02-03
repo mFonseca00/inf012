@@ -1,8 +1,8 @@
 import React, { createContext, useState, useEffect } from "react";
-import { jwtDecode } from "jwt-decode";
 import Cookies from "js-cookie"; // Importação adicionada
 import authService from "../services/authService";
 import userService from "../services/userService";
+import api from "../services/api";
 
 export const AuthContext = createContext();
 
@@ -61,35 +61,29 @@ export function AuthProvider({ children }) {
   // Ao inicializar
   useEffect(() => {
     // [CHECKLIST]: Leitura do cookie em vez do localStorage
-    const recoveredToken = Cookies.get("token");
+    const recoverSession = async () => {
+      try {
+        // Tenta bater no endpoint /me
+        // O cookie vai ir automaticamente graças ao withCredentials: true
+        const response = await api.get("/auth/session");
 
-    if (recoveredToken) {
-      const initializeUser = async () => {
-        try {
-          const decoded = jwtDecode(recoveredToken);
-          if (decoded.exp * 1000 > Date.now()) {
-            const profileData = await userService.getProfile();
-            const userData = formatUser(profileData);
-            setUser(userData);
-          } else {
-            // Token expirado
-            Cookies.remove("token");
-            setUser(null);
-          }
-        } catch (error) {
-          console.error("Erro ao recuperar usuário:", error);
-          Cookies.remove("token");
-          setUser(null);
-        } finally {
-          setLoading(false);
-        }
-      };
+        // Se der certo, restaura o usuário no estado
+        setUser(response.data);
+      } catch (error) {
+        // Se der erro (401), significa que o cookie expirou ou não existe
+        setUser(null);
+      } finally {
+        // Terminou a verificação, libera a tela
+        setLoading(false);
+      }
+    };
 
-      initializeUser();
-    } else {
-      setLoading(false);
-    }
+    recoverSession();
   }, []);
+
+  if (loading) {
+    return <div>Carregando sistema...</div>;
+  }
 
   const logout = async () => {
     try {
@@ -109,10 +103,8 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider
-      value={{ isAuthenticated: !!user, user, login, logout, loading }}
-    >
-      {!loading && children}
+    <AuthContext.Provider value={{ user, login, logout }}>
+      {children}
     </AuthContext.Provider>
   );
 }
