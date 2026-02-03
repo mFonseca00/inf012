@@ -288,25 +288,33 @@ public class AppointmentService {
             .orElseThrow(() -> new EntityNotFoundException(
                 "Paciente não encontrado com ID: " + patientId
             ));
+        
         if (!patient.getIsActive()) {
             throw new BusinessRuleException(
                 "Não é possível agendar consulta para paciente inativo"
             );
         }
         
-        // Verifica limite diário (Cuidado: este método existsBy... pode retornar true 
-        // mesmo para consultas canceladas dependendo da implementação do Repository.
-        // Se o erro persistir aqui, será necessário alterar o Repository para retornar uma Lista e filtrar).
+        // --- CORREÇÃO DO LIMITE DIÁRIO ---
         LocalDateTime startOfDay = appointmentDate.toLocalDate().atStartOfDay();
         LocalDateTime endOfDay = appointmentDate.toLocalDate().atTime(23, 59, 59);
-        if (appointmentRepository.existsByPatientIdAndAppointmentDateBetween(
-                patientId, startOfDay, endOfDay)) {
-             // TODO: Para corrigir totalmente o bug de cancelamento, substituir este existsBy por uma busca de lista e filtro.
-             // Como não tenho acesso ao código do Repository, mantive o original com este aviso.
+
+        // 1. Buscamos todas as consultas do paciente naquele dia
+        List<Appointment> dailyAppointments = appointmentRepository
+            .findByPatientIdAndAppointmentDateBetween(patientId, startOfDay, endOfDay);
+
+        // 2. Verificamos se existe alguma que NÃO esteja cancelada/desistência
+        boolean hasActiveAppointmentToday = dailyAppointments.stream()
+            .anyMatch(a -> a.getAppointmentStatus() != AppointmentStatus.CANCELADA && 
+                           a.getAppointmentStatus() != AppointmentStatus.DESISTENCIA);
+
+        if (hasActiveAppointmentToday) {
             throw new BusinessRuleException(
                 "Paciente já possui consulta agendada neste dia"
             );
         }
+        // --------------------------------
+        
         return patient;
     }
 
