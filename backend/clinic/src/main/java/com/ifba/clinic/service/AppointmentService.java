@@ -312,42 +312,58 @@ public class AppointmentService {
 
     private Doctor getOrSelectDoctor(Long doctorId, LocalDateTime appointmentDate) {
         Doctor doctor;
+        
+        // Define o fim da consulta atual (usado para buscar médicos livres)
         LocalDateTime endTime = appointmentDate.plusHours(1);
+
+        // 1. Lógica de Seleção do Médico
         if (doctorId != null) {
             doctor = doctorRepository.findById(doctorId)
                 .orElseThrow(() -> new EntityNotFoundException(
                     "Médico não encontrado com ID: " + doctorId
                 ));
         } else {
+            // Busca médicos livres no horário exato da consulta
+            // (Certifique-se que sua query findAvailableDoctors também considera o intervalo de conflito)
             List<Doctor> availableDoctors = appointmentRepository
                 .findAvailableDoctors(appointmentDate, endTime);
+                
             if (availableDoctors.isEmpty()) {
                 throw new BusinessRuleException(
                     "Não há médicos disponíveis para este horário"
                 );
             }
+            // Sorteia um médico aleatório
             doctor = availableDoctors.get(new Random().nextInt(availableDoctors.size()));
         }
+
+        // 2. Validação se está ativo
         if (!doctor.getIsActive()) {
             throw new BusinessRuleException(
                 "Não é possível agendar consulta com médico inativo"
             );
         }
 
-        // CORREÇÃO: Substituído existsByDoctorIdAndAppointmentDateBetween por verificação manual
-        // para poder filtrar os CANCELADOS/DESISTENCIA.
+        // 3. Validação de Conflito de Horário (A Regra de Ouro)
+        // Calcula o intervalo de perigo: 1h antes até 1h depois
+        LocalDateTime startRange = appointmentDate.minusHours(1);
+        LocalDateTime endRange = appointmentDate.plusHours(1);
+
+        // Busca agendamentos conflitantes no banco
+        // A Query já deve filtrar 'CANCELADA' e 'DESISTENCIA'
         List<Appointment> conflicts = appointmentRepository
-            .findConflictingAppointmentForDoctor(doctor.getId(), appointmentDate);
+            .findConflictingAppointmentForDoctor(doctor.getId(), startRange, endRange);
 
-        boolean hasActiveConflict = conflicts.stream()
-            .anyMatch(a -> a.getAppointmentStatus() != AppointmentStatus.CANCELADA && 
-                           a.getAppointmentStatus() != AppointmentStatus.DESISTENCIA);
-
-        if (hasActiveConflict) {
+        if (!conflicts.isEmpty()) {
+            // Se entrou aqui, é porque existe conflito real no intervalo
+            // Nota: Se o médico foi escolhido aleatoriamente (else acima), 
+            // seria ideal tentar outro médico em vez de estourar erro, 
+            // mas para manter simples, lançamos a exceção.
             throw new BusinessRuleException(
-                "Médico já possui consulta agendada neste horário"
+                "O médico selecionado já possui consulta agendada neste intervalo de horário."
             );
         }
+
         return doctor;
     }
 
@@ -397,17 +413,20 @@ public class AppointmentService {
     }
 
     private void validateDoctorConflict(Long doctorId, LocalDateTime appointmentDate) {
+        // 1. Definição do Intervalo de Conflito (Regra de 1 hora)
+        // Se quero marcar às 07:30, verifico se existe alguém entre 06:30 e 08:30
+        LocalDateTime startRange = appointmentDate.minusHours(1);
+        LocalDateTime endRange = appointmentDate.plusHours(1);
+
+        // 2. Busca no Banco (A query já deve filtrar data E status 'CANCELADA/DESISTENCIA')
         List<Appointment> conflicts = appointmentRepository
-            .findConflictingAppointmentForDoctor(doctorId, appointmentDate);
+            .findConflictingAppointmentForDoctor(doctorId, startRange, endRange);
         
-        // CORREÇÃO: Filtra para ignorar status de CANCELADA ou DESISTENCIA
-        boolean hasActiveConflict = conflicts.stream()
-            .anyMatch(a -> a.getAppointmentStatus() != AppointmentStatus.CANCELADA && 
-                           a.getAppointmentStatus() != AppointmentStatus.DESISTENCIA);
-        
-        if (hasActiveConflict) {
+        // 3. Validação
+        // Se a lista voltou preenchida, é porque existe uma consulta ATIVA nesse intervalo
+        if (!conflicts.isEmpty()) {
             throw new AppointmentConflictException(
-                "Médico já possui uma consulta ativa agendada para este horário"
+                "Conflito de agenda: O médico já possui agendamento neste intervalo de horário."
             );
         }
     }

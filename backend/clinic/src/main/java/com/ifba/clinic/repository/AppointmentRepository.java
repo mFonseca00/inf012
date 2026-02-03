@@ -36,11 +36,13 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 
     // Verifica se há conflito de horário para o médico (se o médico já tem outra consulta no mesmo horário)
     @Query("SELECT a FROM Appointment a WHERE a.doctor.id = :doctorId " +
-           "AND a.appointmentDate = :appointmentDate " +
-           "AND a.appointmentStatus NOT IN ('CANCELADA', 'DESISTENCIA')")
+        "AND a.appointmentStatus NOT IN ('CANCELADA', 'DESISTENCIA') " +
+        "AND a.appointmentDate >= :startRange " +
+        "AND a.appointmentDate <= :endRange")
     List<Appointment> findConflictingAppointmentForDoctor(
         @Param("doctorId") Long doctorId,
-        @Param("appointmentDate") LocalDateTime appointmentDate
+        @Param("startRange") LocalDateTime startRange,
+        @Param("endRange") LocalDateTime endRange
     );
 
 }
