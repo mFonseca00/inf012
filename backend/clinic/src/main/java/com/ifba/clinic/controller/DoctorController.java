@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -102,6 +103,13 @@ public class DoctorController {
         @Pattern(regexp = "^(\\d{6}-\\d{2}\\/[A-Z]{2}|\\d{8}[A-Z]{2})$", message = "CRM inválido")
         String crm) {
         DoctorDetailDTO doctor = doctorService.getDoctorInfo(crm);
+        return ResponseEntity.ok(doctor);
+    }
+
+    @GetMapping("/info/{username}")
+    @Operation(summary = "Obter informações completas do médico por username", description = "Retorna todos os dados do médico vinculado a um username, se existir.")
+    public ResponseEntity<DoctorDetailDTO> getDoctorInfoByUsername(@PathVariable String username) {
+        DoctorDetailDTO doctor = doctorService.getDoctorInfoByUsername(username);
         return ResponseEntity.ok(doctor);
     }
 }

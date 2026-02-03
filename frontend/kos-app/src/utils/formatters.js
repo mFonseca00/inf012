@@ -2,6 +2,14 @@ export function onlyDigits(value) {
   return value.replace(/\D/g, "");
 }
 
+export function capitalizeFirstLetter(value) {
+  if (!value) return "";
+  return value
+    .split(" ")
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
+}
+
 export function formatCPF(value) {
   const v = onlyDigits(value).slice(0, 11);
   return v

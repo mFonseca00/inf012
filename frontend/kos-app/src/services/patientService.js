@@ -52,7 +52,9 @@ const patientService = {
   },
 
   searchByName: async (name, page = 0, size = 10) => {
-    const response = await api.get("/patient/search", { params: { name, page, size } });
+    const response = await api.get("/patient/search", {
+      params: { name, page, size },
+    });
     return response.data;
   },
 

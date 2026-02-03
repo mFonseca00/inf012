@@ -125,9 +125,7 @@ public class PatientService {
             patient.setPhoneNumber(formattedPhone);
         }
         patientRepository.save(patient);
-        if(!patientRepository.existsByAddress(oldAddress)) {
-            addressService.delete(oldAddress.getId());
-        }
+        addressService.deleteAddressIfUnused(oldAddress);
     }
 
     public void inactivate(PatientInactivationDTO patientDTO) {

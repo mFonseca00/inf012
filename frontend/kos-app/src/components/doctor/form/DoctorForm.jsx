@@ -75,12 +75,12 @@ export default function DoctorForm({ onClose, onSuccess, initialData }) {
           cep: initialData.address?.cep || "",
         },
       };
-      
+
       setFormData(completeData);
       setOriginalName(initialData.name || "");
       setOriginalAddress(completeData.address);
       setIsEditing(true);
-      
+
       if (initialData.username) {
         fetchLinkedPatientForEdit(initialData.username);
       }
@@ -113,10 +113,9 @@ export default function DoctorForm({ onClose, onSuccess, initialData }) {
   };
 
   const preencherDadosPaciente = (patient) => {
-    
     if (patient) {
       const address = patient.address || INITIAL_ADDRESS_STATE;
-            
+
       setFormData((prev) => {
         const newFormData = {
           ...prev,
@@ -150,11 +149,9 @@ export default function DoctorForm({ onClose, onSuccess, initialData }) {
       setLoadingPatient(true);
 
       const timeout = setTimeout(() => {
-        
         patientService
           .getByUsername(formData.username)
           .then((patient) => {
-            
             if (patient) {
               setLinkedPatient(patient);
               // Pré-preencher todos os dados do paciente
@@ -185,12 +182,12 @@ export default function DoctorForm({ onClose, onSuccess, initialData }) {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    
+
     if (name.startsWith("address.")) {
       const addrField = name.split(".")[1];
       setFormData((prev) => ({
         ...prev,
-        address: { ...prev.address, [addrField]: value }
+        address: { ...prev.address, [addrField]: value },
       }));
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
@@ -246,11 +243,10 @@ export default function DoctorForm({ onClose, onSuccess, initialData }) {
         };
 
         await doctorService.update(updateData);
-        
+
         const nameChanged = formData.name !== originalName;
         const addrChanged = addressChanged();
-        
-        
+
         if (linkedPatient && (nameChanged || addrChanged)) {
           try {
             await patientService.update({
@@ -259,14 +255,20 @@ export default function DoctorForm({ onClose, onSuccess, initialData }) {
               phoneNumber: formData.phoneNumber,
               address: formData.address,
             });
-            toast.success("Médico e dados do paciente atualizados!");
+            toast.success("Dados do médico e paciente atualizados!");
           } catch (patientErr) {
-            toast.warning("Médico atualizado, mas houve erro ao atualizar dados do paciente");
+            toast.warning(
+              "Médico atualizado, mas houve erro ao atualizar dados do paciente",
+            );
             console.error("Erro ao atualizar paciente:", patientErr);
           }
         } else {
           toast.success("Dados do médico atualizados!");
         }
+
+        setOriginalName(formData.name);
+        setOriginalAddress(formData.address);
+
       } else {
         await doctorService.register(formData);
         toast.success("Médico cadastrado com sucesso!");
@@ -274,7 +276,7 @@ export default function DoctorForm({ onClose, onSuccess, initialData }) {
       onSuccess();
     } catch (err) {
       let errorMessage = "Erro ao salvar médico. Verifique os dados.";
-      
+
       if (err.response?.data?.message) {
         errorMessage = err.response.data.message;
       } else if (err.response?.data?.fieldErrors) {
@@ -287,7 +289,7 @@ export default function DoctorForm({ onClose, onSuccess, initialData }) {
       } else if (err.message) {
         errorMessage = err.message;
       }
-      
+
       toast.error(errorMessage);
       console.error("Erro ao salvar médico:", err);
     } finally {
@@ -300,9 +302,9 @@ export default function DoctorForm({ onClose, onSuccess, initialData }) {
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div className={styles.header}>
           <h2>{isEditing ? "Editar Médico" : "Novo Médico"}</h2>
-          <button 
-            className={styles.closeBtn} 
-            onClick={onClose} 
+          <button
+            className={styles.closeBtn}
+            onClick={onClose}
             disabled={loading}
             type="button"
           >
@@ -408,25 +410,21 @@ export default function DoctorForm({ onClose, onSuccess, initialData }) {
           />
 
           <div className={styles.footer}>
-            <Button 
-              variant="secondary" 
-              type="button" 
-              onClick={onClose} 
+            <Button
+              variant="secondary"
+              type="button"
+              onClick={onClose}
               disabled={loading}
             >
               Cancelar
             </Button>
-            <Button 
-              variant="primary" 
-              type="submit" 
-              disabled={loading}
-            >
+            <Button variant="primary" type="submit" disabled={loading}>
               {loading ? "Salvando..." : "Salvar"}
             </Button>
           </div>
         </form>
       </div>
     </div>,
-    document.body
+    document.body,
   );
 }

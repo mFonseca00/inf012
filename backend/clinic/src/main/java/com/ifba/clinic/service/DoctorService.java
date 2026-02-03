@@ -96,9 +96,7 @@ public class DoctorService {
             doctor.setPhoneNumber(formattedPhone);
         }
         doctorRepository.save(doctor);
-        if(!doctorRepository.existsByAddress(oldAddress)) {
-            addressService.delete(oldAddress.getId());
-        }
+        addressService.deleteAddressIfUnused(oldAddress);
     }
 
     public void inactivate(DoctorInactivationDTO doctorDTO) {
@@ -184,6 +182,40 @@ public class DoctorService {
         Doctor doctor = doctorRepository.findByCrm(formattedCrm);
         if (doctor == null) {
             throw new EntityNotFoundException("Médico de CRM " + crm + " não encontrado");
+        }
+        
+        AddressDTO addressDTO = new AddressDTO(
+            doctor.getAddress().getStreet(),
+            doctor.getAddress().getNumber(),
+            doctor.getAddress().getComplement(),
+            doctor.getAddress().getDistrict(),
+            doctor.getAddress().getCity(),
+            doctor.getAddress().getState(),
+            doctor.getAddress().getCep()
+        );
+        
+        return new DoctorDetailDTO(
+            doctor.getId(),
+            doctor.getCrm(),
+            doctor.getName(),
+            doctor.getUser().getEmail(),
+            doctor.getUser().getUsername(),
+            doctor.getPhoneNumber(),
+            doctor.getSpeciality(),
+            addressDTO,
+            doctor.getIsActive()
+        );
+    }
+
+    public DoctorDetailDTO getDoctorInfoByUsername(String username) {
+        User user = (User) userRepository.findByUsername(username);
+        if (user == null) {
+            throw new EntityNotFoundException("Usuário não encontrado");
+        }
+        
+        Doctor doctor = doctorRepository.findByUserId(user.getId());
+        if (doctor == null) {
+            throw new EntityNotFoundException("Médico não encontrado para este usuário");
         }
         
         AddressDTO addressDTO = new AddressDTO(

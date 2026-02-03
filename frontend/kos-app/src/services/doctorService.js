@@ -27,7 +27,9 @@ const doctorService = {
   },
 
   searchByName: async (name, pageable = { page: 0, size: 10 }) => {
-    const response = await api.get("/doctor/search", { params: { name, ...pageable } });
+    const response = await api.get("/doctor/search", {
+      params: { name, ...pageable },
+    });
     return response.data;
   },
 
@@ -41,6 +43,15 @@ const doctorService = {
     return response.data;
   },
 
+  getByUsername: async (username) => {
+    try {
+      const response = await api.get(`/doctor/info/${username}`);
+      return response.data;
+    } catch (error) {
+      console.error("Erro ao buscar médico por username:", error);
+      return null;
+    }
+  },
 };
 
 export default doctorService;

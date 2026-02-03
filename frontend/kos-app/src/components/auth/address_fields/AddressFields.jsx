@@ -1,6 +1,6 @@
 import React from "react";
 import TextField from "../../ui/text_field/TextField";
-import { formatCEP, onlyDigits } from "../../../utils/formatters";
+import { formatCEP, capitalizeFirstLetter } from "../../../utils/formatters";
 import styles from "./AddressFields.module.css";
 import StateSelect from "../../ui/selectors/StateSelect";
 
@@ -11,6 +11,34 @@ export default function AddressFields({
   disabledIfLinkedPatient = false,
   loadingPatient = false
 }) {
+  // Wrapper para aplicar formatação síncrona antes de chamar handleChange
+  const handleAddressChange = (e) => {
+    const { name, value } = e.target;
+    const fieldName = name.split(".")[1];
+    
+    let formattedValue = value;
+    
+    switch (fieldName) {
+      // Temporariamente desabilitado para teste
+      // case "street":
+      // case "district":
+      // case "city":
+      // case "complement":
+      //   formattedValue = capitalizeFirstLetter(value);
+      //   break;
+      case "cep":
+        formattedValue = formatCEP(value);
+        break;
+      default:
+        formattedValue = value;
+    }
+    
+    // Chamar handleChange com valor já formatado
+    handleChange({
+      target: { name, value: formattedValue }
+    });
+  };
+
   return (
     <>
       <h3 className={styles.sectionTitle}>Endereço</h3>
@@ -35,7 +63,7 @@ export default function AddressFields({
           name="address.street"
           label="Rua:"
           value={address.street}
-          onChange={handleChange}
+          onChange={handleAddressChange}
           placeholder="Rua"
           disabled={loading || loadingPatient}
           autoComplete="street-address"
@@ -46,7 +74,7 @@ export default function AddressFields({
           name="address.number"
           label="Número:"
           value={address.number}
-          onChange={handleChange}
+          onChange={handleAddressChange}
           placeholder="Número (opcional)"
           maxLength={10}
           disabled={loading || loadingPatient}
@@ -57,7 +85,7 @@ export default function AddressFields({
           name="address.district"
           label="Bairro:"
           value={address.district}
-          onChange={handleChange}
+          onChange={handleAddressChange}
           placeholder="Bairro"
           disabled={loading || loadingPatient}
           autoComplete="address-level3"
@@ -68,7 +96,7 @@ export default function AddressFields({
           name="address.city"
           label="Cidade:"
           value={address.city}
-          onChange={handleChange}
+          onChange={handleAddressChange}
           placeholder="Cidade"
           disabled={loading || loadingPatient}
           autoComplete="address-level2"
@@ -79,7 +107,7 @@ export default function AddressFields({
           name="address.state"
           label="Estado:"
           value={address.state}
-          onChange={handleChange}
+          onChange={handleAddressChange}
           disabled={loading || loadingPatient}
           required={true}
         />
@@ -88,12 +116,11 @@ export default function AddressFields({
           name="address.cep"
           label="CEP:"
           value={address.cep}
-          onChange={handleChange}
+          onChange={handleAddressChange}
           placeholder="00000-000"
           inputMode="numeric"
           maxLength={9}
           disabled={loading || loadingPatient}
-          formatter={formatCEP}
           autoComplete="postal-code"
           required={true}
         />
@@ -104,7 +131,7 @@ export default function AddressFields({
           name="address.complement"
           label="Complemento:"
           value={address.complement}
-          onChange={handleChange}
+          onChange={handleAddressChange}
           disabled={loading || loadingPatient}
           placeholder="Complemento (opcional)"
           autoComplete="address-line3"
