@@ -1,7 +1,7 @@
 .container {
   min-height: 100vh;
   background-color: #f4f4f9;
-  font-family: "Roboto", sans-serif; /* Ou a fonte que você estiver usando */
+  font-family: "Roboto", sans-serif;
 }
 
 .header {
@@ -36,7 +36,7 @@
 }
 
 .logoutButton {
-  background-color: #ff4d4f; /* Vermelho alerta */
+  background-color: #ff4d4f;
   color: white;
   border: none;
   padding: 8px 16px;
@@ -59,7 +59,6 @@
 .container {
   min-height: 100vh;
   background-color: #f4f4f9;
-  /* Use variáveis se tiver definido no global, senão use a cor direta */
 }
 
 .header {
@@ -81,14 +80,13 @@
 .userInfo {
   display: flex;
   align-items: center;
-  gap: 1.5rem; /* Espaço entre o texto e o botão */
+  gap: 1.5rem;
 }
 
-/* Nova classe para alinhar o nome e o cargo */
 .userDetails {
   display: flex;
   flex-direction: column;
-  align-items: flex-end; /* Alinha o texto à direita */
+  align-items: flex-end;
   line-height: 1.2;
 }
 
@@ -97,7 +95,6 @@
   font-size: 1rem;
 }
 
-/* Nova classe para o cargo (Role) */
 .userRole {
   font-size: 0.8rem;
   color: #888;
@@ -144,7 +141,7 @@
 
 .card h2 {
   margin-top: 0;
-  color: #0056b3; /* Cor primária */
+  color: #0056b3;
   font-size: 1.25rem;
   margin-bottom: 0.5rem;
 }

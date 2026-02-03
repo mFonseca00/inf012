@@ -10,7 +10,6 @@
   transition: background-color 0.3s;
 }
 
-/* Variante padrão (verde) */
 .primary {
   background-color: #4c6faf;
   color: white;
@@ -19,7 +18,6 @@
   background-color: #4565a0;
 }
 
-/* Variante secundária (cinza) */
 .secondary {
   background-color: #888;
   color: #fff;
@@ -28,7 +26,6 @@
   background-color: #666;
 }
 
-/* Variante de perigo (vermelho) */
 .confirm {
   background-color: #2e7d32;
   color: #fff;

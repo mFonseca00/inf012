@@ -63,7 +63,6 @@ export default function AutocompleteSelect({
     }
   };
 
-  // Encontrar o label do item selecionado
   const selectedItemLabel = items.find(
     (item) => String(item[valueKey]) === String(selectedItem)
   )?.[labelKey] || "";

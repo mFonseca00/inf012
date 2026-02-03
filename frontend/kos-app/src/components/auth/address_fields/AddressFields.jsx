@@ -19,7 +19,6 @@ export default function AddressFields({
     let formattedValue = value;
     
     switch (fieldName) {
-      // Temporariamente desabilitado para teste
       // case "street":
       // case "district":
       // case "city":

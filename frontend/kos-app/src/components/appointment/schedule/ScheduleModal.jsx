@@ -23,7 +23,6 @@ export default function ScheduleModal({ onClose, onSuccess }) {
   const [appointmentDate, setAppointmentDate] = useState("");
   const [appointmentTime, setAppointmentTime] = useState("");
 
-  // CSS Hack para os inputs nativos
   const customStyles = `
     .native-input-picker { position: relative; }
     .native-input-picker::-webkit-calendar-picker-indicator {
@@ -119,7 +118,6 @@ export default function ScheduleModal({ onClose, onSuccess }) {
       return false;
     }
 
-    // Se não é opcional e está vazio
     if (!showAutoSelect && !selectedDoctor) {
       toast.warning("Selecione um médico");
       return false;
@@ -145,17 +143,13 @@ export default function ScheduleModal({ onClose, onSuccess }) {
     return true;
   };
 
-  // --- NOVA LÓGICA DE VERIFICAÇÃO DE CONFLITO ---
   const checkAvailabilityConflict = (existingDateStr, newDateObj) => {
-    // existingDateStr vem do backend (ex: "2023-10-25T13:00:00")
     const existingTime = new Date(existingDateStr).getTime();
     const newTime = newDateObj.getTime();
 
-    // Calcula diferença em minutos
     const diffInMs = Math.abs(newTime - existingTime);
     const diffInMinutes = diffInMs / (1000 * 60);
 
-    // Se a diferença for menor que 60 minutos, há conflito (overlap)
     return diffInMinutes < 60;
   };
 
@@ -168,11 +162,7 @@ export default function ScheduleModal({ onClose, onSuccess }) {
       const desiredDateObj = new Date(dateTimeStr);
       let finalDoctorId = selectedDoctor;
 
-      // === SELEÇÃO AUTOMÁTICA INTELIGENTE ===
       if (!finalDoctorId && filteredDoctors.length > 0) {
-        // 1. Busca agendamentos JÁ EXISTENTES naquele dia para saber quem está ocupado
-        // ATENÇÃO: Verifique se o seu service tem esse método ou algo similar
-        // Se não tiver, você precisará criar um endpoint tipo 'GET /appointments?date=YYYY-MM-DD'
         let existingAppointments = [];
         try {
           const response =
@@ -185,7 +175,6 @@ export default function ScheduleModal({ onClose, onSuccess }) {
           );
         }
 
-        // 2. Filtra os médicos que NÃO têm conflito de horário
         const availableCandidates = filteredDoctors.filter((doc) => {
           // Pega todas as consultas desse médico específico no dia
           const doctorAppointments = existingAppointments.filter(
@@ -194,16 +183,13 @@ export default function ScheduleModal({ onClose, onSuccess }) {
               appt.status !== "CANCELED",
           );
 
-          // Verifica se ALGUMA consulta dele bate com o horário desejado (menos de 1h de diferença)
           const hasConflict = doctorAppointments.some((appt) =>
             checkAvailabilityConflict(appt.dateTime, desiredDateObj),
           );
 
-          // Se tiver conflito, retorna false (remove da lista). Se não tiver, true (mantém).
           return !hasConflict;
         });
 
-        // 3. Sorteia entre os disponíveis
         if (availableCandidates.length > 0) {
           const randomIndex = Math.floor(
             Math.random() * availableCandidates.length,
@@ -214,14 +200,10 @@ export default function ScheduleModal({ onClose, onSuccess }) {
             "Nenhum médico disponível neste horário (todos ocupados). Tente outro horário.",
           );
           setLoading(false);
-          return; // Para tudo, não deixa agendar
+          return; 
         }
       }
-      // =======================================
-
-      // Verifica se mesmo selecionando manualmente, o médico não está ocupado (Opcional, mas recomendado)
-      // Se quiser aplicar a regra de 1h também para seleção manual, coloque a lógica aqui.
-
+      
       await appointmentService.scheduleAppointment(
         selectedPatient,
         finalDoctorId,

@@ -19,10 +19,7 @@ const Navbar = () => {
     ROLE_DOCTOR: "Médico",
   };
 
-  // [CORREÇÃO]: Lógica para descobrir a role atual
-  // 1. Tenta pegar a primeira role da lista (padrão do DTO novo)
-  // 2. Fallback para mainRole (caso tenha algum legado)
-  // 3. Fallback para string vazia
+  // Lógica para descobrir a role atual
   const currentRoleCode = user?.roles?.[0] || user?.mainRole || "";
 
   return (
@@ -37,7 +34,6 @@ const Navbar = () => {
             Olá, <strong>{user?.username}</strong>
           </span>
           <span className={styles.userRole}>
-            {/* Usa a variável calculada acima */}
             {roleLabels[currentRoleCode] || currentRoleCode}
           </span>
         </div>

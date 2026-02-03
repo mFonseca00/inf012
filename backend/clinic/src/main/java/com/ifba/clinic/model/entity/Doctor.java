@@ -54,6 +54,4 @@ public class Doctor {
         this.speciality = speciality;
         this.user = user;
     }
-
-    // TODO: Possivel adição futura - Criação de cadastro a partir de cadastro de usuário
 }
