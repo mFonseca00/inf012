@@ -194,15 +194,37 @@ export default function DoctorForm({ onClose, onSuccess, initialData }) {
     }
   };
 
-  const addressChanged = () => {
-    return JSON.stringify(formData.address) !== JSON.stringify(originalAddress);
-  };
-
   const validateForm = () => {
-    if (!formData.name?.trim()) {
+    // --- Validação de Nome Reforçada ---
+    const nameClean = formData.name?.trim() || "";
+
+    if (!nameClean) {
       toast.warning("Nome é obrigatório");
       return false;
     }
+
+    if (nameClean.length < 3) {
+      toast.warning("O nome deve ter pelo menos 3 caracteres.");
+      return false;
+    }
+
+    // Regex: Permite letras, acentos, espaços, apóstrofo e hífen
+    const nameRegex = /^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$/;
+    if (!nameRegex.test(nameClean)) {
+      toast.warning("O nome não pode conter números ou símbolos especiais.");
+      return false;
+    }
+
+    // 2. Valida se tem pelo menos duas palavras (Nome + Sobrenome)
+    // O split(/\s+/) garante que múltiplos espaços entre os nomes não contem como palavra extra
+    const nameParts = nameClean.split(/\s+/);
+
+    if (nameParts.length < 2) {
+      toast.warning("Por favor, informe o nome completo (Nome e Sobrenome).");
+      return false;
+    }
+    // ------------------------------------
+
     if (!isEditing && !formData.email?.trim() && !formData.username?.trim()) {
       toast.warning("Email ou usuário é obrigatório");
       return false;
@@ -216,6 +238,7 @@ export default function DoctorForm({ onClose, onSuccess, initialData }) {
         toast.warning("CRM é obrigatório");
         return false;
       }
+      // Validação básica do CRM (Formato 123456-78/UF ou 12345678UF)
       const crmRegex = /^(\d{6}-\d{2}\/[A-Z]{2}|\d{8}[A-Z]{2})$/;
       if (!crmRegex.test(formData.crm.trim())) {
         toast.error("CRM inválido. Formato: 123456-78/UF");
@@ -268,7 +291,6 @@ export default function DoctorForm({ onClose, onSuccess, initialData }) {
 
         setOriginalName(formData.name);
         setOriginalAddress(formData.address);
-
       } else {
         await doctorService.register(formData);
         toast.success("Médico cadastrado com sucesso!");

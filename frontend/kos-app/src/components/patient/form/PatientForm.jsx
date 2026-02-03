@@ -65,12 +65,12 @@ export default function PatientForm({ onClose, onSuccess, initialData }) {
           cep: initialData.address?.cep || "",
         },
       };
-      
+
       setFormData(completeData);
       setOriginalName(initialData.name || "");
       setOriginalAddress(completeData.address);
       setIsEditing(true);
-      
+
       if (initialData.username) {
         fetchLinkedDoctorForEdit(initialData.username);
       }
@@ -168,12 +168,12 @@ export default function PatientForm({ onClose, onSuccess, initialData }) {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    
+
     if (name.startsWith("address.")) {
       const addrField = name.split(".")[1];
       setFormData((prev) => ({
         ...prev,
-        address: { ...prev.address, [addrField]: value }
+        address: { ...prev.address, [addrField]: value },
       }));
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
@@ -181,18 +181,47 @@ export default function PatientForm({ onClose, onSuccess, initialData }) {
   };
 
   const validateForm = () => {
-    if (!formData.name?.trim()) {
+    // --- Validação de Nome Reforçada ---
+    const nameClean = formData.name?.trim() || "";
+
+    if (!nameClean) {
       toast.warning("Nome é obrigatório");
       return false;
     }
+
+    if (nameClean.length < 3) {
+      toast.warning("O nome deve ter pelo menos 3 caracteres.");
+      return false;
+    }
+
+    // Regex: Permite letras (maiúsculas/minúsculas), acentos, espaços, apóstrofo (') e hífen (-)
+    // Bloqueia números e outros símbolos
+    const nameRegex = /^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$/;
+    if (!nameRegex.test(nameClean)) {
+      toast.warning("O nome não pode conter números ou símbolos especiais.");
+      return false;
+    }
+
+    // 2. Valida se tem pelo menos duas palavras (Nome + Sobrenome)
+    // O split(/\s+/) garante que múltiplos espaços entre os nomes não contem como palavra extra
+    const nameParts = nameClean.split(/\s+/);
+
+    if (nameParts.length < 2) {
+      toast.warning("Por favor, informe o nome completo (Nome e Sobrenome).");
+      return false;
+    }
+    // ------------------------------------
+
     if (!isEditing && !formData.email?.trim() && !formData.username?.trim()) {
       toast.warning("Email ou usuário é obrigatório");
       return false;
     }
+
     if (!formData.phoneNumber?.trim()) {
       toast.warning("Telefone é obrigatório");
       return false;
     }
+
     if (!isEditing) {
       if (!formData.cpf?.trim()) {
         toast.warning("CPF é obrigatório");
@@ -247,7 +276,6 @@ export default function PatientForm({ onClose, onSuccess, initialData }) {
 
         setOriginalName(formData.name);
         setOriginalAddress(formData.address);
-
       } else {
         await patientService.register(formData);
         toast.success("Paciente cadastrado com sucesso!");
@@ -255,7 +283,7 @@ export default function PatientForm({ onClose, onSuccess, initialData }) {
       onSuccess();
     } catch (err) {
       let errorMessage = "Erro ao salvar paciente. Verifique os dados.";
-      
+
       if (err.response?.data?.message) {
         errorMessage = err.response.data.message;
       } else if (err.response?.data?.fieldErrors) {
@@ -268,7 +296,7 @@ export default function PatientForm({ onClose, onSuccess, initialData }) {
       } else if (err.message) {
         errorMessage = err.message;
       }
-      
+
       toast.error(errorMessage);
       console.error("Erro ao salvar paciente:", err);
     } finally {
@@ -285,9 +313,9 @@ export default function PatientForm({ onClose, onSuccess, initialData }) {
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div className={styles.header}>
           <h2>{isEditing ? "Editar Paciente" : "Novo Paciente"}</h2>
-          <button 
-            className={styles.closeBtn} 
-            onClick={onClose} 
+          <button
+            className={styles.closeBtn}
+            onClick={onClose}
             disabled={loading}
             type="button"
           >
@@ -317,25 +345,21 @@ export default function PatientForm({ onClose, onSuccess, initialData }) {
           />
 
           <div className={styles.footer}>
-            <Button 
-              variant="secondary" 
-              type="button" 
-              onClick={onClose} 
+            <Button
+              variant="secondary"
+              type="button"
+              onClick={onClose}
               disabled={loading}
             >
               Cancelar
             </Button>
-            <Button 
-              variant="primary" 
-              type="submit" 
-              disabled={loading}
-            >
+            <Button variant="primary" type="submit" disabled={loading}>
               {loading ? "Salvando..." : "Salvar"}
             </Button>
           </div>
         </form>
       </div>
     </div>,
-    document.body
+    document.body,
   );
 }
