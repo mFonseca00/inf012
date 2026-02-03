@@ -16,6 +16,10 @@ Sistema completo para gestão de clínicas médicas desenvolvido com arquitetura
 - [Inicialização](#-inicialização)
 - [URLs Principais](#-urls-principais)
 - [Estrutura do Projeto](#-estrutura-do-projeto)
+- [Tipos de Usuário](#-tipos-de-usuário)
+- [Funcionalidades Futuras](#-funcionalidades-futuras)
+- [Licença](#-licença)
+- [Contribuidores](#-contribuidores)
 
 ---
 
@@ -460,7 +464,7 @@ npm run lint
 
 ---
 
-## � Funcionalidades Futuras
+## 🚧 Funcionalidades Futuras
 
 Durante o planejamento do projeto, foi idealizada uma **tela de gestão de usuários** que permitiria aos perfis **MASTER** e **ADMIN** gerenciar todos os usuários do sistema de forma centralizada, incluindo:
 
